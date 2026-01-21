@@ -1,0 +1,89 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://ralph-web.local/prd.schema.json",
+  "title": "Ralph PRD Schema",
+  "description": "Schema for Ralph autonomous agent PRD files",
+  "type": "object",
+  "required": ["project", "branchName", "userStories"],
+  "properties": {
+    "$schema": {
+      "type": "string",
+      "description": "Reference to this schema file"
+    },
+    "project": {
+      "type": "string",
+      "description": "Project name",
+      "minLength": 1
+    },
+    "branchName": {
+      "type": "string",
+      "description": "Git branch name for this feature (triggers archiving on change)",
+      "pattern": "^ralph/[a-z0-9-]+$"
+    },
+    "description": {
+      "type": "string",
+      "description": "High-level description of the feature"
+    },
+    "userStories": {
+      "type": "array",
+      "description": "List of user stories to implement",
+      "minItems": 1,
+      "items": {
+        "$ref": "#/definitions/UserStory"
+      }
+    }
+  },
+  "definitions": {
+    "UserStory": {
+      "type": "object",
+      "required": ["id", "title", "description", "acceptanceCriteria", "priority", "passes"],
+      "properties": {
+        "id": {
+          "type": "string",
+          "description": "Unique story identifier",
+          "pattern": "^US-[0-9]{3}$"
+        },
+        "title": {
+          "type": "string",
+          "description": "Short title of the story",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "description": {
+          "type": "string",
+          "description": "User story description (As a... I want... So that...)"
+        },
+        "acceptanceCriteria": {
+          "type": "array",
+          "description": "List of acceptance criteria",
+          "minItems": 1,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          }
+        },
+        "priority": {
+          "type": "integer",
+          "description": "Priority order (1 = highest, processed first)",
+          "minimum": 1
+        },
+        "passes": {
+          "type": "boolean",
+          "description": "Whether the story has been completed and verified",
+          "default": false
+        },
+        "notes": {
+          "type": "string",
+          "description": "Optional notes or learnings from implementation"
+        },
+        "threadUrl": {
+          "type": "string",
+          "description": "Amp/Claude thread URL for reference",
+          "format": "uri"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}
