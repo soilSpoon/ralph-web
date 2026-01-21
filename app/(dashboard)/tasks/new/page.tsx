@@ -9,6 +9,8 @@ import { WizardStepClarify } from "@/components/wizard/wizard-step-clarify";
 import { WizardStepReview } from "@/components/wizard/wizard-step-review";
 import { WizardStepApprove } from "@/components/wizard/wizard-step-approve";
 
+import { createTask } from "@/app/actions";
+
 export default function NewTaskPage() {
   const {
     currentStep,
@@ -22,9 +24,14 @@ export default function NewTaskPage() {
     setFormData,
   } = useWizardState();
 
-  const handleNext = () => {
-    // Add validation logic here if needed
-    nextStep();
+  const handleNext = async () => {
+    if (isLastStep) {
+      const formDataToSend = new FormData();
+      formDataToSend.append("description", formData.description);
+      await createTask(formDataToSend);
+    } else {
+      nextStep();
+    }
   };
 
   return (

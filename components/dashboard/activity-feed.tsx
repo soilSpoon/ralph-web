@@ -6,12 +6,14 @@ interface ActivityFeedProps {
   activities: ActivityItem[];
 }
 
+const timeFormatter = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "numeric",
+  hour12: true,
+});
+
 function formatTime(date: Date) {
-  return new Intl.DateTimeFormat("en-US", {
-    hour: "numeric",
-    minute: "numeric",
-    hour12: true,
-  }).format(date);
+  return timeFormatter.format(date);
 }
 
 export function ActivityFeed({ activities }: ActivityFeedProps) {

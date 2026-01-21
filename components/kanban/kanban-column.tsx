@@ -33,14 +33,14 @@ export function KanbanColumn({ status, label, tasks }: KanbanColumnProps) {
     <div
       ref={columnRef}
       className={cn(
-        "flex flex-col w-72 min-w-[18rem] bg-muted/50 rounded-lg border border-transparent transition-colors",
-        isDraggedOver && "bg-muted border-primary/20",
+        "flex flex-col w-72 min-w-[18rem] bg-card/20 rounded-sm border border-border transition-colors duration-150",
+        isDraggedOver && "bg-muted/10 border-primary/40",
       )}
     >
-      <div className="p-4 flex items-center justify-between">
-        <h3 className="font-semibold flex items-center gap-2">
+      <div className="p-3 flex items-center justify-between border-b border-border/50">
+        <h3 className="text-mono-label flex items-center gap-2">
           {label}
-          <span className="text-xs text-muted-foreground font-normal bg-background px-2 py-0.5 rounded-full border">
+          <span className="text-[10px] text-muted-foreground font-mono bg-muted/20 px-1.5 py-0.5 rounded-sm border border-border/50">
             {tasks.length}
           </span>
         </h3>

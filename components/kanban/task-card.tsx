@@ -36,34 +36,37 @@ export function TaskCard({ task }: TaskCardProps) {
         isDragging && "opacity-50",
       )}
     >
-      <Card className="hover:border-primary/50 transition-colors shadow-sm bg-card">
-        <CardContent className="p-4 space-y-3">
+      <Card className="hover:border-primary/50 transition-colors duration-150 shadow-none bg-background rounded-sm border-border/60">
+        <CardContent className="p-3 space-y-3">
           <div className="flex justify-between items-start gap-2">
             <Link
               href={`/tasks/${task.id}`}
-              className="hover:underline focus:outline-none"
+              className="hover:text-primary transition-colors focus:ring-2 focus:ring-primary/20 rounded-sm outline-none"
             >
-              <h4 className="font-medium text-sm leading-tight">{task.name}</h4>
+              <h4 className="font-semibold text-xs leading-tight tracking-tight">
+                {task.name}
+              </h4>
             </Link>
           </div>
 
-          <p className="text-xs text-muted-foreground line-clamp-2">
+          <p className="text-[11px] text-muted-foreground line-clamp-2 leading-relaxed">
             {task.description}
           </p>
 
-          <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1">
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1 border-t border-border/30">
             <div className="flex items-center gap-2">
               {task.branchName && (
-                <div className="flex items-center gap-1">
-                  <GitBranch className="w-3 h-3" />
+                <div className="flex items-center gap-1 font-mono text-[9px]">
+                  <GitBranch className="w-2.5 h-2.5" />
                   <span>{task.branchName}</span>
                 </div>
               )}
             </div>
-            <div className="flex items-center gap-1">
-              <Clock className="w-3 h-3" />
+            <div className="flex items-center gap-1 font-mono text-[9px] bg-muted/30 px-1 py-0.5 rounded-sm">
+              <Clock className="w-2.5 h-2.5" />
               <span>
-                {task.currentIteration}/{task.maxIterations}
+                {task.currentIteration.toString().padStart(2, "0")}/
+                {task.maxIterations.toString().padStart(2, "0")}
               </span>
             </div>
           </div>

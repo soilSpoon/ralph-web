@@ -1,22 +1,11 @@
-"use client";
-
-import { useEffect } from "react";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { AttentionList } from "@/components/dashboard/attention-list";
 import { QuickStartCard } from "@/components/dashboard/quick-start-card";
 import { StatusOverview } from "@/components/dashboard/status-overview";
 import { mockActivity, mockTasks } from "@/lib/mock-data";
-import { useAppStore } from "@/lib/store/use-app-store";
 
 export default function DashboardPage() {
-  const { setTasks, tasks } = useAppStore();
-
-  useEffect(() => {
-    // Load mock data on mount
-    setTasks(mockTasks);
-  }, [setTasks]);
-
-  const displayTasks = tasks.length > 0 ? tasks : mockTasks;
+  const displayTasks = mockTasks;
 
   return (
     <div className="container-custom py-6 space-y-6">

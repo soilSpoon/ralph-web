@@ -29,29 +29,31 @@ export function AttentionList() {
   if (items.length === 0) return null;
 
   return (
-    <Card className="border-amber-200 bg-amber-50/50 dark:bg-amber-900/10 dark:border-amber-900/50">
-      <CardHeader>
+    <Card className="border-destructive/30 bg-destructive/5 rounded-sm">
+      <CardHeader className="py-4">
         <div className="flex items-center gap-2">
-          <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-500" />
-          <CardTitle className="text-lg font-semibold text-amber-900 dark:text-amber-100">
+          <AlertCircle className="w-4 h-4 text-destructive" />
+          <CardTitle className="text-xs font-mono uppercase tracking-widest text-destructive">
             Needs Attention
           </CardTitle>
         </div>
       </CardHeader>
-      <CardContent className="space-y-2">
+      <CardContent className="space-y-2 pb-4">
         {items.map((item) => (
           <div
             key={item.id}
-            className="flex items-center justify-between p-3 bg-white dark:bg-sidebar-accent/50 rounded-lg border border-amber-100 dark:border-amber-900/30"
+            className="flex items-center justify-between p-3 bg-background rounded-sm border border-border/60 hover:border-destructive/40 transition-colors duration-150"
           >
-            <span className="font-medium">{item.title}</span>
+            <span className="text-xs font-medium tracking-tight">
+              {item.title}
+            </span>
             <Button
               variant="ghost"
-              size="sm"
-              className="hover:bg-amber-100 dark:hover:bg-amber-900/30"
+              size="xs"
+              className="text-destructive hover:text-destructive hover:bg-destructive/10"
             >
               View
-              <ArrowRight className="w-4 h-4 ml-1" />
+              <ArrowRight className="w-3 h-3 ml-1" />
             </Button>
           </div>
         ))}

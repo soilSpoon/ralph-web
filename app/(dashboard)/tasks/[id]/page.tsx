@@ -8,6 +8,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockStories, mockTasks } from "@/lib/mock-data";
 
+export async function generateStaticParams() {
+  return mockTasks.map((task) => ({
+    id: task.id,
+  }));
+}
+
 interface TaskDetailPageProps {
   params: Promise<{ id: string }>;
 }
