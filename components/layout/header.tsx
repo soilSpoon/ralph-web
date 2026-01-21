@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import {
   Tooltip,
   TooltipContent,
-  TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 import { useRouter } from "next/navigation";
 
 export function Header() {
@@ -20,9 +20,9 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
+        <Tooltip>
+          <TooltipTrigger
+            render={
               <Button
                 variant="ghost"
                 size="icon"
@@ -31,26 +31,28 @@ export function Header() {
                 <Settings className="h-5 w-5" />
                 <span className="sr-only">Settings</span>
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Settings</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+            }
+          />
+          <TooltipContent>
+            <p>Settings</p>
+          </TooltipContent>
+        </Tooltip>
 
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger>
+        <ThemeToggle />
+
+        <Tooltip>
+          <TooltipTrigger
+            render={
               <Button variant="ghost" size="icon">
                 <HelpCircle className="h-5 w-5" />
                 <span className="sr-only">Help</span>
               </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Help</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+            }
+          />
+          <TooltipContent>
+            <p>Help</p>
+          </TooltipContent>
+        </Tooltip>
       </div>
     </header>
   );
