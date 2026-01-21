@@ -1,32 +1,32 @@
-import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
-import { mockTasks } from '@/lib/mock-data';
-import { KanbanColumn } from '@/components/kanban/kanban-column';
-import type { TaskStatus } from '@/lib/types';
-import Link from 'next/link';
+"use client";
 
-const columns: TaskStatus[] = ['pending', 'queued', 'running', 'review', 'merged'];
+import { KanbanBoard } from "@/components/kanban/kanban-board";
+import { useAppStore } from "@/lib/store/use-app-store";
+import { mockTasks } from "@/lib/mock-data";
+import { useEffect } from "react";
 
 export default function TasksPage() {
+  const { tasks, setTasks } = useAppStore();
+
+  useEffect(() => {
+    if (tasks.length === 0) {
+      setTasks(mockTasks);
+    }
+  }, [tasks.length, setTasks]);
+
   return (
-    <div className="h-full flex flex-col">
-      <div className="border-b bg-background p-4 flex items-center justify-between">
-        <h1 className="heading-2">📋 Tasks</h1>
-        <Link href="/tasks/new">
-          <Button>
-            <Plus className="h-4 w-4 mr-2" />
-            New Task
-          </Button>
-        </Link>
-      </div>
-      
-      <div className="flex-1 overflow-x-auto p-6">
-        <div className="flex gap-6">
-          {columns.map((status) => {
-            const tasks = mockTasks.filter((t) => t.status === status);
-            return <KanbanColumn key={status} status={status} tasks={tasks} />;
-          })}
+    <div className="h-full flex flex-col p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="heading-1">Tasks</h1>
+          <p className="text-muted-foreground">
+            Manage and track your coding tasks
+          </p>
         </div>
+      </div>
+
+      <div className="flex-1 min-h-0">
+        <KanbanBoard tasks={tasks} />
       </div>
     </div>
   );

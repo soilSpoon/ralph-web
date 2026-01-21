@@ -523,9 +523,9 @@ Archive
 | Components | shadcn UI (Base UI + Tailwind CSS) |
 | State      | Zustand (client)                   |
 | Icons      | Lucide React                       |
-| Markdown   | react-markdown + remark-gfm        |
+| Markdown   | Lexical                            |
 | Diff       | react-diff-viewer                  |
-| DnD        | @dnd-kit/core                      |
+| DnD        | Pragmatic Drag and Drop            |
 
 ```
 

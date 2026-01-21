@@ -1,11 +1,48 @@
 // Task and Story Types
-export type TaskStatus = 'pending' | 'queued' | 'running' | 'review' | 'merged' | 'failed';
-export type StoryStatus = 'pending' | 'in-progress' | 'completed' | 'failed';
-export type PatternCategory = 'convention' | 'gotcha' | 'tip';
-export type IterationStatus = 'success' | 'failed' | 'timeout';
-export type ActivityType = 'task_created' | 'task_started' | 'task_completed' | 'task_merged' | 'iteration_completed';
-export type WizardStep = 'describe' | 'clarify' | 'review' | 'approve';
-export type QuestionType = 'radio' | 'checkbox' | 'text';
+export const TASK_STATUSES = [
+  "draft",
+  "pending",
+  "queued",
+  "running",
+  "review",
+  "merged",
+  "failed",
+] as const;
+export type TaskStatus = (typeof TASK_STATUSES)[number];
+
+export const STORY_STATUSES = [
+  "pending",
+  "in-progress",
+  "completed",
+  "failed",
+] as const;
+export type StoryStatus = (typeof STORY_STATUSES)[number];
+
+export const PATTERN_CATEGORIES = ["convention", "gotcha", "tip"] as const;
+export type PatternCategory = (typeof PATTERN_CATEGORIES)[number];
+
+export const ITERATION_STATUSES = ["success", "failed", "timeout"] as const;
+export type IterationStatus = (typeof ITERATION_STATUSES)[number];
+
+export const ACTIVITY_TYPES = [
+  "task_created",
+  "task_started",
+  "task_completed",
+  "task_merged",
+  "iteration_completed",
+] as const;
+export type ActivityType = (typeof ACTIVITY_TYPES)[number];
+
+export const WIZARD_STEPS = [
+  "describe",
+  "clarify",
+  "review",
+  "approve",
+] as const;
+export type WizardStep = (typeof WIZARD_STEPS)[number];
+
+export const QUESTION_TYPES = ["radio", "checkbox", "text"] as const;
+export type QuestionType = (typeof QUESTION_TYPES)[number];
 
 export interface Task {
   id: string;
@@ -73,7 +110,7 @@ export interface ActivityItem {
 // PRD Wizard Types
 export interface PRDFormData {
   description: string;
-  clarifications: Record<string, any>;
+  clarifications: Record<string, string | string[] | boolean>;
   generatedPRD: string;
   approved: boolean;
 }
@@ -83,5 +120,5 @@ export interface WizardQuestion {
   question: string;
   type: QuestionType;
   options?: string[];
-  answer?: any;
+  answer?: string | string[] | boolean;
 }

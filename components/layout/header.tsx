@@ -1,10 +1,14 @@
-'use client';
+"use client";
 
-import { Settings, HelpCircle } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { Settings, HelpCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { useRouter } from "next/navigation";
 
 export function Header() {
   const router = useRouter();
@@ -14,12 +18,16 @@ export function Header() {
       <div className="flex items-center gap-3">
         <h1 className="heading-3">🔧 Ralph-Web</h1>
       </div>
-      
+
       <div className="flex items-center gap-2">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <Button variant="ghost" size="icon" onClick={() => router.push('/settings')}>
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => router.push("/settings")}
+              >
                 <Settings className="h-5 w-5" />
                 <span className="sr-only">Settings</span>
               </Button>

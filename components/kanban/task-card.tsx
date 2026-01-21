@@ -1,56 +1,68 @@
-'use client';
+"use client";
 
-import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
-import { StatusBadge } from '@/components/common/status-badge';
-import { ProgressBar } from '@/components/common/progress-bar';
-import type { Task } from '@/lib/types';
-import { formatRelativeTime } from '@/lib/formatters';
-import { GitBranch, Clock } from 'lucide-react';
-import Link from 'next/link';
+import { Task } from "@/lib/types";
+import { Card, CardContent } from "@/components/ui/card";
+import { useEffect, useRef, useState } from "react";
+import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { cn } from "@/lib/utils";
+import { Clock, GitBranch } from "lucide-react";
 
 interface TaskCardProps {
   task: Task;
 }
 
 export function TaskCard({ task }: TaskCardProps) {
-  // Mock story counts for demo
-  const completedStories = 3;
-  const totalStories = 5;
+  const cardRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+
+  useEffect(() => {
+    const el = cardRef.current;
+    if (!el) return;
+
+    return draggable({
+      element: el,
+      getInitialData: () => ({ taskId: task.id }),
+      onDragStart: () => setIsDragging(true),
+      onDrop: () => setIsDragging(false),
+    });
+  }, [task.id]);
 
   return (
-    <Link href={`/tasks/${task.id}`}>
-      <Card className="cursor-pointer hover:shadow-md transition-shadow">
-        <CardHeader className="pb-3">
-          <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-base line-clamp-2">{task.name}</CardTitle>
-            <StatusBadge status={task.status} />
-          </div>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          <ProgressBar completed={completedStories} total={totalStories} showLabel={false} />
-          
-          <div className="flex items-center gap-2 text-caption text-muted-foreground">
-            <span>{completedStories}/{totalStories} stories</span>
-            <span>•</span>
-            <span>{Math.round((completedStories / totalStories) * 100)}%</span>
+    <div
+      ref={cardRef}
+      className={cn(
+        "cursor-grab active:cursor-grabbing",
+        isDragging && "opacity-50",
+      )}
+    >
+      <Card className="hover:border-primary/50 transition-colors shadow-sm bg-card">
+        <CardContent className="p-4 space-y-3">
+          <div className="flex justify-between items-start gap-2">
+            <h4 className="font-medium text-sm leading-tight">{task.name}</h4>
           </div>
 
-          <div className="space-y-1 text-caption text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <GitBranch className="h-3 w-3" />
-              <span className="truncate">{task.branchName}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Clock className="h-3 w-3" />
-              <span>Iteration #{task.currentIteration}</span>
-            </div>
-          </div>
+          <p className="text-xs text-muted-foreground line-clamp-2">
+            {task.description}
+          </p>
 
-          <div className="text-caption text-muted-foreground">
-            Updated: {formatRelativeTime(task.updatedAt)}
+          <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-1">
+            <div className="flex items-center gap-2">
+              {task.branchName && (
+                <div className="flex items-center gap-1">
+                  <GitBranch className="w-3 h-3" />
+                  <span>{task.branchName}</span>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-1">
+              <Clock className="w-3 h-3" />
+              <span>
+                {task.currentIteration}/{task.maxIterations}
+              </span>
+            </div>
           </div>
         </CardContent>
       </Card>
-    </Link>
+    </div>
   );
 }

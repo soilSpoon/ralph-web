@@ -1,0 +1,48 @@
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ActivityItem } from "@/lib/types";
+import { ScrollArea } from "@/components/ui/scroll-area";
+
+interface ActivityFeedProps {
+  activities: ActivityItem[];
+}
+
+function formatTime(date: Date) {
+  return new Intl.DateTimeFormat("en-US", {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: true,
+  }).format(date);
+}
+
+export function ActivityFeed({ activities }: ActivityFeedProps) {
+  return (
+    <Card className="h-full">
+      <CardHeader>
+        <CardTitle className="text-lg font-semibold">Activity</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ScrollArea className="h-[300px] pr-4">
+          <div className="space-y-6">
+            {activities.map((item) => (
+              <div
+                key={item.id}
+                className="relative pl-6 pb-2 border-l border-border last:border-0"
+              >
+                <div className="absolute left-[-5px] top-0 w-2.5 h-2.5 rounded-full bg-primary/20 ring-4 ring-background" />
+                <div className="flex flex-col gap-1">
+                  <span className="text-xs text-muted-foreground">
+                    {formatTime(item.timestamp)}
+                  </span>
+                  <span className="font-medium text-sm">{item.taskName}</span>
+                  <span className="text-sm text-muted-foreground">
+                    {item.message}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </ScrollArea>
+      </CardContent>
+    </Card>
+  );
+}
