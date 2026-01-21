@@ -50,6 +50,7 @@
   },
   "Tasks": {
     "title": "작업",
-    "description": "코드 생성 및 작업 프로세스 관리"
+    "description": "코드 생성 및 작업 프로세스 관리",
+    "newTask": "새 작업"
   }
 }

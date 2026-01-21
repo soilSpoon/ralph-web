@@ -8,6 +8,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { mockStories, mockTasks } from "@/lib/mock-data";
+import { Link } from "@/i18n/routing";
 
 export async function generateStaticParams() {
   return mockTasks.map((task) => ({
@@ -42,7 +43,13 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
           </div>
           <div className="flex gap-2">
             <StatusBadge status={task.status} />
-            {task.status === "review" && <Button>{t("reviewChanges")}</Button>}
+            {task.status === "review" && (
+              <Link href={`/tasks/${task.id}/review`}>
+                <Button className="font-semibold shadow-sm">
+                  {t("reviewChanges")}
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
 

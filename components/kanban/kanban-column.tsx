@@ -2,7 +2,7 @@
 
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { useEffect, useRef, useState } from "react";
-import { Task, TaskStatus } from "@/lib/types";
+import { Task, TaskStatus, isMoveAllowed } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { TaskCard } from "./task-card";
 
@@ -15,6 +15,7 @@ interface KanbanColumnProps {
 export function KanbanColumn({ status, label, tasks }: KanbanColumnProps) {
   const columnRef = useRef<HTMLDivElement>(null);
   const [isDraggedOver, setIsDraggedOver] = useState(false);
+  const [canDrop, setCanDrop] = useState(false);
 
   useEffect(() => {
     const el = columnRef.current;
@@ -23,9 +24,19 @@ export function KanbanColumn({ status, label, tasks }: KanbanColumnProps) {
     return dropTargetForElements({
       element: el,
       getData: () => ({ status }),
-      onDragEnter: () => setIsDraggedOver(true),
-      onDragLeave: () => setIsDraggedOver(false),
-      onDrop: () => setIsDraggedOver(false),
+      onDragEnter: ({ source }) => {
+        setIsDraggedOver(true);
+        const fromStatus = source.data.currentStatus as TaskStatus;
+        setCanDrop(isMoveAllowed(fromStatus, status));
+      },
+      onDragLeave: () => {
+        setIsDraggedOver(false);
+        setCanDrop(false);
+      },
+      onDrop: () => {
+        setIsDraggedOver(false);
+        setCanDrop(false);
+      },
     });
   }, [status]);
 
@@ -34,7 +45,10 @@ export function KanbanColumn({ status, label, tasks }: KanbanColumnProps) {
       ref={columnRef}
       className={cn(
         "flex flex-col w-72 min-w-[18rem] bg-card/20 rounded-sm border border-border transition-colors duration-150",
-        isDraggedOver && "bg-muted/10 border-primary/40",
+        isDraggedOver &&
+          (canDrop
+            ? "bg-primary/5 border-primary/40 shadow-sm"
+            : "bg-destructive/5 border-destructive/40 cursor-not-allowed opacity-80"),
       )}
     >
       <div className="p-4 flex items-center justify-between border-b border-border/50">

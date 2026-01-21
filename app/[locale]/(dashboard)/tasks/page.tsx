@@ -1,6 +1,9 @@
 import { useTranslations } from "next-intl";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { mockTasks } from "@/lib/mock-data";
+import { Link } from "@/i18n/routing";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
 export default function TasksPage() {
   const t = useTranslations("Tasks");
@@ -14,6 +17,12 @@ export default function TasksPage() {
             {t("description")}
           </p>
         </div>
+        <Link href="/tasks/new">
+          <Button className="font-semibold shadow-sm gap-2">
+            <Plus className="w-4 h-4" />
+            {t("newTask")}
+          </Button>
+        </Link>
       </div>
 
       <div className="flex-1 min-h-0">

@@ -22,7 +22,7 @@ export function TaskCard({ task }: TaskCardProps) {
 
     return draggable({
       element: el,
-      getInitialData: () => ({ taskId: task.id }),
+      getInitialData: () => ({ taskId: task.id, currentStatus: task.status }),
       onDragStart: () => setIsDragging(true),
       onDrop: () => setIsDragging(false),
     });

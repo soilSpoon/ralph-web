@@ -524,7 +524,7 @@ Archive
 | State      | Zustand (client)                   |
 | Icons      | Lucide React                       |
 | Markdown   | Lexical                            |
-| Diff       | react-diff-viewer                  |
+| Diff       | @git-diff-view/react               |
 | DnD        | Pragmatic Drag and Drop            |
 
 ```

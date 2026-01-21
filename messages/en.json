@@ -50,6 +50,7 @@
   },
   "Tasks": {
     "title": "Tasks",
-    "description": "Generate code and manage the automation process"
+    "description": "Generate code and manage the automation process",
+    "newTask": "New Task"
   }
 }

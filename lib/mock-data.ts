@@ -134,3 +134,44 @@ export const mockPatterns: Pattern[] = [
     createdAt: new Date("2024-01-20T09:00:00"),
   },
 ];
+
+export const mockDiff = `diff --git a/src/lib/auth/jwt.ts b/src/lib/auth/jwt.ts
+new file mode 100644
+index 0000000..e69de29
+--- /dev/null
++++ b/src/lib/auth/jwt.ts
+@@ -0,0 +1,15 @@
++import { sign, verify } from 'jsonwebtoken';
++
++const SECRET = process.env.JWT_SECRET || 'fallback';
++
++export function generateToken(payload: object) {
++  return sign(payload, SECRET, { expiresIn: '1h' });
++}
++
++export function verifyToken(token: string) {
++  try {
++    return verify(token, SECRET);
++  } catch (e) {
++    return null;
++  }
++}
+diff --git a/src/middleware.ts b/src/middleware.ts
+index a1b2c3d..e4f5g6h 100644
+--- a/src/middleware.ts
++++ b/src/middleware.ts
+@@ -1,5 +1,6 @@
+ import { NextResponse } from 'next/server';
+-import type { NextRequest } from 'next/server';
++import type { NextRequest } from 'next/server';
++import { verifyToken } from './lib/auth/jwt';
+ 
+ export function middleware(request: NextRequest) {
+-  return NextResponse.next();
++  const authHeader = request.headers.get('authorization');
++  if (!authHeader || !verifyToken(authHeader.split(' ')[1])) {
++    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
++  }
++  return NextResponse.next();
+ }
+`;

@@ -65,6 +65,8 @@ We use a modern, performance-oriented stack.
   - A low-level, high-performance DnD library used for the Kanban board.
 - **Rich Text Editor**: **Lexical**
   - Powers the PRD editor and Markdown viewing experiences.
+- **Diff Viewer**: **[@git-diff-view/react](https://github.com/git-diff-view/git-diff-view)** & **[Shiki](https://shiki.style/)**
+  - Provides high-performance, GitHub-style diff viewing with high-quality syntax highlighting.
 - **Internationalization (i18n)**: **[next-intl](https://next-intl-docs.vercel.app/)**
   - Provides type-safe translations and routing-based multi-language support (English & Korean).
 

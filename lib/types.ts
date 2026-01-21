@@ -9,6 +9,13 @@ export const TASK_STATUSES = [
   "failed",
 ] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
+export const isMoveAllowed = (from: TaskStatus, to: TaskStatus): boolean => {
+  if (from === to) return false;
+  if (from === "draft") return to === "queued";
+  if (from === "queued") return to === "draft";
+  if (from === "review") return to === "merged";
+  return false;
+};
 
 export const STORY_STATUSES = [
   "pending",

@@ -4,7 +4,7 @@ import { useTranslations } from "next-intl";
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { useEffect } from "react";
 import { useAppStore } from "@/lib/store/use-app-store";
-import { TASK_STATUSES, Task, TaskStatus } from "@/lib/types";
+import { TASK_STATUSES, Task, TaskStatus, isMoveAllowed } from "@/lib/types";
 import { KanbanColumn } from "./kanban-column";
 
 interface KanbanBoardProps {
@@ -29,20 +29,25 @@ export function KanbanBoard({ tasks }: KanbanBoardProps) {
         const destination = location.current.dropTargets[0];
         if (!destination) return;
 
-        const { taskId } = source.data;
+        const { taskId, currentStatus } = source.data;
         const { status } = destination.data;
 
         if (
           typeof taskId === "string" &&
           typeof status === "string" &&
+          typeof currentStatus === "string" &&
           (TASK_STATUSES as readonly string[]).includes(status)
         ) {
           const newStatus = status as TaskStatus;
-          setTasks(
-            tasks.map((t) =>
-              t.id === taskId ? { ...t, status: newStatus } : t,
-            ),
-          );
+          const fromStatus = currentStatus as TaskStatus;
+
+          if (isMoveAllowed(fromStatus, newStatus)) {
+            setTasks(
+              tasks.map((t) =>
+                t.id === taskId ? { ...t, status: newStatus } : t,
+              ),
+            );
+          }
         }
       },
     });
