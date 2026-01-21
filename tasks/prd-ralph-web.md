@@ -166,6 +166,20 @@ flowchart LR
 - Changelog 자동 생성
 - **목표**: 외부 도구 통합, 팀 협업 지원
 
+### Phase 5-7: 현재 개발 단계 (세분화)
+
+> 📌 상세 내용: [PRIORITIES.md](./PRIORITIES.md)
+
+| Phase    | 이름               | 설명                                                  |
+| -------- | ------------------ | ----------------------------------------------------- |
+| Phase 7  | Agent Orchestrator | `child_process` 기반 에이전트 연결 및 실시간 스트리밍 |
+| Phase 8  | Worktree Manager   | `git worktree` 격리 환경 구축                         |
+| Phase 9  | Persistence (DB)   | Drizzle ORM + SQLite 연동 및 상태 영속화              |
+| Phase 10 | Queue Manager      | 병렬 태스크 스케줄링 및 리소스 제어                   |
+| Phase 11 | QA Loop (Fixer)    | 자동 테스트 연동 및 에러 피드백 루프                  |
+| Phase 12 | Memory Graph       | 벡터 임베딩 기반 지능형 지식 탐색                     |
+| Phase 13 | Multi-Provider     | 다양한 에이전트 CLI 표준 어댑터 확장                  |
+
 ---
 
 ## 8. 성공 지표 (Success Metrics)
