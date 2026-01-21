@@ -14,45 +14,47 @@ export function Header() {
   const router = useRouter();
 
   return (
-    <header className="h-14 border-b bg-background flex items-center justify-between px-4">
-      <div className="flex items-center gap-3">
-        <h1 className="heading-3">🔧 Ralph-Web</h1>
-      </div>
+    <header className="h-14 border-b bg-background flex items-center shrink-0">
+      <div className="container-custom flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <h1 className="heading-3">🔧 Ralph-Web</h1>
+        </div>
 
-      <div className="flex items-center gap-2">
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => router.push("/settings")}
-              >
-                <Settings className="h-5 w-5" />
-                <span className="sr-only">Settings</span>
-              </Button>
-            }
-          />
-          <TooltipContent>
-            <p>Settings</p>
-          </TooltipContent>
-        </Tooltip>
+        <div className="flex items-center gap-2">
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => router.push("/settings")}
+                >
+                  <Settings className="h-5 w-5" />
+                  <span className="sr-only">Settings</span>
+                </Button>
+              }
+            />
+            <TooltipContent>
+              <p>Settings</p>
+            </TooltipContent>
+          </Tooltip>
 
-        <ThemeToggle />
+          <ThemeToggle />
 
-        <Tooltip>
-          <TooltipTrigger
-            render={
-              <Button variant="ghost" size="icon">
-                <HelpCircle className="h-5 w-5" />
-                <span className="sr-only">Help</span>
-              </Button>
-            }
-          />
-          <TooltipContent>
-            <p>Help</p>
-          </TooltipContent>
-        </Tooltip>
+          <Tooltip>
+            <TooltipTrigger
+              render={
+                <Button variant="ghost" size="icon">
+                  <HelpCircle className="h-5 w-5" />
+                  <span className="sr-only">Help</span>
+                </Button>
+              }
+            />
+            <TooltipContent>
+              <p>Help</p>
+            </TooltipContent>
+          </Tooltip>
+        </div>
       </div>
     </header>
   );

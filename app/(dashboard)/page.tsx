@@ -19,7 +19,7 @@ export default function DashboardPage() {
   const displayTasks = tasks.length > 0 ? tasks : mockTasks;
 
   return (
-    <div className="p-6 space-y-6 max-w-7xl mx-auto w-full">
+    <div className="container-custom py-6 space-y-6">
       <div className="flex flex-col gap-2">
         <h1 className="heading-1">Dashboard</h1>
         <p className="text-muted-foreground">Overview of your coding tasks</p>

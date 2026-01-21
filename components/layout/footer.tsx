@@ -18,8 +18,10 @@ export function Footer() {
     parts.length > 0 ? `Status: ${parts.join(" • ")}` : "All tasks up to date";
 
   return (
-    <footer className="h-8 border-t bg-muted/30 flex items-center px-4">
-      <p className="text-caption text-muted-foreground">{statusText}</p>
+    <footer className="h-8 border-t bg-muted/30 flex items-center shrink-0">
+      <div className="container-custom">
+        <p className="text-caption text-muted-foreground">{statusText}</p>
+      </div>
     </footer>
   );
 }

@@ -15,7 +15,7 @@ export default function TasksPage() {
   }, [tasks.length, setTasks]);
 
   return (
-    <div className="h-full flex flex-col p-6 space-y-6">
+    <div className="container-custom py-6 space-y-6 h-full flex flex-col">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="heading-1">Tasks</h1>
