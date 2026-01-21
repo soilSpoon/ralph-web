@@ -1,3 +1,6 @@
+"use client";
+
+import { useLocale, useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { ActivityItem } from "@/lib/types";
@@ -6,21 +9,24 @@ interface ActivityFeedProps {
   activities: ActivityItem[];
 }
 
-const timeFormatter = new Intl.DateTimeFormat("en-US", {
-  hour: "numeric",
-  minute: "numeric",
-  hour12: true,
-});
-
-function formatTime(date: Date) {
-  return timeFormatter.format(date);
-}
-
 export function ActivityFeed({ activities }: ActivityFeedProps) {
+  const t = useTranslations("Dashboard");
+  const locale = useLocale();
+
+  const timeFormatter = new Intl.DateTimeFormat(locale, {
+    hour: "numeric",
+    minute: "numeric",
+    hour12: locale === "en",
+  });
+
+  function formatTime(date: Date) {
+    return timeFormatter.format(date);
+  }
+
   return (
     <Card className="h-full">
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">Activity</CardTitle>
+        <CardTitle className="text-lg font-semibold">{t("activity")}</CardTitle>
       </CardHeader>
       <CardContent>
         <ScrollArea className="h-[300px] pr-4">

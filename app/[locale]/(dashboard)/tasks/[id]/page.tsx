@@ -1,5 +1,6 @@
 import { CheckCircle, Circle, Clock } from "lucide-react";
 import { notFound } from "next/navigation";
+import { getTranslations } from "next-intl/server";
 import { ProgressBar } from "@/components/common/progress-bar";
 import { StatusBadge } from "@/components/common/status-badge";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +22,7 @@ interface TaskDetailPageProps {
 export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
   const { id } = await params;
   const task = mockTasks.find((t) => t.id === id);
+  const t = await getTranslations("TaskDetail");
 
   if (!task) {
     notFound();
@@ -40,23 +42,23 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
           </div>
           <div className="flex gap-2">
             <StatusBadge status={task.status} />
-            {task.status === "review" && <Button>Review Changes</Button>}
+            {task.status === "review" && <Button>{t("reviewChanges")}</Button>}
           </div>
         </div>
 
         <div className="flex gap-6 text-sm">
           <div className="flex items-center gap-2">
             <Badge variant="outline">
-              Iteration {task.currentIteration}/{task.maxIterations}
+              {t("iteration")} {task.currentIteration}/{task.maxIterations}
             </Badge>
           </div>
           <div className="flex items-center gap-2">
             <Badge variant="outline">
-              {completedStories}/{stories.length} stories
+              {completedStories}/{stories.length} {t("storiesCount")}
             </Badge>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-muted-foreground">Branch:</span>
+            <span className="text-muted-foreground">{t("branch")}:</span>
             <code className="text-sm bg-muted px-2 py-1 rounded">
               {task.branchName}
             </code>
@@ -69,15 +71,15 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
       {/* Tabs */}
       <Tabs defaultValue="stories" className="w-full">
         <TabsList>
-          <TabsTrigger value="stories">Stories</TabsTrigger>
-          <TabsTrigger value="prd">PRD</TabsTrigger>
-          <TabsTrigger value="progress">Progress Log</TabsTrigger>
+          <TabsTrigger value="stories">{t("tabs.stories")}</TabsTrigger>
+          <TabsTrigger value="prd">{t("tabs.prd")}</TabsTrigger>
+          <TabsTrigger value="progress">{t("tabs.progress")}</TabsTrigger>
         </TabsList>
 
         <TabsContent value="stories" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>📝 User Stories</CardTitle>
+              <CardTitle>📝 {t("userStories")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               {stories.map((story) => (
@@ -105,7 +107,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
 
                       <div className="space-y-1">
                         <p className="text-sm font-medium">
-                          Acceptance Criteria:
+                          {t("acceptanceCriteria")}:
                         </p>
                         <ul className="text-sm text-muted-foreground space-y-1 ml-4">
                           {story.acceptanceCriteria.map((criteria, idx) => (
@@ -118,7 +120,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
 
                       {story.threadUrl && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span>Thread:</span>
+                          <span>{t("thread")}:</span>
                           <a
                             href={story.threadUrl}
                             target="_blank"
@@ -140,13 +142,13 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         <TabsContent value="prd" className="mt-6">
           <Card>
             <CardContent className="pt-6 prose prose-sm max-w-none">
-              <h2>개요</h2>
+              <h2>{t("tabs.prd")}</h2>
               <p>{task.description}</p>
-              <h2>범위</h2>
+              <h3>Scope</h3>
               <ul>
-                <li>이메일/비밀번호 로그인</li>
-                <li>OAuth 연동 (Google, GitHub)</li>
-                <li>JWT 토큰 관리</li>
+                <li>Email/Password Login</li>
+                <li>OAuth Integration (Google, GitHub)</li>
+                <li>JWT Token Management</li>
               </ul>
             </CardContent>
           </Card>
@@ -155,7 +157,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         <TabsContent value="progress" className="mt-6">
           <Card>
             <CardHeader>
-              <CardTitle>📖 Progress Log</CardTitle>
+              <CardTitle>📖 {t("progressLog")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="border-l-2 border-primary pl-4 space-y-2">
@@ -165,8 +167,10 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
                 </div>
                 <p className="text-sm">JWT 토큰 생성/검증 로직 구현</p>
                 <div className="text-sm text-muted-foreground">
-                  <p>Files: src/lib/auth/jwt.ts (+), src/middleware.ts (~)</p>
-                  <p>Learnings: refresh token rotation 패턴 적용</p>
+                  <p>
+                    {t("files")}: src/lib/auth/jwt.ts (+), src/middleware.ts (~)
+                  </p>
+                  <p>{t("learnings")}: refresh token rotation 패턴 적용</p>
                 </div>
               </div>
 
@@ -177,7 +181,7 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
                 </div>
                 <p className="text-sm">회원가입 폼 컴포넌트 구현</p>
                 <div className="text-sm text-muted-foreground">
-                  <p>Files: src/components/RegisterForm.tsx (+)</p>
+                  <p>{t("files")}: src/components/RegisterForm.tsx (+)</p>
                 </div>
               </div>
             </CardContent>

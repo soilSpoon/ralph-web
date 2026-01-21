@@ -1,0 +1,55 @@
+{
+  "QuickStart": {
+    "title": "✨ Quick Start",
+    "placeholder": "What do you want to build?",
+    "button": "Start"
+  },
+  "Navigation": {
+    "dashboard": "Dashboard",
+    "tasks": "Tasks",
+    "patterns": "Patterns",
+    "settings": "Settings",
+    "archive": "Archive",
+    "board": "BOARD",
+    "memory": "MEMORY",
+    "help": "Help",
+    "english": "English",
+    "korean": "Korean"
+  },
+  "Status": {
+    "draft": "Draft",
+    "pending": "Pending",
+    "queued": "Queued",
+    "running": "Running",
+    "review": "Review",
+    "merged": "Merged",
+    "failed": "Failed"
+  },
+  "TaskDetail": {
+    "reviewChanges": "Review Changes",
+    "iteration": "Iteration",
+    "storiesCount": "stories",
+    "branch": "Branch",
+    "tabs": {
+      "stories": "Stories",
+      "prd": "PRD",
+      "progress": "Progress Log"
+    },
+    "userStories": "User Stories",
+    "acceptanceCriteria": "Acceptance Criteria",
+    "thread": "Thread",
+    "progressLog": "Progress Log",
+    "files": "Files",
+    "learnings": "Learnings"
+  },
+  "Dashboard": {
+    "activity": "Activity",
+    "attention": "Needs Attention",
+    "view": "View",
+    "description": "Overview of your coding tasks"
+  },
+  "Tasks": {
+    "title": "Tasks",
+    "description": "Generate code and manage the automation process"
+  }
+}

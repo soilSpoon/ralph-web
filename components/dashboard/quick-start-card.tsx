@@ -2,6 +2,7 @@
 
 import { Play } from "lucide-react";
 import { useState } from "react";
+import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -9,6 +10,7 @@ import { useAppStore } from "@/lib/store/use-app-store";
 import { Task } from "@/lib/types";
 
 export function QuickStartCard() {
+  const t = useTranslations("QuickStart");
   const [description, setDescription] = useState("");
   const { addTask } = useAppStore();
 
@@ -40,19 +42,19 @@ export function QuickStartCard() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg font-semibold">✨ 빠른 시작</CardTitle>
+        <CardTitle className="text-lg font-semibold">{t("title")}</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="flex gap-4">
           <Input
-            placeholder="무엇을 만들고 싶으신가요?"
+            placeholder={t("placeholder")}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
             className="flex-1"
           />
           <Button onClick={handleStart} disabled={!description.trim()}>
             <Play className="w-4 h-4 mr-2" />
-            시작
+            {t("button")}
           </Button>
         </div>
       </CardContent>

@@ -37,10 +37,10 @@ export function KanbanColumn({ status, label, tasks }: KanbanColumnProps) {
         isDraggedOver && "bg-muted/10 border-primary/40",
       )}
     >
-      <div className="p-3 flex items-center justify-between border-b border-border/50">
-        <h3 className="text-mono-label flex items-center gap-2">
+      <div className="p-4 flex items-center justify-between border-b border-border/50">
+        <h3 className="text-mono-label flex items-center gap-2.5">
           {label}
-          <span className="text-[10px] text-muted-foreground font-mono bg-muted/20 px-1.5 py-0.5 rounded-sm border border-border/50">
+          <span className="text-[12px] text-muted-foreground font-mono bg-muted/20 px-2 py-0.5 rounded-sm border border-border/50 tabular-nums">
             {tasks.length}
           </span>
         </h3>

@@ -7,8 +7,8 @@ import {
   ListTodo,
   Settings,
 } from "lucide-react";
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { useTranslations } from "next-intl";
+import { Link, usePathname } from "@/i18n/routing";
 import {
   Sidebar,
   SidebarContent,
@@ -20,47 +20,48 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
 
-const boardItems = [
-  {
-    title: "Dashboard",
-    url: "/",
-    icon: LayoutDashboard,
-  },
-  {
-    title: "Tasks",
-    url: "/tasks",
-    icon: ListTodo,
-  },
-];
-
-const memoryItems = [
-  {
-    title: "Patterns",
-    url: "/patterns",
-    icon: Brain,
-  },
-  {
-    title: "Archive",
-    url: "/archive",
-    icon: FolderArchive,
-  },
-];
-
 export function AppSidebar() {
+  const t = useTranslations("Navigation");
   const pathname = usePathname();
+
+  const boardItems = [
+    {
+      title: t("dashboard"),
+      url: "/",
+      icon: LayoutDashboard,
+    },
+    {
+      title: t("tasks"),
+      url: "/tasks",
+      icon: ListTodo,
+    },
+  ];
+
+  const memoryItems = [
+    {
+      title: t("patterns"),
+      url: "/patterns",
+      icon: Brain,
+    },
+    {
+      title: t("archive"),
+      url: "/archive",
+      icon: FolderArchive,
+    },
+  ];
 
   return (
     <Sidebar>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>BOARD</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("board")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {boardItems.map((item) => {
                 const isActive = pathname === item.url;
                 return (
-                  <SidebarMenuItem key={item.title}>
-                    <Link href={item.url}>
+                  <SidebarMenuItem key={item.url}>
+                    <Link href={item.url as any}>
                       <SidebarMenuButton isActive={isActive}>
                         <item.icon />
                         <span>{item.title}</span>
@@ -74,14 +75,14 @@ export function AppSidebar() {
         </SidebarGroup>
 
         <SidebarGroup>
-          <SidebarGroupLabel>MEMORY</SidebarGroupLabel>
+          <SidebarGroupLabel>{t("memory")}</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {memoryItems.map((item) => {
                 const isActive = pathname === item.url;
                 return (
-                  <SidebarMenuItem key={item.title}>
-                    <Link href={item.url}>
+                  <SidebarMenuItem key={item.url}>
+                    <Link href={item.url as any}>
                       <SidebarMenuButton isActive={isActive}>
                         <item.icon />
                         <span>{item.title}</span>
@@ -101,7 +102,7 @@ export function AppSidebar() {
                 <Link href="/settings">
                   <SidebarMenuButton isActive={pathname === "/settings"}>
                     <Settings />
-                    <span>Settings</span>
+                    <span>{t("settings")}</span>
                   </SidebarMenuButton>
                 </Link>
               </SidebarMenuItem>

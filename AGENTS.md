@@ -65,6 +65,8 @@ We use a modern, performance-oriented stack.
   - A low-level, high-performance DnD library used for the Kanban board.
 - **Rich Text Editor**: **Lexical**
   - Powers the PRD editor and Markdown viewing experiences.
+- **Internationalization (i18n)**: **[next-intl](https://next-intl-docs.vercel.app/)**
+  - Provides type-safe translations and routing-based multi-language support (English & Korean).
 
 ### Testing & Quality
 
@@ -87,13 +89,16 @@ Understanding where things live is crucial.
 ```text
 /home/dh/dev/labs/ralph-web/
 ├── app/                  # Next.js App Router
-│   ├── page.tsx          # Dashboard (Home)
-│   ├── tasks/            # Kanban Board & Task Details
-│   └── layout.tsx        # Root layout (Sidebar, Header)
+│   ├── [locale]/         # i18n Routing Layer (en/ko)
+│   │   ├── (dashboard)/  # Authenticated Dashboard
+│   │   └── layout.tsx    # Root layout (i18n Provider)
 ├── components/           # React Components
 │   ├── ui/               # Generic (Button, Input, Badge) - via shadcn
 │   ├── dashboard/        # Dashboard-specific widgets
-│   └── kanban/           # Kanban-specific components
+│   ├── kanban/           # Kanban-specific components
+│   └── layout/           # Shared Layout (Sidebar, Header, LocaleSwitcher)
+├── messages/             # 🌍 Translation Files (en.json, ko.json)
+├── i18n/                  # i18n Config (routing.ts, request.ts)
 ├── lib/                  # Core Logic
 │   ├── store/            # Zustand stores (useAppStore.ts)
 │   ├── db/               # Database schemas & clients (Drizzle/SQLite)

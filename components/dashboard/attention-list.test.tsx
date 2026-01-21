@@ -1,8 +1,10 @@
 import "@/test/env";
 import { afterEach, describe, expect, it } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, render } from "@testing-library/react";
+import { cleanup } from "@testing-library/react";
+import { render } from "@/test/utils";
 import { AttentionList } from "@/components/dashboard/attention-list";
+import ko from "@/messages/ko.json";
 
 expect.extend(matchers);
 
@@ -14,7 +16,7 @@ describe("AttentionList", () => {
   it("should render attention items", () => {
     const { getByText } = render(<AttentionList />);
 
-    expect(getByText("Needs Attention")).toBeInTheDocument();
+    expect(getByText(ko.Dashboard.attention)).toBeInTheDocument();
     // Check for mock items
     expect(getByText('Review failed for "Auth System"')).toBeInTheDocument();
     expect(getByText('Approval needed for "API Schema"')).toBeInTheDocument();
@@ -22,6 +24,6 @@ describe("AttentionList", () => {
 
   it("should render action buttons", () => {
     const { getAllByText } = render(<AttentionList />);
-    expect(getAllByText("View").length).toBe(2);
+    expect(getAllByText(ko.Dashboard.view).length).toBe(2);
   });
 });

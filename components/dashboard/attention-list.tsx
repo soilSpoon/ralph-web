@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { AlertCircle, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -26,6 +29,8 @@ const items: AttentionItem[] = [
 ];
 
 export function AttentionList() {
+  const t = useTranslations("Dashboard");
+
   if (items.length === 0) return null;
 
   return (
@@ -34,7 +39,7 @@ export function AttentionList() {
         <div className="flex items-center gap-2">
           <AlertCircle className="w-4 h-4 text-destructive" />
           <CardTitle className="text-xs font-mono uppercase tracking-widest text-destructive">
-            Needs Attention
+            {t("attention")}
           </CardTitle>
         </div>
       </CardHeader>
@@ -52,7 +57,7 @@ export function AttentionList() {
               size="xs"
               className="text-destructive hover:text-destructive hover:bg-destructive/10"
             >
-              View
+              {t("view")}
               <ArrowRight className="w-3 h-3 ml-1" />
             </Button>
           </div>

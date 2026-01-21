@@ -1,14 +1,17 @@
+import { useTranslations } from "next-intl";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
 import { mockTasks } from "@/lib/mock-data";
 
 export default function TasksPage() {
+  const t = useTranslations("Tasks");
+
   return (
     <div className="container-custom py-6 space-y-6 h-full flex flex-col">
       <div className="flex justify-between items-center">
         <div>
-          <h1 className="heading-1">Tasks</h1>
-          <p className="text-muted-foreground">
-            Manage and track your coding tasks
+          <h1 className="heading-1">{t("title")}</h1>
+          <p className="text-xl text-muted-foreground mt-1">
+            {t("description")}
           </p>
         </div>
       </div>

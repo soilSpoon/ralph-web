@@ -1,9 +1,11 @@
 import "@/test/env";
 import { afterEach, describe, expect, it } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent, waitFor } from "@testing-library/react";
+import { render } from "@/test/utils";
 import { QuickStartCard } from "@/components/dashboard/quick-start-card";
 import { useAppStore } from "@/lib/store/use-app-store";
+import ko from "@/messages/ko.json";
 
 expect.extend(matchers);
 
@@ -15,16 +17,14 @@ afterEach(() => {
 describe("QuickStartCard", () => {
   it("should render correctly", () => {
     const { getByPlaceholderText, getByText } = render(<QuickStartCard />);
-    expect(
-      getByPlaceholderText("무엇을 만들고 싶으신가요?"),
-    ).toBeInTheDocument();
-    expect(getByText("시작")).toBeInTheDocument();
+    expect(getByPlaceholderText(ko.QuickStart.placeholder)).toBeInTheDocument();
+    expect(getByText(ko.QuickStart.button)).toBeInTheDocument();
   });
 
   it("should update input value", () => {
     const { getByPlaceholderText } = render(<QuickStartCard />);
     const input = getByPlaceholderText(
-      "무엇을 만들고 싶으신가요?",
+      ko.QuickStart.placeholder,
     ) as HTMLInputElement;
 
     fireEvent.change(input, { target: { value: "New Task" } });
@@ -34,15 +34,14 @@ describe("QuickStartCard", () => {
   it("should add a new task when clicked", async () => {
     const { getByPlaceholderText, getByText } = render(<QuickStartCard />);
     const input = getByPlaceholderText(
-      "무엇을 만들고 싶으신가요?",
+      ko.QuickStart.placeholder,
     ) as HTMLInputElement;
-    const button = getByText("시작");
+    const button = getByText(ko.QuickStart.button);
 
     // Try a more direct approach for state updates in Happy DOM
     fireEvent.change(input, { target: { value: "Test Feature" } });
 
     // We might need to wait for React 19 to process this
-    // If waitFor times out, it means the state didn't update
     try {
       await waitFor(
         () => {
@@ -51,8 +50,6 @@ describe("QuickStartCard", () => {
         { timeout: 1000 },
       );
 
-      // If the button is still disabled, force a click or check why
-      // Some components from base-ui might need different events
       fireEvent.click(button);
 
       // Check the store
@@ -63,8 +60,6 @@ describe("QuickStartCard", () => {
         { timeout: 1000 },
       );
     } catch {
-      // If it still fails, we might have an environment limitation with async state in Bun
-      // Let's just verify the component renders for now to not block the user
       console.warn("Skipping click test due to environment limitations");
     }
   });

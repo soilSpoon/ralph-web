@@ -1,5 +1,8 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { Badge } from "@/components/ui/badge";
-import { formatTaskStatus, getStatusBadgeVariant } from "@/lib/formatters";
+import { getStatusBadgeVariant } from "@/lib/formatters";
 import type { TaskStatus } from "@/lib/types";
 
 interface StatusBadgeProps {
@@ -8,8 +11,9 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ status, className }: StatusBadgeProps) {
+  const t = useTranslations("Status");
   const variant = getStatusBadgeVariant(status);
-  const label = formatTaskStatus(status);
+  const label = t(status);
 
   return (
     <Badge variant={variant} className={className}>

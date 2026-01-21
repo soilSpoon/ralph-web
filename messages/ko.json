@@ -1,0 +1,55 @@
+{
+  "QuickStart": {
+    "title": "✨ 빠른 시작",
+    "placeholder": "무엇을 만들고 싶으신가요?",
+    "button": "시작"
+  },
+  "Navigation": {
+    "dashboard": "대시보드",
+    "tasks": "작업",
+    "patterns": "패턴",
+    "settings": "설정",
+    "archive": "아카이브",
+    "board": "보드",
+    "memory": "메모리",
+    "help": "도움말",
+    "english": "영어",
+    "korean": "한국어"
+  },
+  "Status": {
+    "draft": "초안",
+    "pending": "대기",
+    "queued": "대기 중",
+    "running": "실행 중",
+    "review": "리뷰",
+    "merged": "병합됨",
+    "failed": "실패"
+  },
+  "TaskDetail": {
+    "reviewChanges": "변경사항 리뷰",
+    "iteration": "반복",
+    "storiesCount": "스토리",
+    "branch": "브랜치",
+    "tabs": {
+      "stories": "스토리",
+      "prd": "PRD",
+      "progress": "진행 로그"
+    },
+    "userStories": "사용자 스토리",
+    "acceptanceCriteria": "수용 기준",
+    "thread": "스레드",
+    "progressLog": "진행 로그",
+    "files": "파일",
+    "learnings": "학습 내용"
+  },
+  "Dashboard": {
+    "activity": "활동",
+    "attention": "집중 필요",
+    "view": "보기",
+    "description": "업무 흐름 및 핵심 지표 한눈에 보기"
+  },
+  "Tasks": {
+    "title": "작업",
+    "description": "코드 생성 및 작업 프로세스 관리"
+  }
+}

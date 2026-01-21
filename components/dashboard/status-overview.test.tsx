@@ -1,9 +1,11 @@
 import "@/test/env";
 import { afterEach, describe, expect, it } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, render } from "@testing-library/react";
+import { cleanup } from "@testing-library/react";
+import { render } from "@/test/utils";
 import { StatusOverview } from "@/components/dashboard/status-overview";
 import { mockTasks } from "@/lib/mock-data";
+import ko from "@/messages/ko.json";
 
 expect.extend(matchers);
 
@@ -17,20 +19,20 @@ describe("StatusOverview", () => {
       <StatusOverview tasks={mockTasks} />,
     );
 
-    // Check for labels
-    expect(getByText("Running")).toBeInTheDocument();
-    expect(getByText("Review")).toBeInTheDocument();
-    expect(getByText("Draft")).toBeInTheDocument();
-    expect(getByText("Queued")).toBeInTheDocument();
+    // Check for labels using translation keys
+    expect(getByText(ko.Status.running)).toBeInTheDocument();
+    expect(getByText(ko.Status.review)).toBeInTheDocument();
+    expect(getByText(ko.Status.draft)).toBeInTheDocument();
+    expect(getByText(ko.Status.queued)).toBeInTheDocument();
 
     // Check for counts (mock data has 1 Running, 1 Review, 1 Draft, 1 Queued)
-    const ones = getAllByText("1");
+    const ones = getAllByText("01"); // Padding is used in component
     expect(ones.length).toBeGreaterThanOrEqual(4);
   });
 
   it("should render zeros when no tasks provided", () => {
     const { getAllByText } = render(<StatusOverview tasks={[]} />);
-    const zeros = getAllByText("0");
+    const zeros = getAllByText("00"); // Padding is used in component
     expect(zeros.length).toBeGreaterThanOrEqual(4);
   });
 });

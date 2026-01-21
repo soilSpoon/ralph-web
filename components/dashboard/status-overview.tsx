@@ -1,3 +1,6 @@
+"use client";
+
+import { useTranslations } from "next-intl";
 import { FileText, ListTodo, Play } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Task } from "@/lib/types";
@@ -8,6 +11,7 @@ interface StatusOverviewProps {
 }
 
 export function StatusOverview({ tasks }: StatusOverviewProps) {
+  const t = useTranslations("Status");
   const counts = tasks.reduce(
     (acc, task) => {
       const status = task.status as keyof typeof acc;
@@ -21,25 +25,29 @@ export function StatusOverview({ tasks }: StatusOverviewProps) {
 
   const items = [
     {
-      label: "RUNNING",
+      label: t("running"),
+      key: "running",
       count: counts.running,
       icon: Play,
       borderColor: "border-primary/40 text-primary",
     },
     {
-      label: "REVIEW",
+      label: t("review"),
+      key: "review",
       count: counts.review,
       icon: FileText,
       borderColor: "border-violet-500/40 text-violet-500",
     },
     {
-      label: "DRAFT",
+      label: t("draft"),
+      key: "draft",
       count: counts.draft,
       icon: FileText,
       borderColor: "border-indigo-500/40 text-indigo-500",
     },
     {
-      label: "QUEUED",
+      label: t("queued"),
+      key: "queued",
       count: counts.queued,
       icon: ListTodo,
       borderColor: "border-orange-500/40 text-orange-500",
@@ -50,7 +58,7 @@ export function StatusOverview({ tasks }: StatusOverviewProps) {
     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
       {items.map((item) => (
         <Card
-          key={item.label}
+          key={item.key}
           className={cn(
             "rounded-sm shadow-none bg-background border-border/60 transition-all hover:border-border",
             item.borderColor.split(" ")[0],
