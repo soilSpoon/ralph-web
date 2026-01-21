@@ -2,9 +2,9 @@
 
 import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { Clock, GitBranch } from "lucide-react";
-import { Link } from "@/i18n/routing";
 import { useEffect, useRef, useState } from "react";
 import { Card, CardContent } from "@/components/ui/card";
+import { Link } from "@/i18n/routing";
 import { Task } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -26,7 +26,7 @@ export function TaskCard({ task }: TaskCardProps) {
       onDragStart: () => setIsDragging(true),
       onDrop: () => setIsDragging(false),
     });
-  }, [task.id]);
+  }, [task.id, task.status]);
 
   return (
     <div

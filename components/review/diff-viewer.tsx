@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { DiffView, DiffModeEnum, DiffFile } from "@git-diff-view/react";
+import { DiffFile, DiffModeEnum, DiffView } from "@git-diff-view/react";
+import { useEffect, useMemo, useState } from "react";
 import "@git-diff-view/react/styles/diff-view.css";
-import { getDiffHighlighter, DiffHighlighter } from "@/lib/diff-highlighter";
-import { ParsedDiffFile } from "@/lib/diff-utils";
 import { useTheme } from "next-themes";
 import { Skeleton } from "@/components/ui/skeleton";
+import { DiffHighlighter, getDiffHighlighter } from "@/lib/diff-highlighter";
+import { ParsedDiffFile } from "@/lib/diff-utils";
 
 interface DiffViewerProps {
   diffFile: ParsedDiffFile;
@@ -79,7 +79,7 @@ export function DiffViewer({ diffFile }: DiffViewerProps) {
         diffViewTheme={isDark ? "dark" : "light"}
         diffViewMode={DiffModeEnum.Split}
         diffViewHighlight={true}
-        registerHighlighter={highlighter as any}
+        registerHighlighter={highlighter}
         diffViewWrap={false}
       />
     </div>

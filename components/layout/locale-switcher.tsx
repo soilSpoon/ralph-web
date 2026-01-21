@@ -1,7 +1,7 @@
 "use client";
 
+import { Languages } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
-import { routing, usePathname, useRouter } from "@/i18n/routing";
 import {
   Select,
   SelectContent,
@@ -9,7 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Languages } from "lucide-react";
+import { routing, usePathname, useRouter } from "@/i18n/routing";
 
 export function LocaleSwitcher() {
   const t = useTranslations("Navigation");
@@ -19,7 +19,7 @@ export function LocaleSwitcher() {
 
   function onSelectChange(value: string | null) {
     if (value) {
-      router.replace(pathname, { locale: value as any });
+      router.replace(pathname, { locale: value as "en" | "ko" });
     }
   }
 

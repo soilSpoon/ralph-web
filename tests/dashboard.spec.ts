@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
-import ko from "../messages/ko.json";
 import en from "../messages/en.json";
+import ko from "../messages/ko.json";
 
 test("dashboard loads with default locale and supports language switching", async ({
   page,

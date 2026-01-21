@@ -1,15 +1,16 @@
 "use client";
 
+import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { createTask } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { useWizardState, WizardStep } from "@/lib/hooks/use-wizard-state";
-import { WizardStepDescribe } from "@/components/wizard/wizard-step-describe";
-import { WizardStepClarify } from "@/components/wizard/wizard-step-clarify";
-import { WizardStepReview } from "@/components/wizard/wizard-step-review";
 import { WizardStepApprove } from "@/components/wizard/wizard-step-approve";
-
-import { createTask } from "@/app/actions";
+import { WizardStepClarify } from "@/components/wizard/wizard-step-clarify";
+import { WizardStepDescribe } from "@/components/wizard/wizard-step-describe";
+import { WizardStepReview } from "@/components/wizard/wizard-step-review";
+import { slideIn } from "@/lib/animations";
+import { useWizardState, WizardStep } from "@/lib/hooks/use-wizard-state";
 
 export default function NewTaskPage() {
   const {
@@ -76,26 +77,38 @@ export default function NewTaskPage() {
           <CardHeader>
             <CardTitle>{getStepTitle(currentStep)}</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {currentStep === "describe" && (
-              <WizardStepDescribe
-                formData={formData}
-                onFormDataChange={setFormData}
-              />
-            )}
+          <CardContent>
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={currentStep}
+                variants={slideIn}
+                initial="initial"
+                animate="animate"
+                exit="exit"
+                transition={{ duration: 0.2 }}
+                className="space-y-6"
+              >
+                {currentStep === "describe" && (
+                  <WizardStepDescribe
+                    formData={formData}
+                    onFormDataChange={setFormData}
+                  />
+                )}
 
-            {currentStep === "clarify" && (
-              <WizardStepClarify
-                formData={formData}
-                onFormDataChange={setFormData}
-              />
-            )}
+                {currentStep === "clarify" && (
+                  <WizardStepClarify
+                    formData={formData}
+                    onFormDataChange={setFormData}
+                  />
+                )}
 
-            {currentStep === "review" && (
-              <WizardStepReview formData={formData} />
-            )}
+                {currentStep === "review" && (
+                  <WizardStepReview formData={formData} />
+                )}
 
-            {currentStep === "approve" && <WizardStepApprove />}
+                {currentStep === "approve" && <WizardStepApprove />}
+              </motion.div>
+            </AnimatePresence>
           </CardContent>
         </Card>
 

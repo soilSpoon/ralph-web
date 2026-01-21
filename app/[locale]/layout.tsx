@@ -1,13 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { notFound } from "next/navigation";
+import { NextIntlClientProvider } from "next-intl";
+import { getMessages } from "next-intl/server";
 import { ThemeProvider } from "next-themes";
 import { Toaster } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { NextIntlClientProvider } from "next-intl";
-import { getMessages } from "next-intl/server";
-import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import "../globals.css";
 
 const geistSans = Geist({
   subsets: ["latin"],
@@ -19,11 +18,12 @@ const geistMono = Geist_Mono({
   variable: "--font-mono",
 });
 
-export const metadata: Metadata = {
-  title: "Ralph-Web | AI Automation Loop",
-  description:
-    "High-precision AI-powered coding platform with Ralph Loop automation",
-};
+// Type predicate to validate locale
+function isValidLocale(
+  locale: string,
+): locale is (typeof routing.locales)[number] {
+  return routing.locales.some((l) => l === locale);
+}
 
 export default async function RootLayout({
   children,
@@ -35,7 +35,7 @@ export default async function RootLayout({
   const { locale } = await params;
 
   // Ensure that the incoming `locale` is valid
-  if (!routing.locales.includes(locale as any)) {
+  if (!isValidLocale(locale)) {
     notFound();
   }
 

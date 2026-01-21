@@ -86,6 +86,7 @@ export interface Pattern {
   id: number;
   taskId?: string;
   pattern: string;
+  description: string;
   category: PatternCategory;
   sourceFile?: string;
   createdAt: Date;

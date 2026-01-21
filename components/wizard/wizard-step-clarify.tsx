@@ -1,7 +1,7 @@
 "use client";
 
-import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { WizardFormData } from "@/lib/hooks/use-wizard-state";
 

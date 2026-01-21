@@ -1,10 +1,10 @@
 "use client";
 
-import { useTranslations } from "next-intl";
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useAppStore } from "@/lib/store/use-app-store";
-import { TASK_STATUSES, Task, TaskStatus, isMoveAllowed } from "@/lib/types";
+import { isMoveAllowed, TASK_STATUSES, Task, TaskStatus } from "@/lib/types";
 import { KanbanColumn } from "./kanban-column";
 
 interface KanbanBoardProps {

@@ -1,14 +1,14 @@
 "use client";
 
-import { ParsedDiffFile } from "@/lib/diff-utils";
-import { cn } from "@/lib/utils";
 import {
+  ChevronDown,
+  ChevronRight,
   FileCode,
   FilePlus,
   FileText,
-  ChevronRight,
-  ChevronDown,
 } from "lucide-react";
+import { ParsedDiffFile } from "@/lib/diff-utils";
+import { cn } from "@/lib/utils";
 
 interface FileTreeProps {
   files: ParsedDiffFile[];

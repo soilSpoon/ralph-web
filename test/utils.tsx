@@ -1,6 +1,6 @@
-import type { ReactElement } from "react";
 import { render } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
+import type { ReactElement } from "react";
 import ko from "../messages/ko.json";
 
 function renderWithIntl(

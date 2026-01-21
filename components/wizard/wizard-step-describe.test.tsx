@@ -1,6 +1,6 @@
 import "@/test/env";
-import { describe, it, expect, afterEach } from "bun:test";
-import { render, cleanup } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "bun:test";
+import { cleanup, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
 import { WizardStepDescribe } from "./wizard-step-describe";

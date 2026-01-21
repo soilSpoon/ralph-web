@@ -2,15 +2,15 @@
 
 import { HelpCircle, Settings } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { useRouter } from "@/i18n/routing";
+import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import { Button } from "@/components/ui/button";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
-import { LocaleSwitcher } from "@/components/layout/locale-switcher";
 import {
   Tooltip,
   TooltipContent,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import { useRouter } from "@/i18n/routing";
 
 export function Header() {
   const t = useTranslations("Navigation");

@@ -7,8 +7,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { mockStories, mockTasks } from "@/lib/mock-data";
 import { Link } from "@/i18n/routing";
+import { mockStories, mockTasks } from "@/lib/mock-data";
 
 export async function generateStaticParams() {
   return mockTasks.map((task) => ({

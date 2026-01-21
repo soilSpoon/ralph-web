@@ -1,9 +1,9 @@
+import { Plus } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { KanbanBoard } from "@/components/kanban/kanban-board";
-import { mockTasks } from "@/lib/mock-data";
-import { Link } from "@/i18n/routing";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Link } from "@/i18n/routing";
+import { mockTasks } from "@/lib/mock-data";
 
 export default function TasksPage() {
   const t = useTranslations("Tasks");

@@ -2,7 +2,7 @@
 
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { useEffect, useRef, useState } from "react";
-import { Task, TaskStatus, isMoveAllowed } from "@/lib/types";
+import { isMoveAllowed, Task, TaskStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { TaskCard } from "./task-card";
 

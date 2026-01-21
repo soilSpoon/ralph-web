@@ -1,8 +1,15 @@
 import "@/test/env";
-import { afterEach, describe, expect, it } from "bun:test";
-import { cleanup, render } from "@testing-library/react";
+import { afterEach, describe, expect, it, mock } from "bun:test";
+import { cleanup } from "@testing-library/react";
 import { Task } from "@/lib/types";
+import { render } from "@/test/utils";
 import { TaskCard } from "./task-card";
+
+mock.module("@atlaskit/pragmatic-drag-and-drop/element/adapter", () => ({
+  monitorForElements: () => () => {},
+  draggable: () => () => {},
+  dropTargetForElements: () => () => {},
+}));
 
 afterEach(() => {
   cleanup();
@@ -29,13 +36,13 @@ describe("TaskCard", () => {
     expect(getByText("Test Task")).toBeTruthy();
     expect(getByText("Description")).toBeTruthy();
     expect(getByText("task/test")).toBeTruthy();
-    expect(getByText("0/5")).toBeTruthy();
+    expect(getByText("00/05")).toBeTruthy();
   });
 
   it("should have a link to the task detail page", () => {
     const { getByRole } = render(<TaskCard task={mockTask} />);
     const link = getByRole("link");
-    expect(link.getAttribute("href")).toBe("/tasks/1");
+    expect(link.getAttribute("href")).toBe("/ko/tasks/1");
     // Also verify the link contains the task name
     expect(link.textContent).toBe("Test Task");
   });

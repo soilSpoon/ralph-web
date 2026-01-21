@@ -1,17 +1,17 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
-import { useTranslations } from "next-intl";
+import { Check, RotateCcw, X } from "lucide-react";
 import { useParams } from "next/navigation";
-import { mockTasks, mockDiff } from "@/lib/mock-data";
-import { splitUnifiedDiffByFile, ParsedDiffFile } from "@/lib/diff-utils";
+import { useTranslations } from "next-intl";
+import { useEffect, useMemo, useState } from "react";
 import { DiffViewer } from "@/components/review/diff-viewer";
 import { FileTree } from "@/components/review/file-tree";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Check, RotateCcw, X } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { ParsedDiffFile, splitUnifiedDiffByFile } from "@/lib/diff-utils";
+import { mockDiff, mockTasks } from "@/lib/mock-data";
 
 export default function ReviewPage() {
   const t = useTranslations("TaskDetail");

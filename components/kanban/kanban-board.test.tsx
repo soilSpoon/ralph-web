@@ -1,8 +1,15 @@
 import "@/test/env";
-import { afterEach, describe, expect, it } from "bun:test";
-import { cleanup, render } from "@testing-library/react";
+import { afterEach, describe, expect, it, mock } from "bun:test";
+import { cleanup } from "@testing-library/react";
 import { Task } from "@/lib/types";
+import { render } from "@/test/utils";
 import { KanbanBoard } from "./kanban-board";
+
+mock.module("@atlaskit/pragmatic-drag-and-drop/element/adapter", () => ({
+  monitorForElements: () => () => {},
+  draggable: () => () => {},
+  dropTargetForElements: () => () => {},
+}));
 
 afterEach(() => {
   cleanup();
@@ -43,11 +50,11 @@ describe("KanbanBoard", () => {
   it("should render all 5 columns labels", () => {
     const { getByText } = render(<KanbanBoard tasks={[]} />);
 
-    expect(getByText("Draft")).toBeTruthy();
-    expect(getByText("Queued")).toBeTruthy();
-    expect(getByText("Running")).toBeTruthy();
-    expect(getByText("Review")).toBeTruthy();
-    expect(getByText("Merged")).toBeTruthy();
+    expect(getByText("초안")).toBeTruthy();
+    expect(getByText("대기 중")).toBeTruthy();
+    expect(getByText("실행 중")).toBeTruthy();
+    expect(getByText("리뷰")).toBeTruthy();
+    expect(getByText("병합됨")).toBeTruthy();
   });
 
   it("should render tasks in correct columns", () => {

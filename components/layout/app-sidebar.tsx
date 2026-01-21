@@ -8,7 +8,7 @@ import {
   Settings,
 } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Link, usePathname } from "@/i18n/routing";
+import type { ComponentProps } from "react";
 import {
   Sidebar,
   SidebarContent,
@@ -19,12 +19,20 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { Link, usePathname } from "@/i18n/routing";
+
+type LinkProps = ComponentProps<typeof Link>;
+type RoutePath = LinkProps["href"];
 
 export function AppSidebar() {
   const t = useTranslations("Navigation");
   const pathname = usePathname();
 
-  const boardItems = [
+  const boardItems: {
+    title: string;
+    url: RoutePath;
+    icon: typeof LayoutDashboard;
+  }[] = [
     {
       title: t("dashboard"),
       url: "/",
@@ -37,7 +45,7 @@ export function AppSidebar() {
     },
   ];
 
-  const memoryItems = [
+  const memoryItems: { title: string; url: RoutePath; icon: typeof Brain }[] = [
     {
       title: t("patterns"),
       url: "/patterns",
@@ -60,8 +68,8 @@ export function AppSidebar() {
               {boardItems.map((item) => {
                 const isActive = pathname === item.url;
                 return (
-                  <SidebarMenuItem key={item.url}>
-                    <Link href={item.url as any}>
+                  <SidebarMenuItem key={item.url.toString()}>
+                    <Link href={item.url}>
                       <SidebarMenuButton isActive={isActive}>
                         <item.icon />
                         <span>{item.title}</span>
@@ -81,8 +89,8 @@ export function AppSidebar() {
               {memoryItems.map((item) => {
                 const isActive = pathname === item.url;
                 return (
-                  <SidebarMenuItem key={item.url}>
-                    <Link href={item.url as any}>
+                  <SidebarMenuItem key={item.url.toString()}>
+                    <Link href={item.url}>
                       <SidebarMenuButton isActive={isActive}>
                         <item.icon />
                         <span>{item.title}</span>
