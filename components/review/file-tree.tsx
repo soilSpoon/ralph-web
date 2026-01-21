@@ -50,12 +50,12 @@ export function FileTree({ files, selectedFileKey, onSelect }: FileTreeProps) {
             </div>
 
             <div className="flex-1 min-w-0 pr-8">
-              <span className="block truncate font-mono text-[13px]">
+              <span className="block truncate font-mono text-sm">
                 {file.newPath || file.oldPath}
               </span>
             </div>
 
-            <div className="shrink-0 font-mono text-[11px] tabular-nums opacity-60 group-hover:opacity-100">
+            <div className="shrink-0 font-mono text-xs tabular-nums opacity-60 group-hover:opacity-100">
               {file.additions > 0 && (
                 <span className="text-emerald-500">+{file.additions}</span>
               )}

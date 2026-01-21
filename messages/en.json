@@ -52,5 +52,34 @@
     "title": "Tasks",
     "description": "Generate code and manage the automation process",
     "newTask": "New Task"
+  },
+  "Archive": {
+    "title": "Archive",
+    "description": "Historical record of completed tasks",
+    "searchPlaceholder": "Search archive...",
+    "unarchive": "Restore",
+    "archive": "Archive",
+    "viewDetails": "View Details",
+    "completedOn": "Completed on",
+    "noArchivedTasks": "No archived tasks found"
+  },
+  "Settings": {
+    "title": "Settings",
+    "description": "Application environment settings",
+    "provider": "AI Provider",
+    "providerSelect": "Select Provider",
+    "apiKey": "API Key",
+    "defaultProvider": "Default Provider",
+    "concurrency": "Concurrency",
+    "maxConcurrentTasks": "Max Concurrent Tasks",
+    "notifications": "Notifications",
+    "notifyOnComplete": "Notify on completion",
+    "notifyOnError": "Notify on error",
+    "git": "Git",
+    "defaultBranch": "Default Branch",
+    "commitFormat": "Commit Message Format",
+    "autoPush": "Auto Push",
+    "save": "Save",
+    "saved": "Settings saved successfully"
   }
 }

@@ -1,7 +1,9 @@
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
 import { TextDecoder, TextEncoder } from "util";
 
-GlobalRegistrator.register();
+if (typeof global.document === "undefined") {
+  GlobalRegistrator.register();
+}
 
 // Add missing globals for React 19 / TL
 if (typeof global.TextEncoder === "undefined") {

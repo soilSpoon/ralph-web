@@ -1,3 +1,9 @@
+import { GlobalRegistrator } from "@happy-dom/global-registrator";
+
+if (typeof global.document === "undefined") {
+  GlobalRegistrator.register();
+}
+
 import { render } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactElement } from "react";

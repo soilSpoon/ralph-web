@@ -4,11 +4,29 @@ import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/ad
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useAppStore } from "@/lib/store/use-app-store";
-import { isMoveAllowed, TASK_STATUSES, Task, TaskStatus } from "@/lib/types";
+import {
+  isMoveAllowed,
+  isTaskStatus,
+  TASK_STATUSES,
+  Task,
+  TaskStatus,
+} from "@/lib/types";
 import { KanbanColumn } from "./kanban-column";
 
 interface KanbanBoardProps {
   tasks: Task[];
+}
+
+function isTaskData(
+  data: Record<string, unknown>,
+): data is { taskId: string; currentStatus: TaskStatus } {
+  return typeof data.taskId === "string" && isTaskStatus(data.currentStatus);
+}
+
+function isColumnData(
+  data: Record<string, unknown>,
+): data is { status: TaskStatus } {
+  return isTaskStatus(data.status);
 }
 
 const COLUMN_STATUSES: TaskStatus[] = [
@@ -29,17 +47,12 @@ export function KanbanBoard({ tasks }: KanbanBoardProps) {
         const destination = location.current.dropTargets[0];
         if (!destination) return;
 
-        const { taskId, currentStatus } = source.data;
-        const { status } = destination.data;
+        const sourceData = source.data;
+        const destinationData = destination.data;
 
-        if (
-          typeof taskId === "string" &&
-          typeof status === "string" &&
-          typeof currentStatus === "string" &&
-          (TASK_STATUSES as readonly string[]).includes(status)
-        ) {
-          const newStatus = status as TaskStatus;
-          const fromStatus = currentStatus as TaskStatus;
+        if (isTaskData(sourceData) && isColumnData(destinationData)) {
+          const { taskId, currentStatus: fromStatus } = sourceData;
+          const { status: newStatus } = destinationData;
 
           if (isMoveAllowed(fromStatus, newStatus)) {
             setTasks(

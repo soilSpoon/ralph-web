@@ -2,7 +2,7 @@
 
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { useEffect, useRef, useState } from "react";
-import { isMoveAllowed, Task, TaskStatus } from "@/lib/types";
+import { isMoveAllowed, isTaskStatus, Task, TaskStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { TaskCard } from "./task-card";
 
@@ -26,8 +26,12 @@ export function KanbanColumn({ status, label, tasks }: KanbanColumnProps) {
       getData: () => ({ status }),
       onDragEnter: ({ source }) => {
         setIsDraggedOver(true);
-        const fromStatus = source.data.currentStatus as TaskStatus;
-        setCanDrop(isMoveAllowed(fromStatus, status));
+        const fromStatus = source.data.currentStatus;
+        if (isTaskStatus(fromStatus)) {
+          setCanDrop(isMoveAllowed(fromStatus, status));
+        } else {
+          setCanDrop(false);
+        }
       },
       onDragLeave: () => {
         setIsDraggedOver(false);
@@ -44,7 +48,7 @@ export function KanbanColumn({ status, label, tasks }: KanbanColumnProps) {
     <div
       ref={columnRef}
       className={cn(
-        "flex flex-col w-72 min-w-[18rem] bg-card/20 rounded-sm border border-border transition-colors duration-150",
+        "flex flex-col w-72 min-w-72 bg-card/20 rounded-sm border border-border transition-colors duration-150",
         isDraggedOver &&
           (canDrop
             ? "bg-primary/5 border-primary/40 shadow-sm"
@@ -52,9 +56,9 @@ export function KanbanColumn({ status, label, tasks }: KanbanColumnProps) {
       )}
     >
       <div className="p-4 flex items-center justify-between border-b border-border/50">
-        <h3 className="text-mono-label flex items-center gap-2.5">
+        <h3 className="font-semibold text-sm flex items-center gap-2 text-foreground tracking-tight">
           {label}
-          <span className="text-[12px] text-muted-foreground font-mono bg-muted/20 px-2 py-0.5 rounded-sm border border-border/50 tabular-nums">
+          <span className="text-xs font-medium text-foreground/60 bg-secondary px-2 py-0.5 rounded-sm tabular-nums border border-border/30">
             {tasks.length}
           </span>
         </h3>

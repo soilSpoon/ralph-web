@@ -2,6 +2,7 @@ import "@/test/env";
 import { afterEach, describe, expect, it } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import { QuickStartCard } from "@/components/dashboard/quick-start-card";
 import { useAppStore } from "@/lib/store/use-app-store";
 import ko from "@/messages/ko.json";
@@ -32,35 +33,33 @@ describe("QuickStartCard", () => {
   });
 
   it("should add a new task when clicked", async () => {
-    const { getByPlaceholderText, getByText } = render(<QuickStartCard />);
-    const input = getByPlaceholderText(
-      ko.QuickStart.placeholder,
-    ) as HTMLInputElement;
-    const button = getByText(ko.QuickStart.button);
+    const user = userEvent.setup();
+    const { getByPlaceholderText, getByRole } = render(<QuickStartCard />);
+    const input = getByPlaceholderText(ko.QuickStart.placeholder);
 
-    // Try a more direct approach for state updates in Happy DOM
-    fireEvent.change(input, { target: { value: "Test Feature" } });
-
-    // We might need to wait for React 19 to process this
-    try {
-      await waitFor(
-        () => {
-          expect(input.value).toBe("Test Feature");
-        },
-        { timeout: 1000 },
-      );
-
-      fireEvent.click(button);
-
-      // Check the store
-      await waitFor(
-        () => {
-          expect(useAppStore.getState().tasks.length).toBeGreaterThan(0);
-        },
-        { timeout: 1000 },
-      );
-    } catch {
-      console.warn("Skipping click test due to environment limitations");
+    if (!(input instanceof HTMLInputElement)) {
+      throw new Error("Input element not found");
     }
+
+    const button = getByRole("button");
+
+    await user.type(input, "Test Feature");
+    expect(input.value).toBe("Test Feature");
+
+    await user.click(button);
+
+    // Wait and check
+    await waitFor(
+      () => {
+        const state = useAppStore.getState();
+        expect(state.tasks.some((t) => t.description === "Test Feature")).toBe(
+          true,
+        );
+      },
+      { timeout: 3000 },
+    );
+
+    // Should clear input
+    expect(input.value).toBe("");
   });
 });

@@ -52,5 +52,34 @@
     "title": "작업",
     "description": "코드 생성 및 작업 프로세스 관리",
     "newTask": "새 작업"
+  },
+  "Archive": {
+    "title": "아카이브",
+    "description": "완료된 작업 기록",
+    "searchPlaceholder": "아카이브 검색...",
+    "unarchive": "복원",
+    "archive": "아카이브",
+    "viewDetails": "상세보기",
+    "completedOn": "완료일",
+    "noArchivedTasks": "아카이브된 작업이 없습니다"
+  },
+  "Settings": {
+    "title": "설정",
+    "description": "애플리케이션 환경 설정",
+    "provider": "AI Provider",
+    "providerSelect": "Provider 선택",
+    "apiKey": "API Key",
+    "defaultProvider": "기본 Provider",
+    "concurrency": "동시성",
+    "maxConcurrentTasks": "최대 동시 태스크 수",
+    "notifications": "알림",
+    "notifyOnComplete": "태스크 완료 시 알림",
+    "notifyOnError": "에러 발생 시 알림",
+    "git": "Git",
+    "defaultBranch": "기본 브랜치",
+    "commitFormat": "커밋 메시지 형식",
+    "autoPush": "자동 푸시",
+    "save": "저장",
+    "saved": "설정이 저장되었습니다"
   }
 }

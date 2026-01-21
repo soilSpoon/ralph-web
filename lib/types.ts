@@ -9,6 +9,13 @@ export const TASK_STATUSES = [
   "failed",
 ] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
+
+export const isTaskStatus = (status: unknown): status is TaskStatus => {
+  return (
+    typeof status === "string" &&
+    (TASK_STATUSES as readonly string[]).includes(status)
+  );
+};
 export const isMoveAllowed = (from: TaskStatus, to: TaskStatus): boolean => {
   if (from === to) return false;
   if (from === "draft") return to === "queued";
@@ -66,6 +73,7 @@ export interface Task {
   updatedAt: Date;
   startedAt?: Date;
   completedAt?: Date;
+  archived?: boolean;
 }
 
 export interface Story {

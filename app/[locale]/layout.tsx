@@ -1,4 +1,5 @@
-import type { Metadata } from "next";
+import "@/app/globals.css";
+
 import { Geist, Geist_Mono } from "next/font/google";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";

@@ -12,16 +12,19 @@ interface StatusOverviewProps {
 
 export function StatusOverview({ tasks }: StatusOverviewProps) {
   const t = useTranslations("Status");
-  const counts = tasks.reduce(
-    (acc, task) => {
-      const status = task.status as keyof typeof acc;
-      if (status in acc) {
-        acc[status]++;
-      }
-      return acc;
-    },
-    { running: 0, review: 0, draft: 0, queued: 0 },
-  );
+  const initialCounts: Record<string, number> = {
+    running: 0,
+    review: 0,
+    draft: 0,
+    queued: 0,
+  };
+  const counts = tasks.reduce((acc, task) => {
+    const { status } = task;
+    if (status in acc) {
+      acc[status]++;
+    }
+    return acc;
+  }, initialCounts);
 
   const items = [
     {
@@ -66,10 +69,10 @@ export function StatusOverview({ tasks }: StatusOverviewProps) {
         >
           <CardContent className="flex items-center justify-between p-4">
             <div>
-              <p className="font-mono text-[10px] uppercase tracking-widest text-muted-foreground">
+              <p className="text-xs font-medium uppercase tracking-wider text-foreground/70">
                 {item.label}
               </p>
-              <div className="text-xl font-mono font-bold mt-1">
+              <div className="text-2xl font-bold mt-1 tracking-tight">
                 {item.count.toString().padStart(2, "0")}
               </div>
             </div>

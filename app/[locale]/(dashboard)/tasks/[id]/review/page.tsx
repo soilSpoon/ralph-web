@@ -15,8 +15,8 @@ import { mockDiff, mockTasks } from "@/lib/mock-data";
 
 export default function ReviewPage() {
   const t = useTranslations("TaskDetail");
-  const params = useParams();
-  const taskId = params.id as string;
+  const { id } = useParams();
+  const taskId = typeof id === "string" ? id : "";
 
   const task = mockTasks.find((t) => t.id === taskId) || mockTasks[0];
   const diffFiles = useMemo(() => splitUnifiedDiffByFile(mockDiff), []);
@@ -90,7 +90,7 @@ export default function ReviewPage() {
                     <span className="font-mono text-xs truncate mr-4">
                       {selectedFile.newPath || selectedFile.oldPath}
                     </span>
-                    <div className="flex items-center gap-2 text-[10px] uppercase font-bold text-muted-foreground">
+                    <div className="flex items-center gap-2 text-xs uppercase font-bold text-muted-foreground">
                       <span className="text-emerald-500">
                         +{selectedFile.additions}
                       </span>

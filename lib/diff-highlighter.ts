@@ -176,7 +176,7 @@ function processAST(ast: Root): {
           children: [],
         };
 
-        loopAST(node.children as RootContent[], elementNode);
+        loopAST(node.children, elementNode);
       }
     });
   };
@@ -206,15 +206,16 @@ export async function getDiffHighlighter(): Promise<DiffHighlighter> {
     getAST(raw, _fileName, lang, theme) {
       try {
         const shikiTheme = theme === "dark" ? "github-dark" : "github-light";
-        return shiki.codeToHast(raw, {
+        const hast = shiki.codeToHast(raw, {
           lang: lang || "plaintext",
           theme: shikiTheme,
           defaultColor: false,
           mergeWhitespaces: false,
-        }) as Root;
+        });
+        return hast;
       } catch (e) {
         console.error("Diff highlighter error:", e);
-        return {} as Root;
+        return { type: "root", children: [] };
       }
     },
     processAST,

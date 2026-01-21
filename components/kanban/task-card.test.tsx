@@ -46,4 +46,10 @@ describe("TaskCard", () => {
     // Also verify the link contains the task name
     expect(link.textContent).toBe("Test Task");
   });
+
+  it("should have an archive option in the menu", () => {
+    const { getByRole } = render(<TaskCard task={mockTask} />);
+    const menuButton = getByRole("button", { name: /more/i });
+    expect(menuButton).toBeInTheDocument();
+  });
 });

@@ -58,6 +58,22 @@ export const mockTasks: Task[] = [
     createdAt: new Date("2024-01-21T13:00:00"),
     updatedAt: new Date("2024-01-21T13:00:00"),
   },
+  {
+    id: "t-5",
+    name: "Old Feature",
+    description: "Something that is already done and archived",
+    status: "merged",
+    priority: 3,
+    currentIteration: 1,
+    maxIterations: 1,
+    worktreePath: "/dev/ralph/old",
+    branchName: "feature/old",
+    metadataPath: ".ralph/old",
+    createdAt: new Date("2023-12-01T10:00:00"),
+    updatedAt: new Date("2023-12-05T14:00:00"),
+    completedAt: new Date("2023-12-05T14:00:00"),
+    archived: true,
+  },
 ];
 
 export const mockActivity: ActivityItem[] = [

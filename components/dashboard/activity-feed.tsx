@@ -29,14 +29,14 @@ export function ActivityFeed({ activities }: ActivityFeedProps) {
         <CardTitle className="text-lg font-semibold">{t("activity")}</CardTitle>
       </CardHeader>
       <CardContent>
-        <ScrollArea className="h-[300px] pr-4">
+        <ScrollArea className="h-72 pr-4">
           <div className="space-y-6">
             {activities.map((item) => (
               <div
                 key={item.id}
                 className="relative pl-6 pb-2 border-l border-border last:border-0"
               >
-                <div className="absolute left-[-5px] top-0 w-2.5 h-2.5 rounded-full bg-primary/20 ring-4 ring-background" />
+                <div className="absolute -left-1 top-0 w-2.5 h-2.5 rounded-full bg-primary/20 ring-4 ring-background" />
                 <div className="flex flex-col gap-1">
                   <span className="text-xs text-muted-foreground">
                     {formatTime(item.timestamp)}

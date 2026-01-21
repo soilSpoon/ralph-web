@@ -81,10 +81,10 @@ export function LexicalEditor({
 
   return (
     <LexicalComposer initialConfig={config}>
-      <div className="relative border rounded-lg bg-background p-4 min-h-[150px]">
+      <div className="relative border rounded-lg bg-background p-4 min-h-40">
         <RichTextPlugin
           contentEditable={
-            <ContentEditable className="outline-none min-h-[150px]" />
+            <ContentEditable className="outline-none min-h-40" />
           }
           placeholder={
             <div className="absolute top-4 left-4 text-muted-foreground pointer-events-none">
