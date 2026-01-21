@@ -1,11 +1,12 @@
 "use client";
 
-import { Task } from "@/lib/types";
-import { Card, CardContent } from "@/components/ui/card";
-import { useEffect, useRef, useState } from "react";
 import { draggable } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
-import { cn } from "@/lib/utils";
 import { Clock, GitBranch } from "lucide-react";
+import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
+import { Card, CardContent } from "@/components/ui/card";
+import { Task } from "@/lib/types";
+import { cn } from "@/lib/utils";
 
 interface TaskCardProps {
   task: Task;
@@ -38,7 +39,12 @@ export function TaskCard({ task }: TaskCardProps) {
       <Card className="hover:border-primary/50 transition-colors shadow-sm bg-card">
         <CardContent className="p-4 space-y-3">
           <div className="flex justify-between items-start gap-2">
-            <h4 className="font-medium text-sm leading-tight">{task.name}</h4>
+            <Link
+              href={`/tasks/${task.id}`}
+              className="hover:underline focus:outline-none"
+            >
+              <h4 className="font-medium text-sm leading-tight">{task.name}</h4>
+            </Link>
           </div>
 
           <p className="text-xs text-muted-foreground line-clamp-2">

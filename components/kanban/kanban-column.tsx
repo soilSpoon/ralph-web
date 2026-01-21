@@ -1,10 +1,10 @@
 "use client";
 
-import { Task, TaskStatus } from "@/lib/types";
-import { TaskCard } from "./task-card";
-import { useEffect, useRef, useState } from "react";
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { useEffect, useRef, useState } from "react";
+import { Task, TaskStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
+import { TaskCard } from "./task-card";
 
 interface KanbanColumnProps {
   status: TaskStatus;

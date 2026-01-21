@@ -1,5 +1,5 @@
-import { Progress } from '@/components/ui/progress';
-import { formatProgress, formatProgressPercent } from '@/lib/formatters';
+import { Progress } from "@/components/ui/progress";
+import { formatProgress, formatProgressPercent } from "@/lib/formatters";
 
 interface ProgressBarProps {
   completed: number;
@@ -8,7 +8,12 @@ interface ProgressBarProps {
   className?: string;
 }
 
-export function ProgressBar({ completed, total, showLabel = true, className }: ProgressBarProps) {
+export function ProgressBar({
+  completed,
+  total,
+  showLabel = true,
+  className,
+}: ProgressBarProps) {
   const percent = formatProgressPercent(completed, total);
   const label = formatProgress(completed, total);
 

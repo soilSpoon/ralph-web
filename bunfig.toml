@@ -1,3 +1,9 @@
 [test]
-environment = "jsdom"
+environment = "happy-dom"
 preload = ["./test/setup.ts"]
+
+# Exclude Playwright tests from bun test runner
+# bun test by default looks for .test.ts, .spec.ts, etc.
+# We want to exclude the tests/ directory which contains Playwright e2e specs.
+# Note: As of now bunfig.toml might not fully support exclude patterns for test runner in all versions,
+# but we will rely on package.json scripts to enforce this as well.

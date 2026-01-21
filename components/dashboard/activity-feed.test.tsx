@@ -1,9 +1,9 @@
 import "@/test/env";
-import { describe, it, expect, afterEach } from "bun:test";
-import { render, cleanup } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "bun:test";
+import * as matchers from "@testing-library/jest-dom/matchers";
+import { cleanup, render } from "@testing-library/react";
 import { ActivityFeed } from "@/components/dashboard/activity-feed";
 import { mockActivity } from "@/lib/mock-data";
-import * as matchers from "@testing-library/jest-dom/matchers";
 
 expect.extend(matchers);
 

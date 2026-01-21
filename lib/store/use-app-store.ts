@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import { Task, ActivityItem } from "@/lib/types";
+import { ActivityItem, Task } from "@/lib/types";
 
 interface AppState {
   tasks: Task[];

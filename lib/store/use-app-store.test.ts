@@ -1,4 +1,4 @@
-import { describe, it, expect, beforeEach } from "bun:test";
+import { beforeEach, describe, expect, it } from "bun:test";
 import { useAppStore } from "@/lib/store/use-app-store";
 import { Task } from "@/lib/types";
 

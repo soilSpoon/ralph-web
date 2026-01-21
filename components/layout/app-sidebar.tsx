@@ -1,41 +1,47 @@
-'use client';
+"use client";
 
-import { LayoutDashboard, ListTodo, Brain, FolderArchive, Settings } from 'lucide-react';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import {
+  Brain,
+  FolderArchive,
+  LayoutDashboard,
+  ListTodo,
+  Settings,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
 import {
   Sidebar,
   SidebarContent,
   SidebarGroup,
-  SidebarGroupLabel,
   SidebarGroupContent,
+  SidebarGroupLabel,
   SidebarMenu,
-  SidebarMenuItem,
   SidebarMenuButton,
-} from '@/components/ui/sidebar';
+  SidebarMenuItem,
+} from "@/components/ui/sidebar";
 
 const boardItems = [
   {
-    title: 'Dashboard',
-    url: '/',
+    title: "Dashboard",
+    url: "/",
     icon: LayoutDashboard,
   },
   {
-    title: 'Tasks',
-    url: '/tasks',
+    title: "Tasks",
+    url: "/tasks",
     icon: ListTodo,
   },
 ];
 
 const memoryItems = [
   {
-    title: 'Patterns',
-    url: '/patterns',
+    title: "Patterns",
+    url: "/patterns",
     icon: Brain,
   },
   {
-    title: 'Archive',
-    url: '/archive',
+    title: "Archive",
+    url: "/archive",
     icon: FolderArchive,
   },
 ];
@@ -93,7 +99,7 @@ export function AppSidebar() {
             <SidebarMenu>
               <SidebarMenuItem>
                 <Link href="/settings">
-                  <SidebarMenuButton isActive={pathname === '/settings'}>
+                  <SidebarMenuButton isActive={pathname === "/settings"}>
                     <Settings />
                     <span>Settings</span>
                   </SidebarMenuButton>

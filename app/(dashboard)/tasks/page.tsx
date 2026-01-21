@@ -1,9 +1,9 @@
 "use client";
 
-import { KanbanBoard } from "@/components/kanban/kanban-board";
-import { useAppStore } from "@/lib/store/use-app-store";
-import { mockTasks } from "@/lib/mock-data";
 import { useEffect } from "react";
+import { KanbanBoard } from "@/components/kanban/kanban-board";
+import { mockTasks } from "@/lib/mock-data";
+import { useAppStore } from "@/lib/store/use-app-store";
 
 export default function TasksPage() {
   const { tasks, setTasks } = useAppStore();

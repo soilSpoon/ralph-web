@@ -1,4 +1,4 @@
-import type { TaskStatus, PatternCategory } from "./types";
+import type { PatternCategory, TaskStatus } from "./types";
 
 // Date and time formatters
 export function formatDate(date: Date): string {

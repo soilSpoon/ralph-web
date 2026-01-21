@@ -1,12 +1,12 @@
-import { notFound } from 'next/navigation';
-import { StatusBadge } from '@/components/common/status-badge';
-import { ProgressBar } from '@/components/common/progress-bar';
-import { mockTasks, mockStories } from '@/lib/mock-data';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { CheckCircle, Circle, Clock } from 'lucide-react';
+import { CheckCircle, Circle, Clock } from "lucide-react";
+import { notFound } from "next/navigation";
+import { ProgressBar } from "@/components/common/progress-bar";
+import { StatusBadge } from "@/components/common/status-badge";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { mockStories, mockTasks } from "@/lib/mock-data";
 
 interface TaskDetailPageProps {
   params: Promise<{ id: string }>;
@@ -15,7 +15,7 @@ interface TaskDetailPageProps {
 export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
   const { id } = await params;
   const task = mockTasks.find((t) => t.id === id);
-  
+
   if (!task) {
     notFound();
   }
@@ -34,22 +34,26 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
           </div>
           <div className="flex gap-2">
             <StatusBadge status={task.status} />
-            {task.status === 'review' && (
-              <Button>Review Changes</Button>
-            )}
+            {task.status === "review" && <Button>Review Changes</Button>}
           </div>
         </div>
 
         <div className="flex gap-6 text-sm">
           <div className="flex items-center gap-2">
-            <Badge variant="outline">Iteration {task.currentIteration}/{task.maxIterations}</Badge>
+            <Badge variant="outline">
+              Iteration {task.currentIteration}/{task.maxIterations}
+            </Badge>
           </div>
           <div className="flex items-center gap-2">
-            <Badge variant="outline">{completedStories}/{stories.length} stories</Badge>
+            <Badge variant="outline">
+              {completedStories}/{stories.length} stories
+            </Badge>
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground">Branch:</span>
-            <code className="text-sm bg-muted px-2 py-1 rounded">{task.branchName}</code>
+            <code className="text-sm bg-muted px-2 py-1 rounded">
+              {task.branchName}
+            </code>
           </div>
         </div>
 
@@ -81,17 +85,27 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
                     <div className="flex-1 space-y-2">
                       <div className="flex items-start justify-between">
                         <div>
-                          <h4 className="font-semibold">{story.id}: {story.title}</h4>
-                          <p className="text-sm text-muted-foreground mt-1">{story.description}</p>
+                          <h4 className="font-semibold">
+                            {story.id}: {story.title}
+                          </h4>
+                          <p className="text-sm text-muted-foreground mt-1">
+                            {story.description}
+                          </p>
                         </div>
-                        <Badge variant="outline">Priority {story.priority}</Badge>
+                        <Badge variant="outline">
+                          Priority {story.priority}
+                        </Badge>
                       </div>
 
                       <div className="space-y-1">
-                        <p className="text-sm font-medium">Acceptance Criteria:</p>
+                        <p className="text-sm font-medium">
+                          Acceptance Criteria:
+                        </p>
                         <ul className="text-sm text-muted-foreground space-y-1 ml-4">
                           {story.acceptanceCriteria.map((criteria, idx) => (
-                            <li key={idx} className="list-disc">{criteria}</li>
+                            <li key={idx} className="list-disc">
+                              {criteria}
+                            </li>
                           ))}
                         </ul>
                       </div>
@@ -99,7 +113,12 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
                       {story.threadUrl && (
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <span>Thread:</span>
-                          <a href={story.threadUrl} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+                          <a
+                            href={story.threadUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline"
+                          >
                             {story.threadUrl}
                           </a>
                         </div>

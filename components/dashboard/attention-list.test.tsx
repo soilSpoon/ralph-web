@@ -1,8 +1,8 @@
 import "@/test/env";
-import { describe, it, expect, afterEach } from "bun:test";
-import { render, cleanup } from "@testing-library/react";
-import { AttentionList } from "@/components/dashboard/attention-list";
+import { afterEach, describe, expect, it } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
+import { cleanup, render } from "@testing-library/react";
+import { AttentionList } from "@/components/dashboard/attention-list";
 
 expect.extend(matchers);
 

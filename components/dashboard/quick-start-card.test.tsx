@@ -1,8 +1,8 @@
 import "@/test/env";
-import { describe, it, expect, afterEach } from "bun:test";
-import { render, cleanup, fireEvent, waitFor } from "@testing-library/react";
-import { QuickStartCard } from "@/components/dashboard/quick-start-card";
+import { afterEach, describe, expect, it } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
+import { cleanup, fireEvent, render, waitFor } from "@testing-library/react";
+import { QuickStartCard } from "@/components/dashboard/quick-start-card";
 import { useAppStore } from "@/lib/store/use-app-store";
 
 expect.extend(matchers);

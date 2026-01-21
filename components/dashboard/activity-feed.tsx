@@ -1,6 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ActivityItem } from "@/lib/types";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { ActivityItem } from "@/lib/types";
 
 interface ActivityFeedProps {
   activities: ActivityItem[];

@@ -1,4 +1,4 @@
-import { test, expect } from "@playwright/test";
+import { expect, test } from "@playwright/test";
 
 test("dashboard loads and shows key components", async ({ page }) => {
   // Navigate to dashboard

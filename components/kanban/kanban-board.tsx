@@ -1,10 +1,10 @@
 "use client";
 
-import { Task, TaskStatus, TASK_STATUSES } from "@/lib/types";
-import { KanbanColumn } from "./kanban-column";
-import { useEffect } from "react";
 import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
+import { useEffect } from "react";
 import { useAppStore } from "@/lib/store/use-app-store";
+import { TASK_STATUSES, Task, TaskStatus } from "@/lib/types";
+import { KanbanColumn } from "./kanban-column";
 
 interface KanbanBoardProps {
   tasks: Task[];

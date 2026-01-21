@@ -36,7 +36,14 @@
   "definitions": {
     "UserStory": {
       "type": "object",
-      "required": ["id", "title", "description", "acceptanceCriteria", "priority", "passes"],
+      "required": [
+        "id",
+        "title",
+        "description",
+        "acceptanceCriteria",
+        "priority",
+        "passes"
+      ],
       "properties": {
         "id": {
           "type": "string",

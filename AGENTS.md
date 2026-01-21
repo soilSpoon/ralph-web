@@ -68,12 +68,15 @@ We use a modern, performance-oriented stack.
 
 ### Testing & Quality
 
-- **Unit/Component Tests**: **Vitest**
-  - Configured with `happy-dom` for fast DOM simulation.
+- **Unit/Component Tests**: **Bun Test**
+  - Native performance, configured with `happy-dom` for DOM simulation.
+  - Automatically excludes Playwright `.spec.ts` files.
 - **E2E Tests**: **Playwright**
-  - Visual verification and full workflow testing.
-- **Visual Testing**: **Storybook 8**
-  - Developing isolated UI components (e.g., Task Cards, Kanban Columns).
+  - Multi-page workflow and browser-level integration testing.
+- **Visual Testing**: **Storybook 10 + Vitest**
+  - Storybook's new Vitest addon is used for component-level interaction testing.
+- **Linting & Formatting**: **[Biome](https://biomejs.dev/)**
+  - Replaces ESLint and Prettier with a single, high-performance tool for linting, formatting, and import sorting.
 
 ---
 
@@ -125,13 +128,17 @@ If you are an agent or developer adding a feature:
 
 ## 6. Common Commands
 
-| Command             | Description                                      |
-| :------------------ | :----------------------------------------------- |
-| `bun run dev`       | Starts the Next.js development server.           |
-| `bun run build`     | Builds the application for production.           |
-| `bun test`          | Runs unit and component tests via Vitest.        |
-| `bun run storybook` | Starts the Storybook UI development environment. |
-| `bun run lint`      | Runs ESLint checks.                              |
+| Command             | Description                                          |
+| :------------------ | :--------------------------------------------------- |
+| `bun run dev`       | Starts the Next.js development server.               |
+| `bun run build`     | Builds the application for production.               |
+| `bun run test:unit` | Runs fast Unit/Component tests via **Bun Test**.     |
+| `bun run test:e2e`  | Runs full interaction tests via **Playwright**.      |
+| `bun run test:sb`   | Runs Storybook interaction tests via **Vitest**.     |
+| `bun run storybook` | Starts the Storybook UI development environment.     |
+| `bun run check`     | Runs lint, format, and import sorting via **Biome**. |
+| `bun run lint`      | Runs fast linting checks via **Biome**.              |
+| `bun run format`    | Automatically formats code via **Biome**.            |
 
 ---
 
@@ -141,7 +148,7 @@ If you are an agent or developer adding a feature:
 
 ## 7. TypeScript & Code Quality Standards
 
-We enforce **Strict TypeScript** rules. We prioritize **type safety and correctness** over development speed or convenience.
+We enforce **Strict TypeScript** and **Biome** linting rules. We prioritize **type safety and correctness** over development speed or convenience.
 
 ### 🚫 Strictly Forbidden (Avoid These)
 

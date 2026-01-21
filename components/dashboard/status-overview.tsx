@@ -1,6 +1,6 @@
+import { FileText, ListTodo, Play } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Task } from "@/lib/types";
-import { Play, FileText, ListTodo } from "lucide-react";
 
 interface StatusOverviewProps {
   tasks: Task[];
