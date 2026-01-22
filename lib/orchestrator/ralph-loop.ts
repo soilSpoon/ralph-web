@@ -3,6 +3,7 @@ import { prdGenerator } from "../prd/generator";
 import type { Story } from "../types";
 import { ptyRunner } from "./pty-runner";
 import type { ProviderId, RalphSession, WorkflowPhase } from "./types";
+import { WorktreeService } from "../worktree";
 
 export interface RalphLoopOptions {
   id: string;
@@ -20,6 +21,7 @@ export interface RalphLoopOptions {
  */
 export class RalphLoop extends EventEmitter {
   private session: RalphSession;
+  private worktreeService: WorktreeService;
   public onTransition?: (phase: WorkflowPhase) => void;
 
   constructor(options: RalphLoopOptions) {
@@ -37,6 +39,7 @@ export class RalphLoop extends EventEmitter {
       lastActivityAt: new Date().toISOString(),
       iterations: [],
     };
+    this.worktreeService = new WorktreeService(process.cwd());
   }
 
   /**
@@ -45,7 +48,17 @@ export class RalphLoop extends EventEmitter {
   async initialize(): Promise<void> {
     this.transition("initializing");
 
-    // Simulate some work like setting up directories
+    try {
+      const worktree = await this.worktreeService.createWorktree(
+        this.session.taskId,
+      );
+      this.session.worktreePath = worktree.path;
+    } catch (error) {
+      console.error("[RalphLoop] Failed to create worktree:", error);
+      // Fallback to process.cwd() or just mark as failed?
+      // For now we continue but without a worktree path.
+    }
+
     this.session.lastActivityAt = new Date().toISOString();
   }
 

@@ -16,6 +16,22 @@ vi.mock("../prd/generator", () => ({
   },
 }));
 
+const mockWorktreeServiceInstance = {
+  createWorktree: vi.fn().mockResolvedValue({
+    id: "wt-1",
+    path: "/temp/worktree-wt-1",
+    branch: "ralph/task-1-wt1",
+  }),
+  removeWorktree: vi.fn().mockResolvedValue(undefined),
+  getSettings: vi.fn().mockReturnValue({}),
+};
+
+vi.mock("../worktree", () => ({
+  WorktreeService: vi
+    .fn()
+    .mockImplementation(() => mockWorktreeServiceInstance),
+}));
+
 describe("RalphLoop", () => {
   it("should initialize and transition through phases", async () => {
     const loop = new RalphLoop({
@@ -33,6 +49,11 @@ describe("RalphLoop", () => {
     await loop.initialize();
 
     expect(phases).toContain("initializing");
+
+    // Check if worktree was created
+    expect(mockWorktreeServiceInstance.createWorktree).toHaveBeenCalledWith(
+      "task-1",
+    );
   });
 
   it("should transition to prd_clarifying when starting wizard", async () => {

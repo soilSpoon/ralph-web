@@ -4,23 +4,17 @@ import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/ad
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useAppStore } from "@/lib/store/use-app-store";
-import { isMoveAllowed, isTaskStatus, Task, TaskStatus } from "@/lib/types";
+import {
+  isColumnData,
+  isMoveAllowed,
+  isTaskData,
+  Task,
+  TaskStatus,
+} from "@/lib/types";
 import { KanbanColumn } from "./kanban-column";
 
 interface KanbanBoardProps {
   tasks: Task[];
-}
-
-function isTaskData(
-  data: Record<string, unknown>,
-): data is { taskId: string; currentStatus: TaskStatus } {
-  return typeof data.taskId === "string" && isTaskStatus(data.currentStatus);
-}
-
-function isColumnData(
-  data: Record<string, unknown>,
-): data is { status: TaskStatus } {
-  return isTaskStatus(data.status);
 }
 
 const COLUMN_STATUSES: TaskStatus[] = [

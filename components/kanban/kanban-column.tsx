@@ -2,7 +2,7 @@
 
 import { dropTargetForElements } from "@atlaskit/pragmatic-drag-and-drop/element/adapter";
 import { useEffect, useRef, useState } from "react";
-import { isMoveAllowed, isTaskStatus, Task, TaskStatus } from "@/lib/types";
+import { isMoveAllowed, isTaskData, Task, TaskStatus } from "@/lib/types";
 import { cn } from "@/lib/utils";
 import { TaskCard } from "./task-card";
 
@@ -26,9 +26,8 @@ export function KanbanColumn({ status, label, tasks }: KanbanColumnProps) {
       getData: () => ({ status }),
       onDragEnter: ({ source }) => {
         setIsDraggedOver(true);
-        const fromStatus = source.data.currentStatus;
-        if (isTaskStatus(fromStatus)) {
-          setCanDrop(isMoveAllowed(fromStatus, status));
+        if (isTaskData(source.data)) {
+          setCanDrop(isMoveAllowed(source.data.currentStatus, status));
         } else {
           setCanDrop(false);
         }

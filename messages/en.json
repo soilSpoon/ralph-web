@@ -86,6 +86,13 @@
     "commitFormat": "Commit Message Format",
     "placeholders": "Available placeholders: {task_id}, {title}, {iteration}",
     "autoPush": "Auto Push",
+    "worktree": "Worktree",
+    "worktreeDescription": "Configure task-isolated Git Worktree environments.",
+    "branchPrefix": "Branch Prefix",
+    "worktreeDir": "Worktree Location",
+    "preservePatterns": "File Patterns to Preserve",
+    "excludePatterns": "Directory Patterns to Exclude",
+    "patternHint": "Multiple patterns can be entered separated by commas (,).",
     "save": "Save",
     "saved": "Settings saved successfully"
   },

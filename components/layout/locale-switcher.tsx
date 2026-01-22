@@ -18,8 +18,13 @@ export function LocaleSwitcher() {
   const pathname = usePathname();
 
   function onSelectChange(value: string | null) {
-    if (value) {
-      router.replace(pathname, { locale: value as "en" | "ko" });
+    if (!value) return;
+
+    const isLocale = (v: string): v is (typeof routing.locales)[number] =>
+      (routing.locales as readonly string[]).includes(v);
+
+    if (isLocale(value)) {
+      router.replace(pathname, { locale: value });
     }
   }
 

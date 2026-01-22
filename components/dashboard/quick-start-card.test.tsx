@@ -34,9 +34,10 @@ describe("QuickStartCard", () => {
 
   it("should update input value", () => {
     const { getByPlaceholderText } = render(<QuickStartCard />);
-    const input = getByPlaceholderText(
-      ko.QuickStart.placeholder,
-    ) as HTMLInputElement;
+    const input = getByPlaceholderText(ko.QuickStart.placeholder);
+    if (!(input instanceof HTMLInputElement)) {
+      throw new Error("Input element not found");
+    }
 
     fireEvent.change(input, { target: { value: "New Task" } });
     expect(input.value).toBe("New Task");

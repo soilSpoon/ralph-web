@@ -1,3 +1,5 @@
+import { z } from "zod";
+
 // Task and Story Types
 export const TASK_STATUSES = [
   "draft",
@@ -10,11 +12,10 @@ export const TASK_STATUSES = [
 ] as const;
 export type TaskStatus = (typeof TASK_STATUSES)[number];
 
-export const isTaskStatus = (status: unknown): status is TaskStatus => {
-  return (
-    typeof status === "string" &&
-    (TASK_STATUSES as readonly string[]).includes(status)
-  );
+export const isTaskStatus = (
+  status: string | null | undefined,
+): status is TaskStatus => {
+  return typeof status === "string" && TASK_STATUSES.some((s) => s === status);
 };
 export const isMoveAllowed = (from: TaskStatus, to: TaskStatus): boolean => {
   if (from === to) return false;
@@ -137,4 +138,25 @@ export interface WizardQuestion {
   type: QuestionType;
   options?: string[];
   answer?: string | string[] | boolean;
+}
+
+// Kanban Drag and Drop Types
+export const TaskDragDataSchema = z.object({
+  taskId: z.string(),
+  currentStatus: z.enum(TASK_STATUSES),
+});
+
+export const ColumnDropDataSchema = z.object({
+  status: z.enum(TASK_STATUSES),
+});
+
+export type TaskDragData = z.infer<typeof TaskDragDataSchema>;
+export type ColumnDropData = z.infer<typeof ColumnDropDataSchema>;
+
+export function isTaskData(data: object): data is TaskDragData {
+  return TaskDragDataSchema.safeParse(data).success;
+}
+
+export function isColumnData(data: object): data is ColumnDropData {
+  return ColumnDropDataSchema.safeParse(data).success;
 }

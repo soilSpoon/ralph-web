@@ -5,14 +5,20 @@ import { taskManager } from "@/lib/tasks/task-manager";
 import { Task } from "@/lib/types";
 
 export async function createTask(formData: FormData) {
-  const description = formData.get("description") as string;
-  const prd = formData.get("prd") as string;
+  const description = formData.get("description");
+  const prd = formData.get("prd");
+
+  if (typeof description !== "string") {
+    throw new Error("Description is required and must be a string");
+  }
+
+  const prdContent = typeof prd === "string" ? prd : "";
   const taskId = `task-${Date.now()}`;
 
   const newTask: Task = {
     id: taskId,
     name: description.substring(0, 30) + (description.length > 30 ? "..." : ""),
-    description: prd || description,
+    description: prdContent || description,
     status: "draft",
     priority: 2,
     currentIteration: 0,
@@ -33,9 +39,8 @@ export async function createTask(formData: FormData) {
     // Note: absolute URL needed for server-to-server fetch in some environments,
     // but here we are in a server action on the same origin.
     // For simplicity, we can also call the sessionManager directly since it's shared.
-    const { sessionManager } = await import(
-      "@/lib/orchestrator/session-manager"
-    );
+    const { sessionManager } =
+      await import("@/lib/orchestrator/session-manager");
     const session = sessionManager.createSession({
       taskId,
       providerId: "gemini",

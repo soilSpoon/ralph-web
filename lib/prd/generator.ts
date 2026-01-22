@@ -132,26 +132,16 @@ export class PRDGenerator {
   ): Promise<R> {
     let currentContent = userContent;
     let attempts = 0;
-    let lastError: unknown = null;
+    let lastError: Error | null = null;
 
     while (attempts < maxRetries) {
       try {
         const response = await this.callLLM(systemPrompt, currentContent);
-
-        let parsed: unknown;
-        try {
-          parsed = JSON.parse(response);
-        } catch (_e) {
-          throw new Error(
-            "Invalid JSON format. Please ensure your response is a valid JSON object.",
-          );
-        }
-
-        const validated = schema.parse(parsed);
+        const validated = schema.parse(JSON.parse(response));
         return mapper(validated);
-      } catch (error: unknown) {
+      } catch (error) {
         attempts++;
-        lastError = error;
+        lastError = error instanceof Error ? error : new Error(String(error));
         const errMessage =
           error instanceof Error ? error.message : "Unknown error occurred";
         console.warn(`[PRDGenerator] Attempt ${attempts} failed:`, errMessage);
@@ -168,7 +158,7 @@ export class PRDGenerator {
     }
 
     throw new Error(
-      `Failed to generate valid output after ${maxRetries} attempts. Last error: ${lastError instanceof Error ? lastError.message : String(lastError)}`,
+      `Failed to generate valid output after ${maxRetries} attempts. Last error: ${lastError?.message || "Unknown error"}`,
     );
   }
 

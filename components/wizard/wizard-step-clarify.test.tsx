@@ -21,9 +21,9 @@ describe("WizardStepClarify", () => {
       },
     ];
 
-    vi.spyOn(global, "fetch").mockResolvedValue({
-      json: async () => ({ questions: mockQuestions }),
-    } as Response);
+    vi.spyOn(global, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ questions: mockQuestions })),
+    );
 
     const { getByText } = render(
       <WizardStepClarify
@@ -51,9 +51,9 @@ describe("WizardStepClarify", () => {
       },
     ];
 
-    vi.spyOn(global, "fetch").mockResolvedValue({
-      json: async () => ({ questions: mockQuestions }),
-    } as Response);
+    vi.spyOn(global, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ questions: mockQuestions })),
+    );
 
     const { getByLabelText } = render(
       <WizardStepClarify
@@ -76,9 +76,7 @@ describe("WizardStepClarify", () => {
   });
 
   it("should display loading state initially", () => {
-    vi.spyOn(global, "fetch").mockImplementation(
-      () => new Promise(() => {}) as Promise<Response>,
-    ); // Never resolves
+    vi.spyOn(global, "fetch").mockImplementation(() => new Promise(() => {}));
 
     const { container } = render(
       <WizardStepClarify

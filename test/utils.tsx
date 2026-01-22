@@ -24,7 +24,7 @@ export * from "@testing-library/react";
 export { renderWithIntl as render };
 
 import { type WizardFormData } from "@/lib/hooks/use-wizard-state";
-import { type Mock, vi } from "vitest";
+import { vi } from "vitest";
 
 export function createMockWizardFormData(
   overrides: Partial<WizardFormData> = {},
@@ -39,5 +39,5 @@ export function createMockWizardFormData(
 }
 
 export function createFetchMock() {
-  return vi.fn() as Mock<typeof fetch>;
+  return vi.fn<typeof fetch>();
 }

@@ -33,10 +33,12 @@ describe("WizardStepReview", () => {
   });
 
   it("should generate PRD if not present", async () => {
-    vi.spyOn(global, "fetch").mockResolvedValue({
-      ok: true,
-      json: async () => ({ prd: mockPRD }),
-    } as Response);
+    vi.spyOn(global, "fetch").mockResolvedValue(
+      new Response(JSON.stringify({ prd: mockPRD }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      }),
+    );
 
     render(
       <WizardStepReview

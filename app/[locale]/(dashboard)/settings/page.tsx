@@ -7,6 +7,7 @@ import { ConcurrencySettings } from "@/components/settings/concurrency-settings"
 import { GitSettings } from "@/components/settings/git-settings";
 import { NotificationSettings } from "@/components/settings/notification-settings";
 import { ProviderSettings } from "@/components/settings/provider-settings";
+import { WorktreeSettings } from "@/components/settings/worktree-settings";
 import { Button } from "@/components/ui/button";
 
 export default function SettingsPage() {
@@ -39,6 +40,7 @@ export default function SettingsPage() {
         </div>
         <div className="space-y-6">
           <GitSettings />
+          <WorktreeSettings />
           <NotificationSettings />
         </div>
       </div>

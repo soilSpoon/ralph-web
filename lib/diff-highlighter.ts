@@ -1,8 +1,10 @@
 import { type Properties, type Root, type RootContent } from "hast";
-import { createHighlighter, Highlighter } from "shiki";
+import { createHighlighter, type Highlighter } from "shiki";
+
+type SyntaxNodeType = "text" | "element" | "root";
 
 interface SyntaxNode {
-  type: string;
+  type: SyntaxNodeType;
   tagName?: string;
   properties?: Properties;
   value: string;
@@ -20,6 +22,8 @@ interface SyntaxLine {
   nodeList: { node: SyntaxNode; wrapper?: SyntaxNode }[];
 }
 
+export type SyntaxFileMap = Record<number, SyntaxLine>;
+
 export interface DiffHighlighter {
   name: string;
   type: "class" | "style";
@@ -34,7 +38,7 @@ export interface DiffHighlighter {
     theme?: "light" | "dark",
   ) => Root;
   processAST: (ast: Root) => {
-    syntaxFileObject: Record<number, SyntaxLine>;
+    syntaxFileObject: SyntaxFileMap;
     syntaxFileLineNumber: number;
   };
   hasRegisteredCurrentLang: (lang: string) => boolean;
@@ -67,103 +71,84 @@ async function getShikiHighlighter() {
 }
 
 function processAST(ast: Root): {
-  syntaxFileObject: Record<number, SyntaxLine>;
+  syntaxFileObject: SyntaxFileMap;
   syntaxFileLineNumber: number;
 } {
   let lineNumber = 1;
-  const syntaxObj: Record<number, SyntaxLine> = {};
+  const syntaxObj: SyntaxFileMap = {};
 
   const loopAST = (nodes: RootContent[], wrapper?: SyntaxNode) => {
-    nodes.forEach((node) => {
+    for (const node of nodes) {
       if (node.type === "text") {
-        // HAST Text has 'type' and 'value'.
-        // We create a new SyntaxNode based on the text node's content.
         const textValue = node.value;
-
-        // Initial SyntaxNode construction
         const textNode: SyntaxNode = {
           type: "text",
           value: textValue,
           lineNumber: lineNumber,
           valueLength: textValue.length,
-          startIndex: 0, // Will be updated below or in loop
-          endIndex: 0, // Will be updated below or in loop
+          startIndex: 0,
+          endIndex: 0,
           children: [],
         };
 
-        if (textValue.indexOf("\n") === -1) {
+        if (!textValue.includes("\n")) {
           const valueLength = textValue.length;
-
           if (!syntaxObj[lineNumber]) {
             textNode.startIndex = 0;
             textNode.endIndex = valueLength - 1;
-
-            // Create a SyntaxLine for the record
-            const lineObject: SyntaxLine = {
+            syntaxObj[lineNumber] = {
               value: textValue,
               lineNumber: lineNumber,
               valueLength: valueLength,
               nodeList: [{ node: textNode, wrapper }],
             };
-            syntaxObj[lineNumber] = lineObject;
           } else {
             textNode.startIndex = syntaxObj[lineNumber].valueLength;
-            textNode.endIndex = (textNode.startIndex || 0) + valueLength - 1;
-
+            textNode.endIndex = textNode.startIndex + valueLength - 1;
             syntaxObj[lineNumber].value += textValue;
             syntaxObj[lineNumber].valueLength += valueLength;
-            syntaxObj[lineNumber].nodeList.push({
-              node: textNode,
-              wrapper: wrapper,
-            });
+            syntaxObj[lineNumber].nodeList.push({ node: textNode, wrapper });
           }
-          return;
+          continue;
         }
 
         const lines = textValue.split("\n");
-        textNode.children = textNode.children || [];
-
         for (let i = 0; i < lines.length; i++) {
-          const _value = i === lines.length - 1 ? lines[i] : lines[i] + "\n";
+          const _value = i === lines.length - 1 ? lines[i] : `${lines[i]}\n`;
           const _lineNumber = i === 0 ? lineNumber : ++lineNumber;
           const _valueLength = _value.length;
-
           const _node: SyntaxNode = {
             type: "text",
             value: _value,
             lineNumber: _lineNumber,
             valueLength: _valueLength,
             startIndex: 0,
-            endIndex: 0, // Will be set
+            endIndex: 0,
             children: [],
           };
 
           if (!syntaxObj[_lineNumber]) {
             _node.startIndex = 0;
             _node.endIndex = _valueLength - 1;
-
-            const lineObject: SyntaxLine = {
+            syntaxObj[_lineNumber] = {
               value: _value,
               lineNumber: _lineNumber,
               valueLength: _valueLength,
               nodeList: [{ node: _node, wrapper }],
             };
-            syntaxObj[_lineNumber] = lineObject;
           } else {
             _node.startIndex = syntaxObj[_lineNumber].valueLength;
-            _node.endIndex = (_node.startIndex || 0) + _valueLength - 1;
-
+            _node.endIndex = _node.startIndex + _valueLength - 1;
             syntaxObj[_lineNumber].value += _value;
             syntaxObj[_lineNumber].valueLength += _valueLength;
             syntaxObj[_lineNumber].nodeList.push({ node: _node, wrapper });
           }
-          textNode.children.push(_node);
+          textNode.children?.push(_node);
         }
-        return;
+        continue;
       }
 
-      if ("children" in node && node.children) {
-        // Create a wrapper SyntaxNode from the Element
+      if (node.type === "element") {
         const elementNode: SyntaxNode = {
           type: node.type,
           tagName: node.tagName,
@@ -175,10 +160,9 @@ function processAST(ast: Root): {
           endIndex: 0,
           children: [],
         };
-
         loopAST(node.children, elementNode);
       }
-    });
+    }
   };
 
   loopAST(ast.children);
@@ -213,8 +197,10 @@ export async function getDiffHighlighter(): Promise<DiffHighlighter> {
           mergeWhitespaces: false,
         });
         return hast;
-      } catch (e) {
-        console.error("Diff highlighter error:", e);
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : String(error);
+        console.error("Diff highlighter error:", errorMessage);
         return { type: "root", children: [] };
       }
     },
