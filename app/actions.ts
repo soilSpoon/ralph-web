@@ -39,8 +39,9 @@ export async function createTask(formData: FormData) {
     // Note: absolute URL needed for server-to-server fetch in some environments,
     // but here we are in a server action on the same origin.
     // For simplicity, we can also call the sessionManager directly since it's shared.
-    const { sessionManager } =
-      await import("@/lib/orchestrator/session-manager");
+    const { sessionManager } = await import(
+      "@/lib/orchestrator/session-manager"
+    );
     const session = sessionManager.createSession({
       taskId,
       providerId: "gemini",
