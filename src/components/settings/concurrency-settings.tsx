@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useId } from "react";
 import {
   Card,
   CardContent,
@@ -13,6 +14,7 @@ import { Label } from "@/components/ui/label";
 
 export function ConcurrencySettings() {
   const t = useTranslations("Settings");
+  const maxConcurrentId = useId();
 
   return (
     <Card className="shadow-none rounded-sm border-border/70">
@@ -22,9 +24,9 @@ export function ConcurrencySettings() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="max-concurrent">{t("maxConcurrentTasks")}</Label>
+          <Label htmlFor={maxConcurrentId}>{t("maxConcurrentTasks")}</Label>
           <Input
-            id="max-concurrent"
+            id={maxConcurrentId}
             type="number"
             min={1}
             max={10}

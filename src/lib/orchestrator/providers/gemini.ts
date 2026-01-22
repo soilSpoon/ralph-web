@@ -1,9 +1,9 @@
-import {
+import type {
   AgentSignal,
   CommandOptions,
   IAgentProvider,
 } from "../provider-interface";
-import { ProviderId } from "../types";
+import type { ProviderId } from "../types";
 
 export class GeminiProvider implements IAgentProvider {
   readonly id: ProviderId = "gemini";
@@ -43,8 +43,8 @@ export class GeminiProvider implements IAgentProvider {
       output.includes("FATAL ERROR") ||
       (output.includes("Error:") && output.includes("stack trace"))
     ) {
-      // 신중하게 에러 감지. 단순 텍스트에 "Error:"가 포함될 수도 있으므로.
-      // 현재는 명시적인 완료 시그널 위주로 처리
+      // Carefully detect errors. Since simple text might contain "Error:",
+      // we currently focus on explicit completion signals
       return null;
     }
     return null;

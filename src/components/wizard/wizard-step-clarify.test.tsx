@@ -1,7 +1,7 @@
 import { fireEvent, waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { type ClarifyQuestion } from "@/lib/prd/generator";
-import { createMockWizardFormData, render } from "@/test/utils";
+import type { ClarifyQuestion } from "@/lib/prd/generator";
+import { createMockWizardFormData, render } from "../../../test/utils";
 import { WizardStepClarify } from "./wizard-step-clarify";
 
 const mockOnFormDataChange = vi.fn();

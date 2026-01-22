@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Pattern, PatternCategory } from "@/lib/types";
+import type { Pattern, PatternCategory } from "@/lib/types";
 
 interface UsePatternFilterResult {
   searchQuery: string;

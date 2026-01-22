@@ -2,7 +2,7 @@
 
 import { Inbox } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Task } from "@/lib/types";
+import type { Task } from "@/lib/types";
 import { ArchivedTaskCard } from "./archived-task-card";
 
 interface ArchivedTaskListProps {

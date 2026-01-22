@@ -1,18 +1,29 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { ScrollArea } from "@/components/ui/scroll-area";
+import { CheckCircle2, ChevronDown, ChevronUp, Layout } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { Button } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button-variants";
+import {
+  Collapsible,
+  CollapsibleContent,
+  CollapsibleTrigger,
+} from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
-import { WizardFormData } from "@/lib/hooks/use-wizard-state";
+import type { WizardFormData } from "@/lib/hooks/use-wizard-state";
 
 interface WizardStepReviewProps {
   formData: WizardFormData;
   onFormDataChange: (data: Partial<WizardFormData>) => void;
+  onConfirm: () => void;
+  isOrchestrating: boolean;
 }
 
 export function WizardStepReview({
   formData,
   onFormDataChange,
+  onConfirm,
+  isOrchestrating,
 }: WizardStepReviewProps) {
   const [loading, setLoading] = useState(!formData.generatedPRD);
 
@@ -52,84 +63,164 @@ export function WizardStepReview({
     onFormDataChange,
   ]);
 
-  if (loading) {
-    return (
-      <div className="space-y-4">
-        <Skeleton className="h-6 w-1/4" />
-        <Skeleton className="h-[400px] w-full" />
-      </div>
-    );
-  }
-
   const prdData = formData.generatedPRD;
+  const [openStories, setOpenStories] = useState<string[]>([]);
 
-  if (!prdData) {
+  const goalsWithIds = useMemo(
+    () =>
+      prdData?.goals.map((g) => ({ id: crypto.randomUUID(), text: g })) || [],
+    [prdData?.goals],
+  );
+
+  const nonGoalsWithIds = useMemo(
+    () =>
+      prdData?.nonGoals.map((g) => ({ id: crypto.randomUUID(), text: g })) ||
+      [],
+    [prdData?.nonGoals],
+  );
+
+  const successMetricsWithIds = useMemo(
+    () =>
+      prdData?.successMetrics.map((g) => ({
+        id: crypto.randomUUID(),
+        text: g,
+      })) || [],
+    [prdData?.successMetrics],
+  );
+
+  const storiesWithIds = useMemo(
+    () =>
+      prdData?.stories.map((s) => ({
+        id: crypto.randomUUID(),
+        story: {
+          ...s,
+          criteriaWithIds: s.acceptanceCriteria.map((c) => ({
+            id: crypto.randomUUID(),
+            text: c,
+          })),
+        },
+      })) || [],
+    [prdData?.stories],
+  );
+
+  const toggleStory = (id: string) => {
+    setOpenStories((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
+    );
+  };
+
+  if (loading || !prdData) {
     return (
       <div className="space-y-4">
-        <h3 className="text-lg font-semibold">생성된 PRD 리뷰</h3>
-        <div className="h-[500px] w-full rounded-md border p-6 bg-muted/30 flex items-center justify-center text-muted-foreground">
-          PRD 생성 중 오류가 발생했거나 데이터가 없습니다.
+        <h3 className="text-lg font-semibold">PRD 생성 중...</h3>
+        <div className="space-y-2">
+          <Skeleton className="h-4 w-full" />
+          <Skeleton className="h-4 w-[90%]" />
+          <Skeleton className="h-4 w-[95%]" />
         </div>
-        <p className="text-sm text-muted-foreground italic">
-          * 내용을 검토해주세요. 승인하면 코드 구현이 시작됩니다.
-        </p>
       </div>
     );
   }
 
   return (
-    <div className="space-y-4">
-      <h3 className="text-lg font-semibold">생성된 PRD 리뷰</h3>
-      <ScrollArea className="h-[500px] w-full rounded-md border p-6 bg-muted/30">
-        <div className="border rounded-xl p-6 bg-muted/20 prose prose-sm max-w-none dark:prose-invert">
-          <h2 className="text-xl font-bold mb-4">{prdData.project}</h2>
+    <div className="space-y-6">
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <h3 className="text-lg font-semibold">{prdData.project}</h3>
+          <p className="text-muted-foreground">{prdData.description}</p>
+        </div>
 
+        <div>
           <h3 className="text-lg font-semibold border-b pb-1">🎯 Goals</h3>
           <ul>
-            {prdData.goals.map((goal, i) => (
-              <li key={i}>{goal}</li>
-            ))}
-          </ul>
-
-          <h3 className="text-lg font-semibold border-b pb-1">
-            📝 User Stories
-          </h3>
-          {prdData.stories.map((story) => (
-            <div key={story.id} className="mb-4">
-              <p className="font-medium mb-1 font-semibold">{story.title}</p>
-              <p className="text-xs text-muted-foreground mb-1">
-                {story.description}
-              </p>
-              <ul className="text-xs mt-1 space-y-1">
-                {story.acceptanceCriteria.map((ac, i) => (
-                  <li key={i} className="list-disc ml-4">
-                    {ac}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
-
-          <h3 className="text-lg font-semibold border-b pb-1">🚫 Non-Goals</h3>
-          <ul>
-            {prdData.nonGoals.map((ng, i) => (
-              <li key={i}>{ng}</li>
-            ))}
-          </ul>
-
-          <h3 className="text-lg font-semibold border-b pb-1">
-            📈 Success Metrics
-          </h3>
-          <ul>
-            {prdData.successMetrics.map((sm, i) => (
-              <li key={i}>{sm}</li>
+            {goalsWithIds.map((item) => (
+              <li key={item.id}>{item.text}</li>
             ))}
           </ul>
         </div>
-      </ScrollArea>
-      <p className="text-sm text-muted-foreground italic">
-        * 내용을 검토해주세요. 승인하면 코드 구현이 시작됩니다.
-      </p>
+
+        <div>
+          <h3 className="text-lg font-semibold border-b pb-1">
+            👤 User Stories
+          </h3>
+          <div className="space-y-2 mt-2">
+            {storiesWithIds.map(({ id, story }) => (
+              <Collapsible
+                key={id}
+                open={openStories.includes(id)}
+                onOpenChange={() => toggleStory(id)}
+                className="border rounded-md p-2"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="font-medium text-sm">{story.title}</span>
+                  <CollapsibleTrigger
+                    className={buttonVariants({
+                      variant: "ghost",
+                      size: "sm",
+                      className: "h-6 w-6 p-0",
+                    })}
+                  >
+                    {openStories.includes(id) ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                    <span className="sr-only">Toggle</span>
+                  </CollapsibleTrigger>
+                </div>
+                <CollapsibleContent>
+                  <p className="text-sm text-muted-foreground mt-1">
+                    {story.description}
+                  </p>
+                  <ul className="text-xs mt-1 space-y-1">
+                    {story.criteriaWithIds.map((ac) => (
+                      <li key={ac.id} className="list-disc ml-4">
+                        {ac.text}
+                      </li>
+                    ))}
+                  </ul>
+                </CollapsibleContent>
+              </Collapsible>
+            ))}
+          </div>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-semibold border-b pb-1">🚫 Non-Goals</h3>
+          <ul>
+            {nonGoalsWithIds.map((item) => (
+              <li key={item.id}>{item.text}</li>
+            ))}
+          </ul>
+        </div>
+
+        <div>
+          <h3 className="text-lg font-semibold border-b pb-1">
+            📊 Success Metrics
+          </h3>
+          <ul>
+            {successMetricsWithIds.map((item) => (
+              <li key={item.id}>{item.text}</li>
+            ))}
+          </ul>
+        </div>
+      </div>
+
+      <div className="flex justify-end gap-2">
+        <Button onClick={onConfirm} disabled={isOrchestrating}>
+          {isOrchestrating ? (
+            <>
+              <Layout className="mr-2 h-4 w-4 animate-spin" />
+              Creating Tasks...
+            </>
+          ) : (
+            <>
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              Approve & Start
+            </>
+          )}
+        </Button>
+      </div>
     </div>
   );
 }

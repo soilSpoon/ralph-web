@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useId } from "react";
 import {
   Card,
   CardContent,
@@ -13,6 +14,10 @@ import { Label } from "@/components/ui/label";
 
 export function WorktreeSettings() {
   const t = useTranslations("Settings");
+  const branchPrefixId = useId();
+  const worktreeDirId = useId();
+  const preservePatternsId = useId();
+  const excludePatternsId = useId();
 
   return (
     <Card className="shadow-none rounded-sm border-border/70">
@@ -23,17 +28,17 @@ export function WorktreeSettings() {
       <CardContent className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="branch-prefix">{t("branchPrefix")}</Label>
+            <Label htmlFor={branchPrefixId}>{t("branchPrefix")}</Label>
             <Input
-              id="branch-prefix"
+              id={branchPrefixId}
               defaultValue="ralph"
               className="rounded-sm"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="worktree-dir">{t("worktreeDir")}</Label>
+            <Label htmlFor={worktreeDirId}>{t("worktreeDir")}</Label>
             <Input
-              id="worktree-dir"
+              id={worktreeDirId}
               defaultValue=".ralph/worktrees"
               className="rounded-sm"
             />
@@ -41,9 +46,9 @@ export function WorktreeSettings() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="preserve-patterns">{t("preservePatterns")}</Label>
+          <Label htmlFor={preservePatternsId}>{t("preservePatterns")}</Label>
           <Input
-            id="preserve-patterns"
+            id={preservePatternsId}
             defaultValue=".env, .env.local, .env.*.local, .envrc"
             className="rounded-sm"
           />
@@ -53,9 +58,9 @@ export function WorktreeSettings() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="exclude-patterns">{t("excludePatterns")}</Label>
+          <Label htmlFor={excludePatternsId}>{t("excludePatterns")}</Label>
           <Input
-            id="exclude-patterns"
+            id={excludePatternsId}
             defaultValue="node_modules, .git, dist, build, .next"
             className="rounded-sm"
           />

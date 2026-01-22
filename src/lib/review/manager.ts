@@ -1,5 +1,9 @@
-import { EventEmitter } from "events";
-import { ReviewDecision, ReviewManagerOptions, ReviewRequest } from "./types";
+import { EventEmitter } from "node:events";
+import type {
+  ReviewDecision,
+  ReviewManagerOptions,
+  ReviewRequest,
+} from "./types";
 
 export class ReviewManager extends EventEmitter {
   private options: ReviewManagerOptions;

@@ -84,7 +84,7 @@
     "gitDescription": "Configure how Ralph-Web interacts with your Git repositories.",
     "defaultBranch": "Default Branch",
     "commitFormat": "Commit Message Format",
-    "placeholders": "Available placeholders: {task_id}, {title}, {iteration}",
+    "placeholders": "Available placeholders: '{task_id}', '{title}', '{iteration}'",
     "autoPush": "Auto Push",
     "worktree": "Worktree",
     "worktreeDescription": "Configure task-isolated Git Worktree environments.",

@@ -84,7 +84,7 @@
     "gitDescription": "Ralph-Web의 Git 저장소 연동 방식을 설정합니다.",
     "defaultBranch": "기본 브랜치",
     "commitFormat": "커밋 메시지 형식",
-    "placeholders": "사용 가능한 변수: {task_id}, {title}, {iteration}",
+    "placeholders": "사용 가능한 변수: '{task_id}', '{title}', '{iteration}'",
     "autoPush": "자동 푸시",
     "worktree": "Worktree",
     "worktreeDescription": "태스크별 격리된 Git Worktree 환경을 설정합니다.",

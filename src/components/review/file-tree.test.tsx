@@ -1,7 +1,7 @@
-import "@/test/env";
+import "../../../test/env";
 import { afterEach, describe, expect, it, vi } from "bun:test";
-import { ParsedDiffFile } from "@/lib/diff-utils";
-import { cleanup, fireEvent, render } from "@/test/utils";
+import type { ParsedDiffFile } from "@/lib/diff-utils";
+import { cleanup, fireEvent, render } from "../../../test/utils";
 import { FileTree } from "./file-tree";
 
 afterEach(() => {

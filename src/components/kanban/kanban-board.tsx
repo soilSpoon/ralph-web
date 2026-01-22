@@ -8,8 +8,8 @@ import {
   isColumnData,
   isMoveAllowed,
   isTaskData,
-  Task,
-  TaskStatus,
+  type Task,
+  type TaskStatus,
 } from "@/lib/types";
 import { KanbanColumn } from "./kanban-column";
 

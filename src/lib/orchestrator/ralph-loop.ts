@@ -1,4 +1,5 @@
-import { EventEmitter } from "events";
+import { EventEmitter } from "node:events";
+import { syncService } from "../db/sync-service";
 import { prdGenerator } from "../prd/generator";
 import type { Story } from "../types";
 import { WorktreeService } from "../worktree";
@@ -60,6 +61,9 @@ export class RalphLoop extends EventEmitter {
     }
 
     this.session.lastActivityAt = new Date().toISOString();
+
+    // Sync from DB to File on init
+    await syncService.materializeTask(this.session.taskId);
   }
 
   /**
@@ -84,6 +88,9 @@ export class RalphLoop extends EventEmitter {
     this.transition("coding");
     this.session.currentStoryId = story.id;
 
+    // Ensure files are up to date before coding
+    await syncService.materializeTask(this.session.taskId);
+
     const prompt = `
 Task: ${story.title}
 Description: ${story.description}
@@ -102,7 +109,9 @@ Please implement this story. When finished, print <promise>COMPLETE</promise>.
       onData: (data) => {
         this.emit("data", data);
       },
-      onExit: (_code) => {
+      onExit: async (_code) => {
+        // Sync from File back to DB after agent finished
+        await syncService.consolidateTask(this.session.taskId);
         this.transition("verifying");
       },
     });

@@ -5,7 +5,11 @@ import path from "node:path";
 import { z } from "zod";
 import { GitClient } from "./git-client";
 import { preserveFilesToWorktree } from "./preserve-files";
-import { IWorktreePersistence, WorktreeInfo, WorktreeSettings } from "./types";
+import type {
+  IWorktreePersistence,
+  WorktreeInfo,
+  WorktreeSettings,
+} from "./types";
 
 const DEFAULT_SETTINGS: WorktreeSettings = {
   preservePatterns: [".env", ".env.local", ".env.*.local", ".envrc", ".npmrc"],

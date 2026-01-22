@@ -1,4 +1,4 @@
-import { ActivityItem, Pattern, Story, Task } from "./types";
+import type { ActivityItem, Pattern, Story, Task } from "./types";
 
 export const mockTasks: Task[] = [
   {

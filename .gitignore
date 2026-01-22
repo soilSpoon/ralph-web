@@ -57,3 +57,8 @@ package-lock.json
 # Cache
 .eslintcache
 .stylelintcache
+
+# Database
+.ralph/pgdata
+.ralph/pgdata-*
+:memory:

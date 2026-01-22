@@ -1,8 +1,8 @@
 import { execFile } from "node:child_process";
 import os from "node:os";
 import { promisify } from "node:util";
-import { SimpleGit, SimpleGitOptions, simpleGit } from "simple-git";
-import { GitClientOptions } from "./types";
+import { type SimpleGit, type SimpleGitOptions, simpleGit } from "simple-git";
+import type { GitClientOptions } from "./types";
 
 const execFileAsync = promisify(execFile);
 

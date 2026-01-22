@@ -2,7 +2,7 @@
 
 import { CheckCircle2, Rocket, ShieldCheck, Zap } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
-import { WizardFormData } from "@/lib/hooks/use-wizard-state";
+import type { WizardFormData } from "@/lib/hooks/use-wizard-state";
 
 interface WizardStepApproveProps {
   formData: WizardFormData;

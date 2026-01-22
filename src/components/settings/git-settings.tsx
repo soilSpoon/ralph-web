@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useId } from "react";
 import {
   Card,
   CardContent,
@@ -14,6 +15,9 @@ import { Label } from "@/components/ui/label";
 
 export function GitSettings() {
   const t = useTranslations("Settings");
+  const defaultBranchId = useId();
+  const commitFormatId = useId();
+  const autoPushId = useId();
 
   return (
     <Card className="shadow-none rounded-sm border-border/70">
@@ -23,18 +27,18 @@ export function GitSettings() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="default-branch">{t("defaultBranch")}</Label>
+          <Label htmlFor={defaultBranchId}>{t("defaultBranch")}</Label>
           <Input
-            id="default-branch"
+            id={defaultBranchId}
             defaultValue="main"
             className="rounded-sm"
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="commit-format">{t("commitFormat")}</Label>
+          <Label htmlFor={commitFormatId}>{t("commitFormat")}</Label>
           <Input
-            id="commit-format"
+            id={commitFormatId}
             defaultValue="feat: {task_id} - {title}"
             className="rounded-sm"
           />
@@ -44,8 +48,8 @@ export function GitSettings() {
         </div>
 
         <div className="flex items-center space-x-2 pt-2">
-          <Checkbox id="auto-push" defaultChecked />
-          <Label htmlFor="auto-push" className="cursor-pointer">
+          <Checkbox id={autoPushId} defaultChecked />
+          <Label htmlFor={autoPushId} className="cursor-pointer">
             {t("autoPush")}
           </Label>
         </div>

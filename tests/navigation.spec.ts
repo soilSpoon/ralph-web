@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import ko from "../messages/ko.json";
+import ko from "../src/messages/ko.json" with { type: "json" };
 
 test("navigation to archive and settings pages", async ({ page }) => {
   await page.goto("/ko");

@@ -1,6 +1,6 @@
 import { beforeEach, describe, expect, it } from "bun:test";
 import { useAppStore } from "@/lib/store/use-app-store";
-import { Task } from "@/lib/types";
+import type { Task } from "@/lib/types";
 
 describe("useAppStore", () => {
   const mockTaskRoot: Task = {

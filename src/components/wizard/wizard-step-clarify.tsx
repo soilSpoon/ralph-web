@@ -5,8 +5,8 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
-import { WizardFormData } from "@/lib/hooks/use-wizard-state";
-import { ClarifyQuestion } from "@/lib/prd/generator";
+import type { WizardFormData } from "@/lib/hooks/use-wizard-state";
+import type { ClarifyQuestion } from "@/lib/prd/generator";
 
 interface WizardStepClarifyProps {
   formData: WizardFormData;
@@ -80,7 +80,9 @@ export function WizardStepClarify({
 
         return (
           <div key={q.id} className="space-y-4">
-            <Label className="text-base font-semibold">{q.question}</Label>
+            <Label htmlFor={q.id} className="text-base font-semibold">
+              {q.question}
+            </Label>
 
             {q.type === "choice" && q.options && (
               <RadioGroup

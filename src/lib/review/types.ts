@@ -1,5 +1,5 @@
-import { PRD } from "../prd/generator";
-import { Task } from "../types";
+import type { PRD } from "../prd/generator";
+import type { Task } from "../types";
 
 export interface ReviewRequest {
   taskId: string;

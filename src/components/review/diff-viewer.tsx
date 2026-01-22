@@ -5,8 +5,11 @@ import { useEffect, useMemo, useState } from "react";
 import "@git-diff-view/react/styles/diff-view.css";
 import { useTheme } from "next-themes";
 import { Skeleton } from "@/components/ui/skeleton";
-import { DiffHighlighter, getDiffHighlighter } from "@/lib/diff-highlighter";
-import { ParsedDiffFile } from "@/lib/diff-utils";
+import {
+  type DiffHighlighter,
+  getDiffHighlighter,
+} from "@/lib/diff-highlighter";
+import type { ParsedDiffFile } from "@/lib/diff-utils";
 
 interface DiffViewerProps {
   diffFile: ParsedDiffFile;

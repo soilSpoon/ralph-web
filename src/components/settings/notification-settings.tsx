@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useId } from "react";
 import {
   Card,
   CardContent,
@@ -13,6 +14,8 @@ import { Label } from "@/components/ui/label";
 
 export function NotificationSettings() {
   const t = useTranslations("Settings");
+  const notifyCompleteId = useId();
+  const notifyErrorId = useId();
 
   return (
     <Card className="shadow-none rounded-sm border-border/70">
@@ -22,14 +25,14 @@ export function NotificationSettings() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center space-x-2">
-          <Checkbox id="notify-complete" defaultChecked />
-          <Label htmlFor="notify-complete" className="cursor-pointer">
+          <Checkbox id={notifyCompleteId} defaultChecked />
+          <Label htmlFor={notifyCompleteId} className="cursor-pointer">
             {t("notifyOnComplete")}
           </Label>
         </div>
         <div className="flex items-center space-x-2">
-          <Checkbox id="notify-error" defaultChecked />
-          <Label htmlFor="notify-error" className="cursor-pointer">
+          <Checkbox id={notifyErrorId} defaultChecked />
+          <Label htmlFor={notifyErrorId} className="cursor-pointer">
             {t("notifyOnError")}
           </Label>
         </div>

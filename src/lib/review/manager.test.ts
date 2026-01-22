@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { PRD } from "@/lib/prd/generator";
+import type { PRD } from "@/lib/prd/generator";
 import { ReviewManager } from "@/lib/review/manager";
-import { ReviewRequest } from "@/lib/review/types";
+import type { ReviewRequest } from "@/lib/review/types";
 
 describe("ReviewManager", () => {
   const createMockPRD = (overrides: Partial<PRD> = {}): PRD => ({

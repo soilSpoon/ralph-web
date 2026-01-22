@@ -1,7 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { minimatch } from "minimatch";
-import { PreserveResult } from "./types";
+import type { PreserveResult } from "./types";
 
 /**
  * Copies gitignored or specific environment files from source to worktree.

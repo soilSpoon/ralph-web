@@ -2,7 +2,7 @@
 
 import { redirect } from "next/navigation";
 import { taskManager } from "@/lib/tasks/task-manager";
-import { Task } from "@/lib/types";
+import type { Task } from "@/lib/types";
 
 export async function createTask(formData: FormData) {
   const description = formData.get("description");
@@ -30,7 +30,7 @@ export async function createTask(formData: FormData) {
     updatedAt: new Date(),
   };
 
-  taskManager.addTask(newTask);
+  await taskManager.addTask(newTask);
 
   // Trigger orchestration start (Fire and forget or wait depending on UX)
   // In a real app, this would be a trigger to a background worker

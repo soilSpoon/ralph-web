@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react";
-import { WizardFormData } from "@/lib/hooks/use-wizard-state";
+import type { WizardFormData } from "@/lib/hooks/use-wizard-state";
 import { WizardStepApprove } from "./wizard-step-approve";
 import { WizardStepClarify } from "./wizard-step-clarify";
 import { WizardStepDescribe } from "./wizard-step-describe";
@@ -58,6 +58,8 @@ export const Step3_Review: StoryObj<typeof WizardStepReview> = {
         },
       }}
       onFormDataChange={() => {}}
+      onConfirm={() => {}}
+      isOrchestrating={false}
     />
   ),
 };

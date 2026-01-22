@@ -13,7 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Link } from "@/i18n/routing";
-import { Task } from "@/lib/types";
+import type { Task } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface TaskCardProps {

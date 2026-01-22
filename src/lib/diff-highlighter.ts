@@ -1,4 +1,4 @@
-import { type Properties, type Root, type RootContent } from "hast";
+import type { Properties, Root, RootContent } from "hast";
 import { createHighlighter, type Highlighter } from "shiki";
 
 type SyntaxNodeType = "text" | "element" | "root";

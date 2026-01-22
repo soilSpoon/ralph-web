@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
@@ -22,9 +23,10 @@
       }
     ],
     "paths": {
-      "@/*": ["./src/*"]
+      "@/*": ["./src/*"],
+      "@test/*": ["./test/*"]
     },
-    "types": ["bun-types", "@testing-library/jest-dom"]
+    "types": ["bun-types", "@testing-library/jest-dom", "node"]
   },
   "include": [
     "next-env.d.ts",
@@ -33,7 +35,9 @@
     ".next/types/**/*.ts",
     "test/types.d.ts",
     ".next/dev/types/**/*.ts",
-    "src/**/*.mts"
+    "src/**/*.mts",
+    "playwright.config.ts",
+    "tests/**/*.ts"
   ],
   "exclude": ["node_modules"]
 }

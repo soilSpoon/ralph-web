@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
-import { PRD } from "../prd/generator";
+import type { PRD } from "../prd/generator";
 
 export type WizardStep = "describe" | "clarify" | "review" | "approve";
 

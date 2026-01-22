@@ -178,6 +178,10 @@ function FormExample() {
     push: true,
   });
   const [theme, setTheme] = React.useState("light");
+  const nameId = React.useId();
+  const roleId = React.useId();
+  const frameworkId = React.useId();
+  const commentsId = React.useId();
 
   return (
     <Example title="Form">
@@ -430,17 +434,13 @@ function FormExample() {
             <FieldGroup>
               <div className="grid grid-cols-2 gap-4">
                 <Field>
-                  <FieldLabel htmlFor="small-form-name">Name</FieldLabel>
-                  <Input
-                    id="small-form-name"
-                    placeholder="Enter your name"
-                    required
-                  />
+                  <FieldLabel htmlFor={nameId}>Name</FieldLabel>
+                  <Input id={nameId} placeholder="Enter your name" required />
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="small-form-role">Role</FieldLabel>
+                  <FieldLabel htmlFor={roleId}>Role</FieldLabel>
                   <Select items={roleItems} defaultValue={null}>
-                    <SelectTrigger id="small-form-role">
+                    <SelectTrigger id={roleId}>
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -456,12 +456,10 @@ function FormExample() {
                 </Field>
               </div>
               <Field>
-                <FieldLabel htmlFor="small-form-framework">
-                  Framework
-                </FieldLabel>
+                <FieldLabel htmlFor={frameworkId}>Framework</FieldLabel>
                 <Combobox items={frameworks}>
                   <ComboboxInput
-                    id="small-form-framework"
+                    id={frameworkId}
                     placeholder="Select a framework"
                     required
                   />
@@ -478,9 +476,9 @@ function FormExample() {
                 </Combobox>
               </Field>
               <Field>
-                <FieldLabel htmlFor="small-form-comments">Comments</FieldLabel>
+                <FieldLabel htmlFor={commentsId}>Comments</FieldLabel>
                 <Textarea
-                  id="small-form-comments"
+                  id={commentsId}
                   placeholder="Add any additional comments"
                 />
               </Field>

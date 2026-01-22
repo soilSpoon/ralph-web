@@ -1,7 +1,7 @@
 "use client";
 
 import { FileCode, FilePlus } from "lucide-react";
-import { ParsedDiffFile } from "@/lib/diff-utils";
+import type { ParsedDiffFile } from "@/lib/diff-utils";
 import { cn } from "@/lib/utils";
 
 interface FileTreeProps {
@@ -22,6 +22,7 @@ export function FileTree({ files, selectedFileKey, onSelect }: FileTreeProps) {
 
         return (
           <button
+            type="button"
             key={file.key}
             onClick={() => onSelect(file)}
             className={cn(

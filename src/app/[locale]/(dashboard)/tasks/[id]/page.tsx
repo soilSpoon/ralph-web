@@ -12,11 +12,7 @@ import { Link } from "@/i18n/routing";
 import { mockStories } from "@/lib/mock-data";
 import { taskManager } from "@/lib/tasks/task-manager";
 
-export async function generateStaticParams() {
-  return taskManager.getTasks().map((task) => ({
-    id: task.id,
-  }));
-}
+export { generateStaticParams } from "./generate-params";
 
 interface TaskDetailPageProps {
   params: Promise<{ id: string }>;
@@ -24,7 +20,7 @@ interface TaskDetailPageProps {
 
 export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
   const { id } = await params;
-  const task = taskManager.getTask(id);
+  const task = await taskManager.getTask(id);
   const t = await getTranslations("TaskDetail");
 
   if (!task) {
@@ -126,8 +122,11 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
                             {t("acceptanceCriteria")}:
                           </p>
                           <ul className="text-sm text-muted-foreground space-y-1 ml-4">
-                            {story.acceptanceCriteria.map((criteria, idx) => (
-                              <li key={idx} className="list-disc">
+                            {story.acceptanceCriteria.map((criteria) => (
+                              <li
+                                key={crypto.randomUUID()}
+                                className="list-disc"
+                              >
                                 {criteria}
                               </li>
                             ))}

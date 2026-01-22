@@ -1,4 +1,4 @@
-import { NextRequest } from "next/server";
+import type { NextRequest } from "next/server";
 import { sessionManager } from "@/lib/orchestrator/session-manager";
 
 export async function GET(request: NextRequest) {

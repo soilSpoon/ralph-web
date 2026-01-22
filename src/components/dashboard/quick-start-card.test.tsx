@@ -4,8 +4,8 @@ import userEvent from "@testing-library/user-event";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { QuickStartCard } from "@/components/dashboard/quick-start-card";
 import { useAppStore } from "@/lib/store/use-app-store";
-import ko from "@/messages/ko.json";
-import { render } from "@/test/utils";
+import ko from "@/messages/ko.json" with { type: "json" };
+import { render } from "../../../test/utils";
 
 expect.extend(matchers);
 
@@ -44,7 +44,7 @@ describe("QuickStartCard", () => {
   });
 
   it("should redirect to new task page when clicked", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ document: global.document });
     const { getByPlaceholderText, getByRole } = render(<QuickStartCard />);
     const input = getByPlaceholderText(ko.QuickStart.placeholder);
 

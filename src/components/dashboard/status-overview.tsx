@@ -3,7 +3,7 @@
 import { FileText, ListTodo, Play } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Card, CardContent } from "@/components/ui/card";
-import { Task } from "@/lib/types";
+import type { Task } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
 interface StatusOverviewProps {

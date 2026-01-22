@@ -1,11 +1,11 @@
-import "@/test/env";
+import "../../../test/env";
 import { afterEach, describe, expect, it, vi } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup, fireEvent } from "@testing-library/react";
 import { ArchivedTaskCard } from "@/components/archive/archived-task-card";
 import { mockTasks } from "@/lib/mock-data";
-import ko from "@/messages/ko.json";
-import { render } from "@/test/utils";
+import ko from "@/messages/ko.json" with { type: "json" };
+import { render } from "../../../test/utils";
 
 expect.extend(matchers);
 
@@ -14,7 +14,8 @@ afterEach(() => {
 });
 
 describe("ArchivedTaskCard", () => {
-  const task = mockTasks.find((t) => t.archived)!;
+  const task = mockTasks.find((t) => t.archived);
+  if (!task) throw new Error("Archived task not found in mock data");
 
   it("should render task details correctly", () => {
     const { getByText } = render(<ArchivedTaskCard task={task} />);

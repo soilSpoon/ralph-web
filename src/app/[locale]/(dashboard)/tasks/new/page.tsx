@@ -4,7 +4,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
-import { Suspense, useEffect } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { createTask } from "@/app/actions";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -39,6 +39,23 @@ function NewTaskPageContent() {
     prevStep,
     setFormData,
   } = useWizardState();
+
+  const [isOrchestrating, setIsOrchestrating] = useState(false);
+
+  const handleApprove = async () => {
+    setIsOrchestrating(true);
+    const formDataToSend = new FormData();
+    formDataToSend.append("description", formData.description);
+    if (formData.generatedPRD) {
+      formDataToSend.append("prd", JSON.stringify(formData.generatedPRD));
+    }
+    try {
+      await createTask(formDataToSend);
+    } catch (error) {
+      console.error("Failed to create task:", error);
+      setIsOrchestrating(false);
+    }
+  };
 
   useEffect(() => {
     if (descriptionParam && !formData.description) {
@@ -130,6 +147,8 @@ function NewTaskPageContent() {
                   <WizardStepReview
                     formData={formData}
                     onFormDataChange={setFormData}
+                    onConfirm={handleApprove}
+                    isOrchestrating={isOrchestrating}
                   />
                 )}
 

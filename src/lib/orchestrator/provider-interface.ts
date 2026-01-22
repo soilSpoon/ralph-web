@@ -1,4 +1,4 @@
-import { ProviderId } from "./types";
+import type { ProviderId } from "./types";
 
 export interface CommandOptions {
   cwd?: string;

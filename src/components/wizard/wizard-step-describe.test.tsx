@@ -1,9 +1,9 @@
-import "@/test/env";
+import "../../../test/env";
 import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
-import { WizardFormData } from "@/lib/hooks/use-wizard-state";
+import type { WizardFormData } from "@/lib/hooks/use-wizard-state";
 import { WizardStepDescribe } from "./wizard-step-describe";
 
 afterEach(() => {
@@ -43,7 +43,7 @@ describe("WizardStepDescribe", () => {
   });
 
   it("should call onFormDataChange when typing", async () => {
-    const user = userEvent.setup();
+    const user = userEvent.setup({ document: global.document });
 
     // Controlled component wrapper for testing interactions
     function TestComponent() {

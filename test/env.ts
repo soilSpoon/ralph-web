@@ -1,5 +1,5 @@
+import { TextDecoder, TextEncoder } from "node:util";
 import { GlobalRegistrator } from "@happy-dom/global-registrator";
-import { TextDecoder, TextEncoder } from "util";
 
 if (typeof global.document === "undefined") {
   GlobalRegistrator.register();

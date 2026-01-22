@@ -1,31 +1,66 @@
-import { mockTasks } from "../mock-data";
-import { Task } from "../types";
+import { eq } from "drizzle-orm";
+import { type Task as DBTask, getDB, tasks } from "@/lib/db";
+import type { Task } from "../types";
 
 class TaskManager {
-  private tasks: Map<string, Task> = new Map();
-
-  constructor() {
-    // Initialize with mock tasks
-    mockTasks.forEach((task) => this.tasks.set(task.id, task));
+  async getTasks(): Promise<Task[]> {
+    const db = await getDB();
+    if (!db) return [];
+    const results = await db.query.tasks.findMany({
+      orderBy: (t, { desc }) => [desc(t.createdAt)],
+    });
+    return results.map((t) => this.mapDBTaskToTask(t));
   }
 
-  getTasks(): Task[] {
-    return Array.from(this.tasks.values());
+  async getTask(id: string): Promise<Task | undefined> {
+    const db = await getDB();
+    if (!db) return undefined;
+    const result = await db.query.tasks.findFirst({
+      where: eq(tasks.id, id),
+    });
+    return result ? this.mapDBTaskToTask(result) : undefined;
   }
 
-  getTask(id: string): Task | undefined {
-    return this.tasks.get(id);
+  async addTask(task: Task): Promise<void> {
+    const db = await getDB();
+    if (!db) return;
+    await db.insert(tasks).values({
+      id: task.id,
+      name: task.name,
+      description: task.description,
+      branchName: task.branchName,
+      status: task.status,
+      priority: task.priority,
+      currentIteration: task.currentIteration,
+      maxIterations: task.maxIterations,
+      worktreePath: task.worktreePath,
+      metadataPath: task.metadataPath,
+      createdAt: task.createdAt,
+      updatedAt: task.updatedAt,
+      archived: task.archived ?? false,
+    });
   }
 
-  addTask(task: Task): void {
-    this.tasks.set(task.id, task);
+  async updateTask(id: string, updates: Partial<Task>): Promise<void> {
+    const db = await getDB();
+    if (!db) return;
+    await db
+      .update(tasks)
+      .set({
+        ...updates,
+      })
+      .where(eq(tasks.id, id));
   }
 
-  updateTask(id: string, updates: Partial<Task>): void {
-    const task = this.tasks.get(id);
-    if (task) {
-      this.tasks.set(id, { ...task, ...updates, updatedAt: new Date() });
-    }
+  private mapDBTaskToTask(dbTask: DBTask): Task {
+    return {
+      ...dbTask,
+      description: dbTask.description ?? "",
+      worktreePath: dbTask.worktreePath ?? "",
+      metadataPath: dbTask.metadataPath ?? "",
+      startedAt: dbTask.startedAt ?? undefined,
+      completedAt: dbTask.completedAt ?? undefined,
+    };
   }
 }
 

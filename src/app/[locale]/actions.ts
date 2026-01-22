@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { z } from "zod";
 import { mockTasks } from "@/lib/mock-data";
-import { Task } from "@/lib/types";
+import type { Task } from "@/lib/types";
 
 const createTaskSchema = z.object({
   description: z.string().min(1, "Description is required"),

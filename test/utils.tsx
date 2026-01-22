@@ -7,7 +7,7 @@ if (typeof global.document === "undefined") {
 import { render } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import type { ReactElement } from "react";
-import ko from "../messages/ko.json";
+import ko from "@/messages/ko.json" with { type: "json" };
 
 function renderWithIntl(
   ui: ReactElement,
@@ -23,8 +23,8 @@ function renderWithIntl(
 export * from "@testing-library/react";
 export { renderWithIntl as render };
 
-import { type WizardFormData } from "@/lib/hooks/use-wizard-state";
 import { vi } from "vitest";
+import type { WizardFormData } from "@/lib/hooks/use-wizard-state";
 
 export function createMockWizardFormData(
   overrides: Partial<WizardFormData> = {},

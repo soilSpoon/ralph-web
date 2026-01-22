@@ -16,6 +16,13 @@ vi.mock("../prd/generator", () => ({
   },
 }));
 
+vi.mock("../db/sync-service", () => ({
+  syncService: {
+    materializeTask: vi.fn().mockResolvedValue("/mock/prd.json"),
+    consolidateTask: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
 const mockWorktreeServiceInstance = {
   createWorktree: vi.fn().mockResolvedValue({
     id: "wt-1",
@@ -157,7 +164,7 @@ describe("RalphLoop", () => {
     });
 
     // Simulate PTY exit
-    capturedOnExit(0);
+    await capturedOnExit(0);
 
     expect(phases).toContain("verifying");
   });

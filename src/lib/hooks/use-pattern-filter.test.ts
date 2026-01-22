@@ -1,6 +1,7 @@
+import "../../../test/utils";
 import { describe, expect, it } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
-import { Pattern } from "@/lib/types";
+import type { Pattern } from "@/lib/types";
 import { usePatternFilter } from "./use-pattern-filter";
 
 // Mock Data

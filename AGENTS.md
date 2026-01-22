@@ -175,3 +175,6 @@ We enforce **Strict TypeScript** and **Biome** linting rules. We prioritize **ty
 2.  **Type Inference**: Allow TypeScript to infer types naturally where possible.
 3.  **Utility Types**: Use `Pick`, `Omit`, `Partial`, or `type-fest` for safe manipulation.
 4.  **Strict Declarations**: Define precise interfaces for all props, state, and data.
+5.  **Comments**:
+    - **English Only**: All comments must be written in English. Korean comments are strictly forbidden.
+    - **No Redundancy**: Do not write comments that can be explained by the code itself. "Self-documenting code" is preferred over verbose comments.

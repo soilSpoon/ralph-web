@@ -3,7 +3,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScrollArea } from "@/components/ui/scroll-area";
-import { ActivityItem } from "@/lib/types";
+import type { ActivityItem } from "@/lib/types";
 
 interface ActivityFeedProps {
   activities: ActivityItem[];

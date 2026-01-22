@@ -2,7 +2,7 @@
 
 import { Combobox as ComboboxPrimitive } from "@base-ui/react";
 import { CheckIcon, ChevronDownIcon, XIcon } from "lucide-react";
-import * as React from "react";
+import type * as React from "react";
 import { Button } from "@/components/ui/button";
 import {
   InputGroup,
@@ -12,7 +12,9 @@ import {
 } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
 
-const Combobox = ComboboxPrimitive.Root;
+function Combobox({ ...props }: ComboboxPrimitive.Root.Props<unknown>) {
+  return <ComboboxPrimitive.Root data-slot="combobox" {...props} />;
+}
 
 function ComboboxValue({ ...props }: ComboboxPrimitive.Value.Props) {
   return <ComboboxPrimitive.Value data-slot="combobox-value" {...props} />;
@@ -275,10 +277,6 @@ function ComboboxChipsInput({
   );
 }
 
-function useComboboxAnchor() {
-  return React.useRef<HTMLDivElement | null>(null);
-}
-
 export {
   Combobox,
   ComboboxInput,
@@ -295,5 +293,4 @@ export {
   ComboboxChipsInput,
   ComboboxTrigger,
   ComboboxValue,
-  useComboboxAnchor,
 };

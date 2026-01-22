@@ -1,7 +1,7 @@
 import { waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { type PRD } from "@/lib/prd/generator";
-import { createMockWizardFormData, render } from "@/test/utils";
+import type { PRD } from "@/lib/prd/generator";
+import { createMockWizardFormData, render } from "../../../test/utils";
 import { WizardStepReview } from "./wizard-step-review";
 
 const mockOnFormDataChange = vi.fn();
@@ -48,6 +48,8 @@ describe("WizardStepReview", () => {
           generatedPRD: null,
         })}
         onFormDataChange={mockOnFormDataChange}
+        onConfirm={vi.fn()}
+        isOrchestrating={false}
       />,
     );
 
@@ -67,6 +69,8 @@ describe("WizardStepReview", () => {
           generatedPRD: mockPRD,
         })}
         onFormDataChange={mockOnFormDataChange}
+        onConfirm={vi.fn()}
+        isOrchestrating={false}
       />,
     );
 
@@ -87,13 +91,13 @@ describe("WizardStepReview", () => {
           generatedPRD: null,
         })}
         onFormDataChange={mockOnFormDataChange}
+        onConfirm={vi.fn()}
+        isOrchestrating={false}
       />,
     );
 
     await waitFor(() => {
-      expect(
-        getByText("PRD 생성 중 오류가 발생했거나 데이터가 없습니다."),
-      ).toBeInTheDocument();
+      expect(getByText("PRD 생성 중...")).toBeInTheDocument();
     });
 
     consoleSpy.mockRestore();

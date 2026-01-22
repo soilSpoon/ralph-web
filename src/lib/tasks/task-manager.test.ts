@@ -1,10 +1,16 @@
-import { describe, expect, it } from "vitest";
-import { Task } from "../types";
+import { beforeEach, describe, expect, it } from "vitest";
+import { getDB } from "../db";
+import type { Task } from "../types";
 import { taskManager } from "./task-manager";
 
 describe("TaskManager", () => {
+  beforeEach(async () => {
+    // Attempt to get a fresh instance
+    await getDB({ forceNew: true });
+  });
+
   const createTestTask = (overrides: Partial<Task>): Task => ({
-    id: "test-id",
+    id: `test-id-${Math.random().toString(36).substring(7)}`,
     name: "Test Task",
     description: "Description",
     branchName: "main",
@@ -19,24 +25,30 @@ describe("TaskManager", () => {
     ...overrides,
   });
 
-  it("should add and retrieve a task", () => {
-    const taskId = "test-task-1";
-    const newTask = createTestTask({ id: taskId });
+  it("should add and retrieve a task", async () => {
+    const id = crypto.randomUUID();
+    const newTask = createTestTask({ id });
 
-    taskManager.addTask(newTask);
-    const retrieved = taskManager.getTask(taskId);
-    expect(retrieved).toEqual(newTask);
+    await taskManager.addTask(newTask);
+    const retrieved = await taskManager.getTask(id);
+    expect(retrieved).toMatchObject(newTask);
   });
 
-  it("should list all tasks", () => {
-    const tasks = taskManager.getTasks();
+  it("should list all tasks", async () => {
+    const id = crypto.randomUUID();
+    await taskManager.addTask(createTestTask({ id }));
+
+    const tasks = await taskManager.getTasks();
     expect(Array.isArray(tasks)).toBe(true);
+    // Isolation may fail, so check if our task is present
+    expect(tasks.some((t) => t.id === id)).toBe(true);
   });
 
-  it("should update task properties", () => {
-    const taskId = "test-task-2";
-    taskManager.addTask(createTestTask({ id: taskId, name: "Old" }));
-    taskManager.updateTask(taskId, { name: "New" });
-    expect(taskManager.getTask(taskId)?.name).toBe("New");
+  it("should update task properties", async () => {
+    const id = crypto.randomUUID();
+    await taskManager.addTask(createTestTask({ id, name: "Old" }));
+    await taskManager.updateTask(id, { name: "New" });
+    const updated = await taskManager.getTask(id);
+    expect(updated?.name).toBe("New");
   });
 });

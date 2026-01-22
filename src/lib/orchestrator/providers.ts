@@ -1,6 +1,6 @@
-import { IAgentProvider } from "./provider-interface";
+import type { IAgentProvider } from "./provider-interface";
 import { GeminiProvider } from "./providers/gemini";
-import { ProviderId } from "./types";
+import type { ProviderId } from "./types";
 
 // Registry of instantiated providers
 const providerRegistry = new Map<ProviderId, IAgentProvider>();

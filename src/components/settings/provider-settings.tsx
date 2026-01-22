@@ -1,6 +1,7 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { useId } from "react";
 import {
   Card,
   CardContent,
@@ -20,6 +21,9 @@ import {
 
 export function ProviderSettings() {
   const t = useTranslations("Settings");
+  const providerSelectId = useId();
+  const apiKeyId = useId();
+  const defaultProviderId = useId();
 
   return (
     <Card className="shadow-none rounded-sm border-border/70">
@@ -29,9 +33,9 @@ export function ProviderSettings() {
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="provider-select">{t("providerSelect")}</Label>
+          <Label htmlFor={providerSelectId}>{t("providerSelect")}</Label>
           <Select defaultValue="claude">
-            <SelectTrigger id="provider-select" className="rounded-sm w-full">
+            <SelectTrigger id={providerSelectId} className="rounded-sm w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -43,9 +47,9 @@ export function ProviderSettings() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="api-key">{t("apiKey")}</Label>
+          <Label htmlFor={apiKeyId}>{t("apiKey")}</Label>
           <Input
-            id="api-key"
+            id={apiKeyId}
             type="password"
             placeholder={t("apiKey")}
             className="rounded-sm"
@@ -53,9 +57,9 @@ export function ProviderSettings() {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="default-provider">{t("defaultProvider")}</Label>
+          <Label htmlFor={defaultProviderId}>{t("defaultProvider")}</Label>
           <Select defaultValue="claude">
-            <SelectTrigger id="default-provider" className="rounded-sm w-full">
+            <SelectTrigger id={defaultProviderId} className="rounded-sm w-full">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>

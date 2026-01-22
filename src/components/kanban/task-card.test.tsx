@@ -1,8 +1,8 @@
-import "@/test/env";
+import "../../../test/env";
 import { afterEach, describe, expect, it, mock } from "bun:test";
 import { cleanup } from "@testing-library/react";
-import { Task } from "@/lib/types";
-import { render } from "@/test/utils";
+import type { Task } from "@/lib/types";
+import { render } from "../../../test/utils";
 import { TaskCard } from "./task-card";
 
 mock.module("@atlaskit/pragmatic-drag-and-drop/element/adapter", () => ({
