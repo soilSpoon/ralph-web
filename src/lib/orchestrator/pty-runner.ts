@@ -1,7 +1,7 @@
 import os from "os";
+import { AgentSignal } from "./provider-interface";
 import { getActiveProvider } from "./providers";
 import type { ProviderId } from "./types";
-import { AgentSignal } from "./provider-interface";
 
 type PtyRecord = {
   id: string;

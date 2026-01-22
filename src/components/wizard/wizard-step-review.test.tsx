@@ -1,8 +1,8 @@
 import { waitFor } from "@testing-library/react";
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { WizardStepReview } from "./wizard-step-review";
-import { render, createMockWizardFormData } from "@/test/utils";
 import { type PRD } from "@/lib/prd/generator";
+import { createMockWizardFormData, render } from "@/test/utils";
+import { WizardStepReview } from "./wizard-step-review";
 
 const mockOnFormDataChange = vi.fn();
 

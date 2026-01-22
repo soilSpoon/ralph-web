@@ -1,7 +1,7 @@
 # Phase 7-13 구현 명세
 
 > 📌 Part of [PRIORITIES.md](../PRIORITIES.md)  
-> 참조 레포: [1code](file:///home/dh/dev/labs/1code), [Auto-Claude](file:///home/dh/dev/labs/Auto-Claude), [emdash](file:///home/dh/dev/labs/emdash)
+> Reference Repos: [1code](../..), [Auto-Claude](../..), [emdash](../..)
 
 ---
 

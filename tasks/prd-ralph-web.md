@@ -125,12 +125,29 @@ flowchart LR
 
 | Layer    | Tech                                                                  |
 | -------- | --------------------------------------------------------------------- |
-| Frontend | Next.js 15 (App Router), React 19, shadcn UI (Base UI + Tailwind CSS) |
+| Frontend | Next.js 16 (App Router), React 19, shadcn UI (Base UI + Tailwind CSS) |
 | Backend  | Node.js, Socket.io, tRPC                                              |
 | Database | SQLite (Drizzle ORM), Vector Embeddings (Phase 3)                     |
 | State    | Zustand (client), Files (persistence)                                 |
 | AI       | Multi-Provider Registry (Claude, Amp, Gemini, Qwen...)                |
 | Testing  | Playwright (E2E), Vitest (Unit)                                       |
+
+### Project Structure
+
+```text
+ralph-web/
+├── src/                  # Main source code
+│   ├── app/              # Next.js App Router (i18n: en/ko)
+│   ├── components/       # UI Components
+│   ├── lib/              # Core Logic (Orchestrator, Worktree, Store, etc.)
+│   ├── hooks/            # Shared React hooks
+│   ├── i18n/             # i18n Configuration
+│   ├── messages/         # Translation files (en/ko)
+│   └── stories/          # Storybook component stories
+├── public/               # Static assets
+├── tasks/                # Project Specs & Roadmap
+└── AGENTS.md             # Technical guide for agents
+```
 
 ### JSON Schema
 

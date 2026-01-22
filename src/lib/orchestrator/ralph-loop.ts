@@ -1,9 +1,9 @@
 import { EventEmitter } from "events";
 import { prdGenerator } from "../prd/generator";
 import type { Story } from "../types";
+import { WorktreeService } from "../worktree";
 import { ptyRunner } from "./pty-runner";
 import type { ProviderId, RalphSession, WorkflowPhase } from "./types";
-import { WorktreeService } from "../worktree";
 
 export interface RalphLoopOptions {
   id: string;

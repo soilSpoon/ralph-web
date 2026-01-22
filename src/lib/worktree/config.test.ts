@@ -1,8 +1,8 @@
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
-import { WorktreeService } from "./worktree-service";
 import fs from "node:fs/promises";
-import path from "node:path";
 import os from "node:os";
+import path from "node:path";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
+import { WorktreeService } from "./worktree-service";
 
 describe("WorktreeService with .ralph.json", () => {
   let projectDir: string;

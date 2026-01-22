@@ -1,7 +1,7 @@
 import {
-  IAgentProvider,
-  CommandOptions,
   AgentSignal,
+  CommandOptions,
+  IAgentProvider,
 } from "../provider-interface";
 import { ProviderId } from "../types";
 

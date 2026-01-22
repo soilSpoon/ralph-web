@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
+import { createMockWizardFormData, render } from "@/test/utils";
 import { WizardStepApprove } from "./wizard-step-approve";
-import { render, createMockWizardFormData } from "@/test/utils";
 
 describe("WizardStepApprove", () => {
   it("should render approval confirmation", () => {

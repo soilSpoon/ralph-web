@@ -210,33 +210,25 @@ interface ProviderDefinition {
 ```
 ralph-web/
 ├── src/
-│   ├── app/                 # Next.js App Router
-│   ├── components/          # UI Components
-│   ├── lib/
-│   │   ├── agents/          # Agent Adapters
-│   │   ├── git-manager.ts   # Worktree Logic & Merge
-│   │   ├── orchestrator.ts  # The Ralph Loop & QA
-│   │   ├── task-manager.ts  # 다중 태스크 상태 관리
-│   │   └── types.ts         # Shared Types
-│   └── server/              # Socket.io Server
-├── .worktrees/              # (Gitignored) 태스크별 격리된 작업 공간
-│   ├── task-001/            # Task 001의 Git Worktree
-│   ├── task-002/            # Task 002의 Git Worktree (병렬 실행)
-│   └── task-003/
-├── .ralph/                  # Ralph-Web 메타데이터 (Gitignored)
-│   ├── ralph.db             # SQLite: 전체 태스크 상태 중앙 관리
-│   ├── global-patterns.md   # 프로젝트 전역 Codebase Patterns
-│   └── tasks/               # 태스크별 격리된 디렉토리
-│       ├── task-001/
-│       │   ├── prd.json     # 이 태스크의 스토리 목록
-│       │   ├── progress.txt # 이 태스크의 진행 로그
-│       │   └── memory/      # 이 태스크의 인사이트
-│       ├── task-002/
-│       │   ├── prd.json
-│       │   ├── progress.txt
-│       │   └── memory/
-│       └── archive/         # 완료된 태스크 아카이브
-└── AGENTS.md                # 에이전트가 자동 업데이트하는 학습 내용
+│   ├── app/             # Next.js App Router (en/ko)
+│   ├── components/      # UI Components (dashboard, kanban, wizard, settings, etc.)
+│   ├── lib/             # Core Logic
+│   │   ├── orchestrator/ # Agent loops, PTY runner, Provider interface
+│   │   ├── worktree/    # Git Worktree logic, File preservation
+│   │   ├── store/       # Zustand stores
+│   │   ├── prd/         # PRD generation & schema
+│   │   ├── review/      # Review process & Diff utils
+│   │   ├── tasks/       # Task domain logic
+│   │   └── types.ts     # Shared Types
+│   ├── hooks/           # Custom React hooks
+│   ├── i18n/            # i18n routing and request logic
+│   ├── messages/        # Translation JSON files (en/ko)
+│   └── stories/         # Storybook component stories
+├── public/              # Static assets
+├── tests/               # Playwright E2E tests
+├── .worktrees/          # (Gitignored) Isolated agent workspace
+├── .ralph/              # (Gitignored) Task metadata & SQLite DB
+└── AGENTS.md            # Technical guide for agents and developers
 ```
 
 **핵심 원칙:**

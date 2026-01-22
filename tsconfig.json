@@ -22,18 +22,18 @@
       }
     ],
     "paths": {
-      "@/*": ["./*"]
+      "@/*": ["./src/*"]
     },
     "types": ["bun-types", "@testing-library/jest-dom"]
   },
   "include": [
     "next-env.d.ts",
-    "**/*.ts",
-    "**/*.tsx",
+    "src/**/*.ts",
+    "src/**/*.tsx",
     ".next/types/**/*.ts",
     "test/types.d.ts",
     ".next/dev/types/**/*.ts",
-    "**/*.mts"
+    "src/**/*.mts"
   ],
   "exclude": ["node_modules"]
 }

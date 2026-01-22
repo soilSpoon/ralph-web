@@ -53,6 +53,7 @@ We use a modern, performance-oriented stack.
   - Used for extremely fast package installation, script execution, and testing.
 - **Framework**: **[Next.js 16](https://nextjs.org/)** (App Router)
   - Leverages Server Components for performance and Server Actions for data mutation.
+- **Library**: **[React 19](https://react.dev/)**
 - **Language**: **TypeScript** (Strict mode)
 
 ### User Interface (UI)
@@ -74,64 +75,72 @@ We use a modern, performance-oriented stack.
 
 - **Unit/Component Tests**: **Bun Test**
   - Native performance, configured with `happy-dom` for DOM simulation.
-  - Automatically excludes Playwright `.spec.ts` files.
 - **E2E Tests**: **Playwright**
   - Multi-page workflow and browser-level integration testing.
 - **Visual Testing**: **Storybook 10 + Vitest**
   - Storybook's new Vitest addon is used for component-level interaction testing.
 - **Linting & Formatting**: **[Biome](https://biomejs.dev/)**
-  - Replaces ESLint and Prettier with a single, high-performance tool for linting, formatting, and import sorting.
+  - Replaces ESLint and Prettier with a single tool for linting, formatting, and import sorting.
 
 ---
 
 ## 4. Directory Structure
 
-Understanding where things live is crucial.
+Understanding the codebase organization is crucial.
 
 ```text
-/home/dh/dev/labs/ralph-web/
-├── app/                  # Next.js App Router
-│   ├── [locale]/         # i18n Routing Layer (en/ko)
-│   │   ├── (dashboard)/  # Authenticated Dashboard
-│   │   └── layout.tsx    # Root layout (i18n Provider)
-├── components/           # React Components
-│   ├── ui/               # Generic (Button, Input, Badge) - via shadcn
-│   ├── dashboard/        # Dashboard-specific widgets
-│   ├── kanban/           # Kanban-specific components
-│   └── layout/           # Shared Layout (Sidebar, Header, LocaleSwitcher)
-├── messages/             # 🌍 Translation Files (en.json, ko.json)
-├── i18n/                  # i18n Config (routing.ts, request.ts)
-├── lib/                  # Core Logic
-│   ├── store/            # Zustand stores (useAppStore.ts)
-│   ├── db/               # Database schemas & clients (Drizzle/SQLite)
-│   └── utils.ts          # Helpers
-├── tasks/                # 📄 Project Specs (READ THESE!)
+/
+├── src/                  # Main source code
+│   ├── app/              # Next.js App Router (en/ko)
+│   ├── components/       # UI Components
+│   │   ├── ui/           # Generic components via shadcn
+│   │   ├── dashboard/    # Dashboard-specific widgets
+│   │   ├── kanban/       # Kanban board components
+│   │   ├── wizard/       # PRD generation & Approval wizards
+│   │   ├── settings/     # User & System settings
+│   │   ├── review/       # Task review & Diff viewer
+│   │   └── layout/       # Shared layout components
+│   ├── lib/              # Core business logic
+│   │   ├── orchestrator/ # Agent loops & PTY runner
+│   │   ├── worktree/     # Git worktree management
+│   │   ├── store/        # Zustand stores
+│   │   ├── prd/          # PRD logic & schema
+│   │   ├── review/       # Review process & diff utils
+│   │   ├── tasks/        # Task domain logic
+│   │   └── utils.ts      # Shared helper functions
+│   ├── hooks/            # Custom React hooks
+│   ├── i18n/             # i18n routing and request logic
+│   ├── messages/         # Translation JSON files (en/ko)
+│   └── stories/          # Storybook component stories
+├── public/               # Static assets
+├── tasks/                # Project Specs & Roadmap
+│   ├── PRIORITIES.md     # Current Roadmap & Phase Status
 │   ├── prd-ralph-web.md  # The Master Plan
 │   └── specs/            # Detailed Architecture & UI Specs
-├── .worktrees/           # 🚫 Ignored. Where agents do their work.
-├── .ralph/               # 🚫 Ignored. Central DB & Task Metadata.
+├── .worktrees/           # (Ignored) Isolated agent workspace
+├── .ralph/               # (Ignored) Task metadata & SQLite DB
 └── AGENTS.md             # 👈 You are here.
 ```
 
 ---
 
-## 5. Development Workflow (How to Contribute)
+## 5. Development Workflow
 
 If you are an agent or developer adding a feature:
 
-1.  **Read the Feature Spec**: Check if there is a specific MD file in `tasks/specs/` for what you are building.
+1.  **Read the Feature Spec**: Check `tasks/specs/` for relevant design documents.
 2.  **Create Components in Isolation**:
-    - Use `Storybook` to build complex UI pieces (like the Task Card) without running the full app.
+    - Use `Storybook` to build complex UI pieces without running the full app.
     - Run `bun run storybook`.
 3.  **Implement Logic & Stores**:
-    - Add state to `useAppStore.ts` or create a new store slice.
-    - Write unit tests (`bun test`) for pure logic.
+    - Add state to relevant Zustand stores in `src/lib/store/`.
+    - Write unit tests (`bun test`) for business logic.
 4.  **Assemble Pages**:
-    - Import components into `app/.../page.tsx`.
-    - Ensure responsiveness (Tailwind mobile-first).
+    - Import components into `src/app/.../page.tsx`.
+    - Ensure responsiveness and accessibility.
 5.  **Verify**:
     - Run `bun run dev` to check locally.
-    - Run `bun test` to ensure no regressions.
+    - Run `bun run test:unit` to ensure no regressions.
 
 ## 6. Common Commands
 
@@ -149,26 +158,20 @@ If you are an agent or developer adding a feature:
 
 ---
 
-> **Tip for Agents**: When asked to implement a feature, always check `tasks/specs/ui-spec.md` first to see if a specific layout or component hierarchy has already been designed.
-
----
-
 ## 7. TypeScript & Code Quality Standards
 
-We enforce **Strict TypeScript** and **Biome** linting rules. We prioritize **type safety and correctness** over development speed or convenience.
+We enforce **Strict TypeScript** and **Biome** linting rules. We prioritize **type safety and correctness** over development speed.
 
-### 🚫 Strictly Forbidden (Avoid These)
+### 🚫 Strictly Forbidden
 
-1.  **Workarounds**: Do not use `@ts-expect-error`, `@ts-ignore`, or `eslint-disable` to silence errors. Fix the underlying issue.
-2.  **`any`**: The usage of `any` is strictly prohibited.
-3.  **Loose Types**: Avoid `unknown` or `Record<string, any>` when a specific type can be defined.
-4.  **Type Assertions (`as`)**: Avoid casting with `as` to bypass type checks (e.g., `data as User`). This "lies" to the compiler and hides bugs.
+1.  **Workarounds**: Do not use `@ts-expect-error`, `@ts-ignore`, or `eslint-disable`. Fix the root issue.
+2.  **`any`**: Strictly prohibited.
+3.  **Loose Types**: Avoid `unknown` or `Record<string, any>` when specific types are possible.
+4.  **Type Assertions (`as`)**: Avoid casting to bypass type checks.
 
-### ✅ Best Practices (Do These)
+### ✅ Best Practices
 
-1.  **Fundamental Solutions**: Solve the root cause of type errors. If a type doesn't match, changing the code or the type definition is better than forcing it.
-2.  **Type Inference**: Write code that allows TypeScript to infer types naturally. Explicitly declare return types only when necessary or for clarity.
-3.  **Utility Types**: Use built-in utilities (`Pick`, `Omit`, `Partial`) or libraries like **`type-fest`** to manipulate types safely.
+1.  **Fundamental Solutions**: Solve the root cause of type errors.
+2.  **Type Inference**: Allow TypeScript to infer types naturally where possible.
+3.  **Utility Types**: Use `Pick`, `Omit`, `Partial`, or `type-fest` for safe manipulation.
 4.  **Strict Declarations**: Define precise interfaces for all props, state, and data.
-    - _Bad_: `payload: object`
-    - _Good_: `payload: { id: string; status: 'draft' | 'published' }`
