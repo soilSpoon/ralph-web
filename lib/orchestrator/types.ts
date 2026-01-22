@@ -48,16 +48,7 @@ export function phaseToUIStatus(phase: WorkflowPhase): UIStatus {
  */
 export type ProviderId = "gemini" | "claude" | "amp" | "codex";
 
-export interface ProviderDefinition {
-  id: ProviderId;
-  name: string;
-  cli: string;
-  installCommand?: string;
-  autoApproveFlag?: string;
-  initialPromptFlag?: string;
-  resumeFlag?: string;
-  icon?: string;
-}
+// ProviderDefinition moved to provider-interface.ts interface IAgentProvider
 
 /**
  * Iteration record for a Ralph session.

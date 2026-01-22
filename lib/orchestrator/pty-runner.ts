@@ -1,6 +1,7 @@
 import os from "os";
 import { getActiveProvider } from "./providers";
 import type { ProviderId } from "./types";
+import { AgentSignal } from "./provider-interface";
 
 type PtyRecord = {
   id: string;
@@ -32,7 +33,7 @@ function getDefaultShell(): string {
 
 /**
  * PTYRunner manages lifecycle of pseudoterminals for agents.
- * Inspired by emdash ptyManager for secure environment handling.
+ * Integrates with IAgentProvider for command generation and signal detection.
  */
 export class PTYRunner {
   /**
@@ -59,11 +60,9 @@ export class PTYRunner {
     }
 
     const provider = getActiveProvider(options.providerId);
-
     const shell = getDefaultShell();
 
-    // 1. Build a clean environment (emdash pattern)
-    // Prevents issues with bundled Python/Node paths in packaged apps or specific environments.
+    // 1. Build a clean environment (Security Best Practice)
     const cleanEnv: Record<string, string> = {
       TERM: "xterm-256color",
       COLORTERM: "truecolor",
@@ -72,26 +71,24 @@ export class PTYRunner {
       SHELL: process.env.SHELL || shell,
       PATH: process.env.PATH || "",
       LANG: process.env.LANG || "en_US.UTF-8",
-      // Add API Keys
+      // Pass through API Keys
       GEMINI_API_KEY: process.env.GEMINI_API_KEY || "",
       ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY || "",
+      OPENAI_API_KEY: process.env.OPENAI_API_KEY || "",
     };
 
-    // 2. Build shell arguments (emdash pattern)
-    // Wrap the CLI command in a login shell to ensure user config (.zshrc, .bashrc) is loaded.
+    // 2. Build shell arguments via Provider Interface
+    const providerArgs = provider.buildArgs({
+      prompt: options.prompt,
+      autoApprove: options.autoApprove,
+      cwd: options.cwd,
+    });
+
+    // Construct the command string
+    const command =
+      `${provider.getExecutable()} ${providerArgs.join(" ")}`.trim();
+
     const args: string[] = [];
-    const cliArgs: string[] = [];
-
-    if (options.autoApprove && provider.autoApproveFlag) {
-      cliArgs.push(provider.autoApproveFlag);
-    }
-
-    if (provider.initialPromptFlag && options.prompt) {
-      cliArgs.push(provider.initialPromptFlag);
-      cliArgs.push(options.prompt);
-    }
-
-    const command = `${provider.cli} ${cliArgs.join(" ")}`.trim();
 
     if (process.platform !== "win32") {
       const shellBase = shell.split("/").pop() || "";
@@ -101,7 +98,6 @@ export class PTYRunner {
         args.push("-c", command);
       }
     } else {
-      // Windows shell args (simplified)
       args.push("/c", command);
     }
 
@@ -126,12 +122,14 @@ export class PTYRunner {
       options.onData(data);
 
       /**
-       * Detect Completion Signal (ralph.sh pattern)
+       * Detect Completion Signal via Provider
        */
-      if (data.includes("<promise>COMPLETE</promise>")) {
+      const signal: AgentSignal = provider.detectSignal(data);
+      if (signal === "COMPLETE") {
         // We delay killing it slightly to allow all output to flush
         setTimeout(() => this.kill(options.id), 500);
       }
+      // Handle ERROR signal if needed
     });
 
     proc.onExit(({ exitCode, signal }) => {

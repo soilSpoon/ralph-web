@@ -1,32 +1,36 @@
-import type { ProviderDefinition, ProviderId } from "./types";
+import { IAgentProvider } from "./provider-interface";
+import { GeminiProvider } from "./providers/gemini";
+import { ProviderId } from "./types";
 
-export const PROVIDERS: ProviderDefinition[] = [
-  {
-    id: "gemini",
-    name: "Gemini",
-    cli: "gemini",
-    installCommand: "npm install -g @google/gemini-cli",
-    autoApproveFlag: "--yolomode",
-    initialPromptFlag: "-i",
-    resumeFlag: "--resume",
-  },
-  {
-    id: "claude",
-    name: "Claude Code",
-    cli: "claude",
-    installCommand: "npm install -g @anthropic-ai/claude-code",
-    autoApproveFlag: "-y",
-    initialPromptFlag: undefined, // Passed via stdin
-    resumeFlag: undefined,
-  },
-];
+// Registry of instantiated providers
+const providerRegistry = new Map<ProviderId, IAgentProvider>();
+
+// Register providers
+const gemini = new GeminiProvider();
+providerRegistry.set(gemini.id, gemini);
+
+// Claude provider stub (can be implemented later)
+// providerRegistry.set("claude", new ClaudeProvider());
 
 export const DEFAULT_PROVIDER_ID: ProviderId = "gemini";
 
-export function getProvider(id: ProviderId): ProviderDefinition | undefined {
-  return PROVIDERS.find((p) => p.id === id);
+/**
+ * Get a provider instance by ID.
+ */
+export function getProvider(id: ProviderId): IAgentProvider | undefined {
+  return providerRegistry.get(id);
 }
 
-export function getActiveProvider(id?: ProviderId): ProviderDefinition {
-  return getProvider(id || DEFAULT_PROVIDER_ID) || PROVIDERS[0];
+/**
+ * Get the active provider or default if not found.
+ */
+export function getActiveProvider(id?: ProviderId): IAgentProvider {
+  return getProvider(id || DEFAULT_PROVIDER_ID) || gemini;
+}
+
+/**
+ * Get all registered providers
+ */
+export function getAllProviders(): IAgentProvider[] {
+  return Array.from(providerRegistry.values());
 }

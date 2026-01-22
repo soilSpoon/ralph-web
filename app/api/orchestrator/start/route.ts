@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { PROVIDERS } from "@/lib/orchestrator/providers";
+import { DEFAULT_PROVIDER_ID } from "@/lib/orchestrator/providers";
 import { sessionManager } from "@/lib/orchestrator/session-manager";
 
 export async function POST(request: Request) {
@@ -13,7 +13,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const provider = providerId || PROVIDERS[0].id;
+    const provider = providerId || DEFAULT_PROVIDER_ID;
 
     const session = sessionManager.createSession({
       taskId,

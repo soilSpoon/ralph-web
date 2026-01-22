@@ -22,3 +22,22 @@ function renderWithIntl(
 
 export * from "@testing-library/react";
 export { renderWithIntl as render };
+
+import { type WizardFormData } from "@/lib/hooks/use-wizard-state";
+import { type Mock, vi } from "vitest";
+
+export function createMockWizardFormData(
+  overrides: Partial<WizardFormData> = {},
+): WizardFormData {
+  return {
+    description: "Default description",
+    clarifications: {},
+    generatedPRD: null,
+    approved: false,
+    ...overrides,
+  };
+}
+
+export function createFetchMock() {
+  return vi.fn() as Mock<typeof fetch>;
+}

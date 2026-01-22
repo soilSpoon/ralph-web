@@ -152,10 +152,11 @@ export class PRDGenerator {
       } catch (error: unknown) {
         attempts++;
         lastError = error;
-        const err = error as Error;
-        console.warn(`[PRDGenerator] Attempt ${attempts} failed:`, err.message);
+        const errMessage =
+          error instanceof Error ? error.message : "Unknown error occurred";
+        console.warn(`[PRDGenerator] Attempt ${attempts} failed:`, errMessage);
 
-        let detailedError = err.message;
+        let detailedError = errMessage;
         if (error instanceof z.ZodError) {
           detailedError = error.issues
             .map((e) => `${e.path.join(".")}: ${e.message}`)

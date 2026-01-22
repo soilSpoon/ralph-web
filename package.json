@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "lint": "biome lint .",
+    "typecheck": "tsc --noEmit",
     "format": "biome format --write .",
     "check": "biome check --write .",
     "storybook": "storybook dev -p 6006",
@@ -92,6 +93,7 @@
     "playwright": "^1.57.0",
     "storybook": "^10.1.11",
     "tailwindcss": "^4.1.18",
+    "type-fest": "^5.4.1",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
     "vitest": "^4.0.17"

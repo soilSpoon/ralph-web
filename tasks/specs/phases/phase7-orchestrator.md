@@ -166,145 +166,56 @@ interface RalphSession {
 
 ---
 
-## node-pty 기반 에이전트 러너
+## Provider Architecture (확장형)
+
+다양한 CLI 에이전트(Gemini, Claude, Amp 등)를 지원하기 위해 인터페이스 기반으로 설계되었습니다. `providers.ts` 레지스트리를 통해 관리됩니다.
+
+```typescript
+// lib/orchestrator/provider-interface.ts
+export interface IAgentProvider {
+  readonly id: ProviderId;
+  readonly name: string;
+
+  // CLI 실행 파일명
+  getExecutable(): string;
+
+  // 명령어 인자 구성 (--yolomode, -i 등)
+  buildArgs(options: CommandOptions): string[];
+
+  // 출력에서 완료/에러 시그널 감지 (<promise>COMPLETE</promise>)
+  detectSignal(output: string): AgentSignal;
+}
+```
+
+```typescript
+// lib/orchestrator/providers/gemini.ts
+export class GeminiProvider implements IAgentProvider {
+  id = "gemini";
+  getExecutable() {
+    return "gemini";
+  }
+  buildArgs(opts) {
+    /* ... */
+  }
+  detectSignal(output) {
+    /* ... */
+  }
+}
+```
+
+### PTYRunner 연동
+
+`PTYRunner`는 `IAgentProvider` 인터페이스에 의존하여 구체적인 CLI 옵션을 몰라도 에이전트를 실행할 수 있습니다.
 
 ```typescript
 // lib/orchestrator/pty-runner.ts
-import type { IPty } from "node-pty";
-import { getProvider, GEMINI_PROVIDER } from "../providers";
+const provider = getActiveProvider(options.providerId);
+const command = `${provider.getExecutable()} ${provider.buildArgs(...).join(" ")}`;
 
-interface PTYSession {
-  id: string;
-  pty: IPty;
-  output: string[];
-}
+// ... spawn pty ...
 
-const sessions = new Map<string, PTYSession>();
-
-export class PTYRunner {
-  private pty: typeof import("node-pty");
-
-  constructor() {
-    // Lazy load to avoid startup issues
-    this.pty = require("node-pty");
-  }
-
-  /**
-   * 에이전트 시작 (emdash 패턴)
-   *
-   * ralph.sh 철학: 단순하게 CLI 실행하고 출력 감시
-   */
-  async spawn(options: {
-    sessionId: string;
-    providerId: ProviderId;
-    cwd: string;
-    prompt: string;
-    autoApprove?: boolean;
-    onData: (data: string) => void;
-    onExit: (code: number) => void;
-  }): Promise<void> {
-    const provider = getProvider(options.providerId) ?? GEMINI_PROVIDER;
-
-    // 쉘 명령 구성 (emdash 스타일)
-    const shell = process.env.SHELL || "/bin/bash";
-    const command = this.buildCommand(provider, options);
-
-    const proc = this.pty.spawn(shell, ["-c", command], {
-      name: "xterm-256color",
-      cols: 120,
-      rows: 40,
-      cwd: options.cwd,
-      env: {
-        TERM: "xterm-256color",
-        COLORTERM: "truecolor",
-        HOME: process.env.HOME!,
-        USER: process.env.USER!,
-        SHELL: shell,
-        // Provider 환경 변수
-        GEMINI_API_KEY: process.env.GEMINI_API_KEY,
-        ANTHROPIC_API_KEY: process.env.ANTHROPIC_API_KEY,
-      },
-    });
-
-    const session: PTYSession = {
-      id: options.sessionId,
-      pty: proc,
-      output: [],
-    };
-    sessions.set(options.sessionId, session);
-
-    // 출력 감시
-    proc.onData((data) => {
-      session.output.push(data);
-      options.onData(data);
-    });
-
-    proc.onExit(({ exitCode }) => {
-      sessions.delete(options.sessionId);
-      options.onExit(exitCode);
-    });
-  }
-
-  /**
-   * CLI 명령 구성 (Provider별 플래그)
-   */
-  private buildCommand(
-    provider: ProviderDefinition,
-    options: {
-      prompt: string;
-      autoApprove?: boolean;
-    },
-  ): string {
-    const args: string[] = [provider.cli];
-
-    // Auto-approve (Gemini: --yolomode)
-    if (options.autoApprove && provider.autoApproveFlag) {
-      args.push(provider.autoApproveFlag);
-    }
-
-    // Initial prompt (Gemini: -i)
-    if (provider.initialPromptFlag && options.prompt) {
-      args.push(provider.initialPromptFlag);
-      // 프롬프트는 stdin으로 전달하거나 임시 파일로
-    }
-
-    return args.join(" ");
-  }
-
-  /**
-   * 프롬프트 전송 (PTY stdin)
-   */
-  write(sessionId: string, data: string): void {
-    const session = sessions.get(sessionId);
-    if (session) {
-      session.pty.write(data);
-    }
-  }
-
-  /**
-   * 세션 종료
-   */
-  kill(sessionId: string): void {
-    const session = sessions.get(sessionId);
-    if (session) {
-      session.pty.kill();
-      sessions.delete(sessionId);
-    }
-  }
-
-  /**
-   * 출력에서 완료 신호 감지 (ralph.sh 스타일)
-   */
-  detectSignal(output: string): "COMPLETE" | "ERROR" | null {
-    if (output.includes("<promise>COMPLETE</promise>")) {
-      return "COMPLETE";
-    }
-    if (output.includes("Error:") || output.includes("FATAL")) {
-      return "ERROR";
-    }
-    return null;
-  }
-}
+// 시그널 감지 위임
+const signal = provider.detectSignal(data);
 ```
 
 ---

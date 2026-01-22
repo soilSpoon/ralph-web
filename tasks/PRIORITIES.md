@@ -6,16 +6,16 @@
 
 ## 현재 남은 작업 (세분화된 로드맵)
 
-| 우선순위 | 작업                            | 설명                                                              | 상태      |
-| -------- | ------------------------------- | ----------------------------------------------------------------- | --------- |
-| 🥇 1순위 | **Phase 7: Agent Orchestrator** | `child_process` 기반 에이전트(Claude/Amp) 연결 및 실시간 스트리밍 | 🔄 진행중 |
-| 🥈 2순위 | **Phase 8: Worktree Manager**   | `git worktree` 격리 환경 구축 및 환경 파일 링크                   | ⏳ 대기   |
-| 🥉 3순위 | **Phase 9: Persistence (DB)**   | Drizzle ORM + SQLite 연동 및 상태 영속화                          | ⏳ 대기   |
-| 🏅 4순위 | **Phase 10: Queue Manager**     | 병렬 태스크 스케줄링 및 리소스 제어                               | ⏳ 대기   |
-| 🏅 5순위 | **Phase 11: QA Loop (Fixer)**   | 자동 테스트 연동 및 에러 피드백 루프                              | ⏳ 대기   |
-| 🎖️ 6순위 | **Phase 12: Memory Graph**      | 벡터 임베딩 기반 지능형 지식 탐색                                 | ⏳ 대기   |
-| 🎖️ 7순위 | **Phase 13: Multi-Provider**    | 다양한 에이전트 CLI 표준 어댑터 확장                              | ⏳ 대기   |
-| 🎖️ 8순위 | **Authentication**              | 인증 시스템 (가장 후순위)                                         | ⏳ 대기   |
+| 우선순위 | 작업                            | 설명                                                    | 상태    |
+| -------- | ------------------------------- | ------------------------------------------------------- | ------- |
+| ✅ 완료  | **Phase 7: Agent Orchestrator** | `node-pty` 기반 Provider 인터페이스 구현 및 Gemini 연결 | ✅ 완료 |
+| 🥇 1순위 | **Phase 8: Worktree Manager**   | `git worktree` 격리 환경 구축 및 환경 파일 링크         | 🔄 대기 |
+| 🥉 3순위 | **Phase 9: Persistence (DB)**   | Drizzle ORM + SQLite 연동 및 상태 영속화                | ⏳ 대기 |
+| 🏅 4순위 | **Phase 10: Queue Manager**     | 병렬 태스크 스케줄링 및 리소스 제어                     | ⏳ 대기 |
+| 🏅 5순위 | **Phase 11: QA Loop (Fixer)**   | 자동 테스트 연동 및 에러 피드백 루프                    | ⏳ 대기 |
+| 🎖️ 6순위 | **Phase 12: Memory Graph**      | 벡터 임베딩 기반 지능형 지식 탐색                       | ⏳ 대기 |
+| 🎖️ 7순위 | **Phase 13: Multi-Provider**    | 다양한 에이전트 CLI 표준 어댑터 확장                    | ⏳ 대기 |
+| 🎖️ 8순위 | **Authentication**              | 인증 시스템 (가장 후순위)                               | ⏳ 대기 |
 
 ---
 
