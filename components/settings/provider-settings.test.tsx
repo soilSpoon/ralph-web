@@ -1,7 +1,7 @@
 import "@/test/env";
-import { afterEach, describe, expect, it, vi } from "bun:test";
+import { afterEach, describe, expect, it } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, fireEvent } from "@testing-library/react";
+import { cleanup } from "@testing-library/react";
 import { ProviderSettings } from "@/components/settings/provider-settings";
 import ko from "@/messages/ko.json";
 import { render } from "@/test/utils";

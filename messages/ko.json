@@ -33,7 +33,8 @@
     "tabs": {
       "stories": "스토리",
       "prd": "PRD",
-      "progress": "진행 로그"
+      "terminal": "터미널",
+      "progress": "진행 기록"
     },
     "userStories": "사용자 스토리",
     "acceptanceCriteria": "수용 기준",
@@ -67,19 +68,56 @@
     "title": "설정",
     "description": "애플리케이션 환경 설정",
     "provider": "AI Provider",
+    "providerDescription": "AI 모델 제공자 및 API 키를 설정합니다.",
     "providerSelect": "Provider 선택",
     "apiKey": "API Key",
     "defaultProvider": "기본 Provider",
     "concurrency": "동시성",
+    "concurrencyDescription": "동시에 실행할 작업 수를 관리합니다.",
     "maxConcurrentTasks": "최대 동시 태스크 수",
+    "performanceWarning": "너무 높게 설정하면 시스템 성능에 영향을 줄 수 있습니다.",
     "notifications": "알림",
+    "notificationDescription": "알림을 받을 시점을 선택합니다.",
     "notifyOnComplete": "태스크 완료 시 알림",
     "notifyOnError": "에러 발생 시 알림",
     "git": "Git",
+    "gitDescription": "Ralph-Web의 Git 저장소 연동 방식을 설정합니다.",
     "defaultBranch": "기본 브랜치",
     "commitFormat": "커밋 메시지 형식",
+    "placeholders": "사용 가능한 변수: {task_id}, {title}, {iteration}",
     "autoPush": "자동 푸시",
     "save": "저장",
     "saved": "설정이 저장되었습니다"
+  },
+  "Patterns": {
+    "title": "🧠 코드베이스 패턴",
+    "searchPlaceholder": "패턴 검색...",
+    "categories": "📂 카테고리",
+    "foundPatterns": "{count}개의 패턴을 찾았습니다",
+    "allPatterns": "📋 모든 패턴",
+    "noPatterns": "검색 결과와 일치하는 패턴이 없습니다.",
+    "clearFilters": "필터 초기화",
+    "source": "소스",
+    "created": "생성일",
+    "promoted": "승급일",
+    "categoryLabels": {
+      "all": "전체",
+      "convention": "🔧 빌드",
+      "gotcha": "📁 파일",
+      "tip": "🧪 테스트"
+    }
+  },
+  "Wizard": {
+    "title": "✨ 새 작업",
+    "step": "{current} / {total} 단계",
+    "back": "이전",
+    "next": "다음",
+    "approve": "승인 및 생성",
+    "steps": {
+      "describe": "💬 요청 사항",
+      "clarify": "🤖 AI 질의응답",
+      "review": "📄 PRD 리뷰",
+      "approve": "✅ 최종 승인"
+    }
   }
 }

@@ -1,9 +1,12 @@
 "use client";
 
-import { Checkbox } from "@/components/ui/checkbox";
+import { useEffect, useState } from "react";
 import { Label } from "@/components/ui/label";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
 import { WizardFormData } from "@/lib/hooks/use-wizard-state";
+import { ClarifyQuestion } from "@/lib/prd/generator";
 
 interface WizardStepClarifyProps {
   formData: WizardFormData;
@@ -14,123 +17,108 @@ export function WizardStepClarify({
   formData,
   onFormDataChange,
 }: WizardStepClarifyProps) {
-  return (
-    <div className="space-y-6">
-      <p className="text-sm text-muted-foreground">
-        몇 가지 확인이 필요합니다:
-      </p>
+  const [questions, setQuestions] = useState<ClarifyQuestion[]>([]);
+  const [loading, setLoading] = useState(true);
 
-      <div className="space-y-4">
-        <div className="space-y-3">
-          <Label>1. 인증 방식</Label>
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <input
-                type="radio"
-                id="jwt"
-                name="auth"
-                value="jwt"
-                checked={formData.authMethod === "jwt"}
-                onChange={() => onFormDataChange({ authMethod: "jwt" })}
-              />
-              <Label htmlFor="jwt">JWT (토큰 기반)</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="radio"
-                id="session"
-                name="auth"
-                value="session"
-                checked={formData.authMethod === "session"}
-                onChange={() => onFormDataChange({ authMethod: "session" })}
-              />
-              <Label htmlFor="session">Session (서버 세션)</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="radio"
-                id="recommend"
-                name="auth"
-                value="recommend"
-                checked={formData.authMethod === "recommend"}
-                onChange={() => onFormDataChange({ authMethod: "recommend" })}
-              />
-              <Label htmlFor="recommend">잘 모르겠어요 (AI 추천)</Label>
-            </div>
+  useEffect(() => {
+    const fetchQuestions = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch("/api/prd/questions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ description: formData.description }),
+        });
+        const data = await response.json();
+        if (data.questions) {
+          setQuestions(data.questions);
+        }
+      } catch (error) {
+        console.error("Failed to fetch questions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (formData.description && questions.length === 0) {
+      fetchQuestions();
+    } else if (!formData.description) {
+      setLoading(false);
+    }
+  }, [formData.description, questions.length]);
+
+  const handleUpdateAnswer = (
+    questionId: string,
+    answer: string | string[] | boolean,
+  ) => {
+    onFormDataChange({
+      clarifications: {
+        ...formData.clarifications,
+        [questionId]: answer,
+      },
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="space-y-3">
+            <Skeleton className="h-4 w-1/3" />
+            <Skeleton className="h-10 w-full" />
           </div>
-        </div>
-
-        <div className="space-y-3">
-          <Label>2. 비밀번호 재설정 기능이 필요한가요?</Label>
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <input
-                type="radio"
-                id="reset-yes"
-                name="reset"
-                value="yes"
-                checked={formData.passwordReset === true}
-                onChange={() => onFormDataChange({ passwordReset: true })}
-              />
-              <Label htmlFor="reset-yes">네</Label>
-            </div>
-            <div className="flex items-center space-x-2">
-              <input
-                type="radio"
-                id="reset-no"
-                name="reset"
-                value="no"
-                checked={formData.passwordReset === false}
-                onChange={() => onFormDataChange({ passwordReset: false })}
-              />
-              <Label htmlFor="reset-no">아니오</Label>
-            </div>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <Label>3. OAuth 제공자를 선택해주세요 (복수 선택)</Label>
-          <div className="space-y-2">
-            {["google", "github", "apple"].map((provider) => (
-              <div key={provider} className="flex items-center space-x-2">
-                <Checkbox
-                  id={provider}
-                  checked={formData.oauthProviders?.includes(provider)}
-                  onCheckedChange={(checked) => {
-                    const current = formData.oauthProviders || [];
-                    if (checked) {
-                      onFormDataChange({
-                        oauthProviders: [...current, provider],
-                      });
-                    } else {
-                      onFormDataChange({
-                        oauthProviders: current.filter((p) => p !== provider),
-                      });
-                    }
-                  }}
-                />
-                <Label htmlFor={provider} className="capitalize">
-                  {provider}
-                </Label>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="comments">
-            4. 추가 의견이 있다면 작성해주세요 (선택)
-          </Label>
-          <Textarea
-            id="comments"
-            rows={3}
-            value={formData.additionalComments}
-            onChange={(e) =>
-              onFormDataChange({ additionalComments: e.target.value })
-            }
-          />
-        </div>
+        ))}
       </div>
+    );
+  }
+
+  return (
+    <div className="space-y-8">
+      {questions.map((q) => {
+        const value = formData.clarifications[q.id];
+        const stringValue = typeof value === "string" ? value : "";
+
+        return (
+          <div key={q.id} className="space-y-4">
+            <Label className="text-base font-semibold">{q.question}</Label>
+
+            {q.type === "choice" && q.options && (
+              <RadioGroup
+                value={stringValue}
+                onValueChange={(value) => handleUpdateAnswer(q.id, value)}
+                className="space-y-2"
+              >
+                {q.options.map((option) => (
+                  <div key={option} className="flex items-center space-x-3">
+                    <RadioGroupItem value={option} id={`${q.id}-${option}`} />
+                    <Label
+                      htmlFor={`${q.id}-${option}`}
+                      className="font-normal"
+                    >
+                      {option}
+                    </Label>
+                  </div>
+                ))}
+              </RadioGroup>
+            )}
+
+            {q.type === "text" && (
+              <Textarea
+                placeholder="여기에 답변을 입력하세요..."
+                value={stringValue}
+                onChange={(e) => handleUpdateAnswer(q.id, e.target.value)}
+                rows={3}
+              />
+            )}
+          </div>
+        );
+      })}
+
+      {questions.length === 0 && !loading && (
+        <p className="text-muted-foreground text-center py-8">
+          추가 질문이 없습니다. 다음 단계로 진행해주세요.
+        </p>
+      )}
     </div>
   );
 }

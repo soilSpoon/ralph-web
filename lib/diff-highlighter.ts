@@ -1,10 +1,10 @@
-import { type Element, type Root, type RootContent, type Text } from "hast";
+import { type Properties, type Root, type RootContent } from "hast";
 import { createHighlighter, Highlighter } from "shiki";
 
 interface SyntaxNode {
   type: string;
   tagName?: string;
-  properties?: Record<string, unknown>;
+  properties?: Properties;
   value: string;
   lineNumber: number;
   valueLength: number;

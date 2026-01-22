@@ -4,13 +4,7 @@ import { monitorForElements } from "@atlaskit/pragmatic-drag-and-drop/element/ad
 import { useTranslations } from "next-intl";
 import { useEffect } from "react";
 import { useAppStore } from "@/lib/store/use-app-store";
-import {
-  isMoveAllowed,
-  isTaskStatus,
-  TASK_STATUSES,
-  Task,
-  TaskStatus,
-} from "@/lib/types";
+import { isMoveAllowed, isTaskStatus, Task, TaskStatus } from "@/lib/types";
 import { KanbanColumn } from "./kanban-column";
 
 interface KanbanBoardProps {

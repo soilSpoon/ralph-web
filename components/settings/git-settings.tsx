@@ -1,16 +1,16 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Label } from "@/components/ui/label";
-import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 
 export function GitSettings() {
   const t = useTranslations("Settings");
@@ -19,9 +19,7 @@ export function GitSettings() {
     <Card className="shadow-none rounded-sm border-border/70">
       <CardHeader>
         <CardTitle className="text-lg">{t("git")}</CardTitle>
-        <CardDescription>
-          Configure how Ralph-Web interacts with your Git repositories.
-        </CardDescription>
+        <CardDescription>{t("gitDescription")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">
@@ -41,7 +39,7 @@ export function GitSettings() {
             className="rounded-sm"
           />
           <p className="text-caption text-muted-foreground pt-1">
-            Available placeholders: {"{task_id}"}, {"{title}"}, {"{iteration}"}
+            {t("placeholders")}
           </p>
         </div>
 

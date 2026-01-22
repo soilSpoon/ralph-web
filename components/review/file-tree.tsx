@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  ChevronDown,
-  ChevronRight,
-  FileCode,
-  FilePlus,
-  FileText,
-} from "lucide-react";
+import { FileCode, FilePlus } from "lucide-react";
 import { ParsedDiffFile } from "@/lib/diff-utils";
 import { cn } from "@/lib/utils";
 

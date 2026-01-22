@@ -4,6 +4,7 @@ import { AlertCircle, ArrowRight } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Link } from "@/i18n/routing";
 
 interface AttentionItem {
   id: string;
@@ -52,14 +53,16 @@ export function AttentionList() {
             <span className="text-xs font-medium tracking-tight">
               {item.title}
             </span>
-            <Button
-              variant="ghost"
-              size="xs"
-              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-            >
-              {t("view")}
-              <ArrowRight className="w-3 h-3 ml-1" />
-            </Button>
+            <Link href={`/tasks/${item.taskId}`}>
+              <Button
+                variant="ghost"
+                size="xs"
+                className="text-destructive hover:text-destructive hover:bg-destructive/10"
+              >
+                {t("view")}
+                <ArrowRight className="w-3 h-3 ml-1" />
+              </Button>
+            </Link>
           </div>
         ))}
       </CardContent>

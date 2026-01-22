@@ -6,37 +6,22 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useAppStore } from "@/lib/store/use-app-store";
-import { Task } from "@/lib/types";
+import { useRouter } from "@/i18n/routing";
 
 export function QuickStartCard() {
   const t = useTranslations("QuickStart");
+  const router = useRouter();
   const [description, setDescription] = useState("");
-  const { addTask } = useAppStore();
 
   const handleStart = () => {
     if (!description.trim()) return;
+    router.push(`/tasks/new?description=${encodeURIComponent(description)}`);
+  };
 
-    const newTask: Task = {
-      id: `t-${Date.now()}`,
-      name:
-        description.length > 20
-          ? description.substring(0, 20) + "..."
-          : description,
-      description: description,
-      status: "draft",
-      priority: 2,
-      currentIteration: 0,
-      maxIterations: 5,
-      worktreePath: "",
-      branchName: "",
-      metadataPath: "",
-      createdAt: new Date(),
-      updatedAt: new Date(),
-    };
-
-    addTask(newTask);
-    setDescription("");
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleStart();
+    }
   };
 
   return (
@@ -50,6 +35,7 @@ export function QuickStartCard() {
             placeholder={t("placeholder")}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
+            onKeyDown={handleKeyDown}
             className="flex-1"
           />
           <Button onClick={handleStart} disabled={!description.trim()}>

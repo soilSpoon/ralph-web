@@ -1,8 +1,7 @@
-import "@/test/env";
-import { afterEach, describe, expect, it } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
-import { cleanup, fireEvent, waitFor } from "@testing-library/react";
+import { cleanup, fireEvent } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { QuickStartCard } from "@/components/dashboard/quick-start-card";
 import { useAppStore } from "@/lib/store/use-app-store";
 import ko from "@/messages/ko.json";
@@ -15,7 +14,18 @@ afterEach(() => {
   useAppStore.setState({ tasks: [], activityLog: [] });
 });
 
+const mockPush = vi.fn();
+vi.mock("@/i18n/routing", () => ({
+  useRouter: () => ({
+    push: mockPush,
+  }),
+}));
+
 describe("QuickStartCard", () => {
+  beforeEach(() => {
+    mockPush.mockClear();
+  });
+
   it("should render correctly", () => {
     const { getByPlaceholderText, getByText } = render(<QuickStartCard />);
     expect(getByPlaceholderText(ko.QuickStart.placeholder)).toBeInTheDocument();
@@ -32,7 +42,7 @@ describe("QuickStartCard", () => {
     expect(input.value).toBe("New Task");
   });
 
-  it("should add a new task when clicked", async () => {
+  it("should redirect to new task page when clicked", async () => {
     const user = userEvent.setup();
     const { getByPlaceholderText, getByRole } = render(<QuickStartCard />);
     const input = getByPlaceholderText(ko.QuickStart.placeholder);
@@ -44,22 +54,10 @@ describe("QuickStartCard", () => {
     const button = getByRole("button");
 
     await user.type(input, "Test Feature");
-    expect(input.value).toBe("Test Feature");
-
     await user.click(button);
 
-    // Wait and check
-    await waitFor(
-      () => {
-        const state = useAppStore.getState();
-        expect(state.tasks.some((t) => t.description === "Test Feature")).toBe(
-          true,
-        );
-      },
-      { timeout: 3000 },
+    expect(mockPush).toHaveBeenCalledWith(
+      `/tasks/new?description=${encodeURIComponent("Test Feature")}`,
     );
-
-    // Should clear input
-    expect(input.value).toBe("");
   });
 });

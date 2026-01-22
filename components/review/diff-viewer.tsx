@@ -1,6 +1,6 @@
 "use client";
 
-import { DiffFile, DiffModeEnum, DiffView } from "@git-diff-view/react";
+import { DiffModeEnum, DiffView } from "@git-diff-view/react";
 import { useEffect, useMemo, useState } from "react";
 import "@git-diff-view/react/styles/diff-view.css";
 import { useTheme } from "next-themes";

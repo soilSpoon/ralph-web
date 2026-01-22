@@ -1,5 +1,5 @@
 import "@/test/env";
-import { afterEach, describe, expect, it, vi } from "bun:test";
+import { afterEach, describe, expect, it } from "bun:test";
 import * as matchers from "@testing-library/jest-dom/matchers";
 import { cleanup } from "@testing-library/react";
 import { ArchivedTaskList } from "@/components/archive/archived-task-list";

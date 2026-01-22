@@ -1,13 +1,13 @@
 "use client";
 
+import { Save, Settings } from "lucide-react";
 import { useTranslations } from "next-intl";
-import { Settings, Save } from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { ProviderSettings } from "@/components/settings/provider-settings";
-import { ConcurrencySettings } from "@/components/settings/concurrency-settings";
-import { NotificationSettings } from "@/components/settings/notification-settings";
-import { GitSettings } from "@/components/settings/git-settings";
 import { toast } from "sonner";
+import { ConcurrencySettings } from "@/components/settings/concurrency-settings";
+import { GitSettings } from "@/components/settings/git-settings";
+import { NotificationSettings } from "@/components/settings/notification-settings";
+import { ProviderSettings } from "@/components/settings/provider-settings";
+import { Button } from "@/components/ui/button";
 
 export default function SettingsPage() {
   const t = useTranslations("Settings");

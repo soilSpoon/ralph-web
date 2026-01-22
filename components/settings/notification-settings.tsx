@@ -1,15 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Label } from "@/components/ui/label";
-import { Checkbox } from "@/components/ui/checkbox";
 import {
   Card,
   CardContent,
+  CardDescription,
   CardHeader,
   CardTitle,
-  CardDescription,
 } from "@/components/ui/card";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 export function NotificationSettings() {
   const t = useTranslations("Settings");
@@ -18,7 +18,7 @@ export function NotificationSettings() {
     <Card className="shadow-none rounded-sm border-border/70">
       <CardHeader>
         <CardTitle className="text-lg">{t("notifications")}</CardTitle>
-        <CardDescription>Choose when you want to be notified.</CardDescription>
+        <CardDescription>{t("notificationDescription")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="flex items-center space-x-2">

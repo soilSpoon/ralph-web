@@ -7,6 +7,7 @@ if (typeof global.document === "undefined") {
 
 // Add missing globals for React 19 / TL
 if (typeof global.TextEncoder === "undefined") {
+  // Mismatch between Node.js and DOM types requires a double cast
   global.TextEncoder = TextEncoder as unknown as typeof global.TextEncoder;
   global.TextDecoder = TextDecoder as unknown as typeof global.TextDecoder;
 }

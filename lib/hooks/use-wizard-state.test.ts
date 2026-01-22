@@ -1,5 +1,5 @@
 import "@/test/env";
-import { beforeEach, describe, expect, it } from "bun:test";
+import { describe, expect, it } from "bun:test";
 import { act, renderHook } from "@testing-library/react";
 import { useWizardState } from "./use-wizard-state";
 

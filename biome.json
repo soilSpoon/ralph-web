@@ -8,7 +8,10 @@
     "rules": {
       "recommended": false,
       "complexity": { "noUselessTypeConstraint": "error" },
-      "correctness": { "noUnusedVariables": "error" },
+      "correctness": {
+        "noUnusedVariables": "error",
+        "noUnusedImports": "error"
+      },
       "performance": {
         "noImgElement": "warn",
         "noUnwantedPolyfillio": "warn",
@@ -200,6 +203,7 @@
           },
           "correctness": {
             "noChildrenProp": "error",
+            "noUnusedImports": "error",
             "useExhaustiveDependencies": "warn",
             "useHookAtTopLevel": "error",
             "useJsxKeyInIterable": "error"

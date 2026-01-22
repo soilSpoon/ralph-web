@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useState } from "react";
+import { PRD } from "../prd/generator";
 
 export type WizardStep = "describe" | "clarify" | "review" | "approve";
 
@@ -8,18 +9,16 @@ const STEPS: WizardStep[] = ["describe", "clarify", "review", "approve"];
 
 export interface WizardFormData {
   description: string;
-  authMethod?: "jwt" | "session" | "recommend";
-  passwordReset?: boolean;
-  oauthProviders?: string[];
-  additionalComments?: string;
+  clarifications: Record<string, string | string[] | boolean>;
+  generatedPRD: PRD | null;
+  approved: boolean;
 }
 
 const initialFormData: WizardFormData = {
   description: "",
-  authMethod: undefined,
-  passwordReset: undefined,
-  oauthProviders: [],
-  additionalComments: "",
+  clarifications: {},
+  generatedPRD: null,
+  approved: false,
 };
 
 export function useWizardState() {

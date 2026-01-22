@@ -33,6 +33,7 @@
     "tabs": {
       "stories": "Stories",
       "prd": "PRD",
+      "terminal": "Terminal",
       "progress": "Progress Log"
     },
     "userStories": "User Stories",
@@ -67,19 +68,56 @@
     "title": "Settings",
     "description": "Application environment settings",
     "provider": "AI Provider",
+    "providerDescription": "Configure your AI model providers and API keys.",
     "providerSelect": "Select Provider",
     "apiKey": "API Key",
     "defaultProvider": "Default Provider",
     "concurrency": "Concurrency",
+    "concurrencyDescription": "Manage how many tasks can run in parallel.",
     "maxConcurrentTasks": "Max Concurrent Tasks",
+    "performanceWarning": "Setting this too high may affect your machine's performance.",
     "notifications": "Notifications",
+    "notificationDescription": "Choose when you want to be notified.",
     "notifyOnComplete": "Notify on completion",
     "notifyOnError": "Notify on error",
     "git": "Git",
+    "gitDescription": "Configure how Ralph-Web interacts with your Git repositories.",
     "defaultBranch": "Default Branch",
     "commitFormat": "Commit Message Format",
+    "placeholders": "Available placeholders: {task_id}, {title}, {iteration}",
     "autoPush": "Auto Push",
     "save": "Save",
     "saved": "Settings saved successfully"
+  },
+  "Patterns": {
+    "title": "🧠 Codebase Patterns",
+    "searchPlaceholder": "Search patterns...",
+    "categories": "📂 Categories",
+    "foundPatterns": "{count} patterns found",
+    "allPatterns": "📋 All Patterns",
+    "noPatterns": "No patterns found matching your criteria.",
+    "clearFilters": "Clear Filters",
+    "source": "Source",
+    "created": "Created",
+    "promoted": "Promoted",
+    "categoryLabels": {
+      "all": "All",
+      "convention": "🔧 Build",
+      "gotcha": "📁 Files",
+      "tip": "🧪 Test"
+    }
+  },
+  "Wizard": {
+    "title": "✨ New Task",
+    "step": "Step {current} of {total}",
+    "back": "Back",
+    "next": "Next",
+    "approve": "Approve & Create",
+    "steps": {
+      "describe": "💬 Your Request",
+      "clarify": "🤖 AI Clarifying Questions",
+      "review": "📄 Review PRD",
+      "approve": "✅ Final Approval"
+    }
   }
 }

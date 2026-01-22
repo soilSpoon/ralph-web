@@ -3,6 +3,7 @@ import { afterEach, describe, expect, it } from "bun:test";
 import { cleanup, render } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { useState } from "react";
+import { WizardFormData } from "@/lib/hooks/use-wizard-state";
 import { WizardStepDescribe } from "./wizard-step-describe";
 
 afterEach(() => {
@@ -10,7 +11,12 @@ afterEach(() => {
 });
 
 describe("WizardStepDescribe", () => {
-  const mockFormData = { description: "" };
+  const mockFormData: WizardFormData = {
+    description: "",
+    clarifications: {},
+    generatedPRD: null,
+    approved: false,
+  };
 
   it("should render description label and textarea", () => {
     const { getByLabelText, getByPlaceholderText } = render(
@@ -25,7 +31,10 @@ describe("WizardStepDescribe", () => {
   });
 
   it("should display existing description value", () => {
-    const formData = { description: "Test description" };
+    const formData: WizardFormData = {
+      ...mockFormData,
+      description: "Test description",
+    };
     const { getByDisplayValue } = render(
       <WizardStepDescribe formData={formData} onFormDataChange={() => {}} />,
     );
@@ -38,7 +47,7 @@ describe("WizardStepDescribe", () => {
 
     // Controlled component wrapper for testing interactions
     function TestComponent() {
-      const [formData, setFormData] = useState({ description: "" });
+      const [formData, setFormData] = useState<WizardFormData>(mockFormData);
       return (
         <WizardStepDescribe
           formData={formData}

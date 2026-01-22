@@ -1,8 +1,15 @@
 "use client";
 
 import { useTranslations } from "next-intl";
-import { Label } from "@/components/ui/label";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -10,13 +17,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-  CardDescription,
-} from "@/components/ui/card";
 
 export function ProviderSettings() {
   const t = useTranslations("Settings");
@@ -25,9 +25,7 @@ export function ProviderSettings() {
     <Card className="shadow-none rounded-sm border-border/70">
       <CardHeader>
         <CardTitle className="text-lg">{t("provider")}</CardTitle>
-        <CardDescription>
-          Configure your AI model providers and API keys.
-        </CardDescription>
+        <CardDescription>{t("providerDescription")}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div className="space-y-2">

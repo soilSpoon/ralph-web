@@ -3,15 +3,17 @@ import { notFound } from "next/navigation";
 import { getTranslations } from "next-intl/server";
 import { ProgressBar } from "@/components/common/progress-bar";
 import { StatusBadge } from "@/components/common/status-badge";
+import { TerminalView } from "@/components/orchestrator/terminal-view";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Link } from "@/i18n/routing";
-import { mockStories, mockTasks } from "@/lib/mock-data";
+import { mockStories } from "@/lib/mock-data";
+import { taskManager } from "@/lib/tasks/task-manager";
 
 export async function generateStaticParams() {
-  return mockTasks.map((task) => ({
+  return taskManager.getTasks().map((task) => ({
     id: task.id,
   }));
 }
@@ -22,7 +24,7 @@ interface TaskDetailPageProps {
 
 export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
   const { id } = await params;
-  const task = mockTasks.find((t) => t.id === id);
+  const task = taskManager.getTask(id);
   const t = await getTranslations("TaskDetail");
 
   if (!task) {
@@ -80,6 +82,9 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
         <TabsList>
           <TabsTrigger value="stories">{t("tabs.stories")}</TabsTrigger>
           <TabsTrigger value="prd">{t("tabs.prd")}</TabsTrigger>
+          <TabsTrigger value="terminal">
+            {t("tabs.terminal") || "Terminal"}
+          </TabsTrigger>
           <TabsTrigger value="progress">{t("tabs.progress")}</TabsTrigger>
         </TabsList>
 
@@ -89,74 +94,75 @@ export default async function TaskDetailPage({ params }: TaskDetailPageProps) {
               <CardTitle>📝 {t("userStories")}</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              {stories.map((story) => (
-                <div key={story.id} className="border rounded-md p-4 space-y-3">
-                  <div className="flex items-start gap-3">
-                    {story.passes ? (
-                      <CheckCircle className="h-5 w-5 text-merged mt-0.5" />
-                    ) : (
-                      <Circle className="h-5 w-5 text-muted-foreground mt-0.5" />
-                    )}
-                    <div className="flex-1 space-y-2">
-                      <div className="flex items-start justify-between">
-                        <div>
-                          <h4 className="font-semibold">
-                            {story.id}: {story.title}
-                          </h4>
-                          <p className="text-sm text-muted-foreground mt-1">
-                            {story.description}
-                          </p>
-                        </div>
-                        <Badge variant="outline">
-                          Priority {story.priority}
-                        </Badge>
-                      </div>
-
-                      <div className="space-y-1">
-                        <p className="text-sm font-medium">
-                          {t("acceptanceCriteria")}:
-                        </p>
-                        <ul className="text-sm text-muted-foreground space-y-1 ml-4">
-                          {story.acceptanceCriteria.map((criteria, idx) => (
-                            <li key={idx} className="list-disc">
-                              {criteria}
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
-
-                      {story.threadUrl && (
-                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                          <span>{t("thread")}:</span>
-                          <a
-                            href={story.threadUrl}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline"
-                          >
-                            {story.threadUrl}
-                          </a>
-                        </div>
+              {stories.length > 0 ? (
+                stories.map((story) => (
+                  <div
+                    key={story.id}
+                    className="border rounded-md p-4 space-y-3"
+                  >
+                    <div className="flex items-start gap-3">
+                      {story.passes ? (
+                        <CheckCircle className="h-5 w-5 text-merged mt-0.5" />
+                      ) : (
+                        <Circle className="h-5 w-5 text-muted-foreground mt-0.5" />
                       )}
+                      <div className="flex-1 space-y-2">
+                        <div className="flex items-start justify-between">
+                          <div>
+                            <h4 className="font-semibold">
+                              {story.id}: {story.title}
+                            </h4>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              {story.description}
+                            </p>
+                          </div>
+                          <Badge variant="outline">
+                            Priority {story.priority}
+                          </Badge>
+                        </div>
+
+                        <div className="space-y-1">
+                          <p className="text-sm font-medium">
+                            {t("acceptanceCriteria")}:
+                          </p>
+                          <ul className="text-sm text-muted-foreground space-y-1 ml-4">
+                            {story.acceptanceCriteria.map((criteria, idx) => (
+                              <li key={idx} className="list-disc">
+                                {criteria}
+                              </li>
+                            ))}
+                          </ul>
+                        </div>
+                      </div>
                     </div>
                   </div>
-                </div>
-              ))}
+                ))
+              ) : (
+                <p className="text-center py-8 text-muted-foreground">
+                  No stories found. Generate PRD first.
+                </p>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
 
         <TabsContent value="prd" className="mt-6">
           <Card>
-            <CardContent className="pt-6 prose prose-sm max-w-none">
+            <CardContent className="pt-6 prose prose-sm max-w-none dark:prose-invert">
               <h2>{t("tabs.prd")}</h2>
-              <p>{task.description}</p>
-              <h3>Scope</h3>
-              <ul>
-                <li>Email/Password Login</li>
-                <li>OAuth Integration (Google, GitHub)</li>
-                <li>JWT Token Management</li>
-              </ul>
+              <div className="whitespace-pre-wrap">{task.description}</div>
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="terminal" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle>📟 Agent Logs</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[500px]">
+              {/* Connect to the session created for this task */}
+              <TerminalView sessionId={`session-for-${task.id}`} />
             </CardContent>
           </Card>
         </TabsContent>
