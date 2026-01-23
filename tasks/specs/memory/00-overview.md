@@ -1,140 +1,97 @@
-# Phase 9: Memory System 개요
+# Phase 9: Memory System Overview
 
-> **Enterprise-Ready 메모리 & 영속성 아키텍처**
+> **Enterprise-Ready Cognitive Architecture**
 >
-> Phase 8 완료 후, 에이전트의 상태 영속화와 확장 가능한 지능형 메모리 시스템을 구축합니다.
+> Phase 8 완료 후, `agentdb` (powered by `ruvector` & `SONA`)를 핵심 두뇌로 하는 자율 학습형 메모리 시스템을 구축합니다.
 
 ---
 
-## 핵심 인사이트
+## 핵심 분석 및 전략 (Analysis & Strategy)
 
-> [!IMPORTANT]
-> **메모리는 데이터베이스 문제가 아니라 정보 생명주기(Information Lifecycle) 문제이다.**
->
-> Selection → Normalization → Storage → Retrieval → Consolidation
+벤치마크 레포지토리(`SimpleMem`, `memU`, `ruvector`, `agentic-flow`) 분석 결과, 다음과 같은 통합 전략을 수립했습니다.
 
-모든 성공적인 메모리 시스템은 다음을 공유합니다:
-
-1. **Canonical Memory Units**: 자기완결적, 타입화된, 인용 가능한 메모리 원자
-2. **Multi-View Indexing**: Semantic + Lexical + Symbolic + Relational 인덱스
-3. **Token Budget as Economic System**: 검색은 예산 할당 문제
-4. **Write Governance**: Staging vs Published 분리
-5. **Provenance First**: 인용 없음 = 가설, 사실 아님
-6. **ECL Pipeline**: Extract → Cognify → Load 파이프라인 경계
+| 컴포넌트 | 역할 | 벤치마크 (Source) | Ralph-Web 적용 전략 |
+| :--- | :--- | :--- | :--- |
+| **Cognify Middleware** | **Input Purity** | **SimpleMem** | 로그 저장 전 **LLM 기반 모호성 제거(Disambiguation)** 필수. "그거 고쳐줘" -> "User fixed auth error". |
+| **Cognitive Engine** | **Brain & Storage** | **agentdb (SONA)** | 직접 DB를 짜지 않고 `agentdb`의 **ReasoningBank**와 **GNN**을 그대로 사용. Trajectory Learning 자동화. |
+| **Context Accountant** | **Presentation** | **claude-mem** | 무조건적인 Top-k 검색 대신, **토큰 예산(Token Budget)** 기반의 경제적 컨텍스트 구성 (Summary vs Detail). |
+| **Provenance** | **Trust** | **memU** | 모든 메모리는 **Citation(출처)**을 가져야 함. DB 스키마 레벨에서 강제. |
+| **Memory Janitor** | **Maintenance** | **Insight** | 코드 삭제 시 관련 기억을 정리하는 **Concept Drift** 관리 프로세스 도입. |
 
 ---
 
-## 벤치마크 레포지토리
+## 아키텍처 (The "Active Brain" Model)
 
-| 레포지토리      | 핵심 기여                                          | 적용 영역                          |
-| :-------------- | :------------------------------------------------- | :--------------------------------- |
-| **agentdb**     | **Core Memory Engine** (Reflexion, Causal, Skills) | **메인 메모리 시스템**             |
-| **SimpleMem**   | Semantic Lossless Compression, Multi-View Indexing | Atomic Fact 생성, Hybrid Retrieval |
-| **memU**        | Resource→Item→Category 계층, Sufficiency Check     | 계층 구조, 검색 충분성 검증        |
-| **claude-mem**  | Progressive Disclosure (3-Layer), ~10x 토큰 효율   | 3단계 검색 도구                    |
-| **cognee**      | ECL Pipeline, Knowledge Graph, Code Indexing       | 파이프라인 분리, 코드 그래프       |
-| **Auto-Claude** | Graphiti Memory, 순환 수정 감지                    | 에피소드 타입, 루프 방지           |
-| **emdash**      | Terminal Snapshot, 자동 정리(Pruning)              | 상태 캡처, 보존 정책               |
-| **spec-kit**    | Constitution Layer                                 | 불변 원칙 계층                     |
-| **1code**       | Worktree Isolation, Session Management             | Phase 8에 이미 적용됨              |
+단순 저장소가 아니라, 에이전트가 행동할 때마다 스스로 학습하는 구조입니다.
 
----
+```mermaid
+graph TD
+    subgraph "Layer 1: Perception (SimpleMem)"
+        RawLog[Raw Logs] --> Buffer[LogBuffer]
+        Buffer -->|Window Full| Cognify[Cognify Agent]
+        Cognify -->|Atomic Fact + Citation| Atomic[Atomic Entries]
+    end
 
-## 스케일 전략 (Dual DB Architecture)
+    Atomic --> Engine
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│                      Hybrid Architecture                     │
-├──────────────────────┬──────────────────────────────────────┤
-│    Application DB    │            Cognitive DB              │
-│   (pglite / Drizzle) │             (agentdb)                │
-├──────────────────────┼──────────────────────────────────────┤
-│ - Users, Projects    │ - Reflexion (Episodic)               │
-│ - Tasks, Worktrees   │ - Skills (Procedural)                │
-│ - Staging Logs       │ - Causal Graph (Semantic)            │
-│                      │                                      │
-│  [Source of Truth]   │         [Source of Wisdom]           │
-└──────────────────────┴──────────────────────────────────────┘
-```
+    subgraph "Layer 2: Cognitive Engine (agentdb)"
+        Engine[agentdb Controller]
+        
+        %% Built-in Features
+        Engine <--> Reflexion[(Reflexion Memory)]
+        Engine <--> Reasoning[(ReasoningBank)]
+        Engine <--> GNN[(GNN Layer)]
+        
+        %% Learning Loop
+        TaskResult[Task Result] -->|Reward Signal| Engine
+        Engine -->|SONA Update| Reasoning
+    end
 
----
+    Engine --> ContextBuilder
+    Janitor[Memory Janitor] -.->|Prune Dead Links| Engine
 
-## Memory Layers (mapped to agentdb)
-
-```
-┌─────────────────────────────────────────────────────────────┐
-│                 Level 0: Constitution                        │
-│             (CONSTITUTION.md + PolicyGuard)                  │
-└─────────────────────────────────────────────────────────────┘
-                               ↓
-┌─────────────────────────────────────────────────────────────┐
-│                 Level 1: Semantic Memory                     │
-│   ┌─────────────────┐  ┌─────────────────┐  ┌────────────┐  │
-│   │  SkillLibrary   │  │   Code Graph    │  │ReasoningBank│ │
-│   │ (구조화된 지식) │  │  (코드 인덱스)  │  │ (성공 패턴)│  │
-│   └─────────────────┘  └─────────────────┘  └────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                               ↓
-┌─────────────────────────────────────────────────────────────┐
-│                 Level 2: Episodic Memory                     │
-│   ┌─────────────────┐  ┌─────────────────┐  ┌────────────┐  │
-│   │ ReflexionMemory │  │  Staging Logs   │  │ CausalGraph│  │
-│   │ (Atomic Facts)  │  │   (pglite)      │  │ (실수/원인)│  │
-│   └─────────────────┘  └─────────────────┘  └────────────┘  │
-└─────────────────────────────────────────────────────────────┘
-                               ↓
-┌─────────────────────────────────────────────────────────────┐
-│                  Level 3: Working Memory                     │
-│               (agentdb ContextSynthesizer)                   │
-└─────────────────────────────────────────────────────────────┘
+    subgraph "Layer 3: Presentation (claude-mem)"
+        ContextBuilder[Context Accountant]
+        ContextBuilder -->|Calculate Cost| Budgeter{Token Budget?}
+        Budgeter -->|Pattern| P1[Global Skills]
+        Budgeter -->|Recent| P2[Timeline View]
+        Budgeter -->|Overflow| P3[Summarized View]
+        P1 & P2 & P3 --> FinalContext[Final Prompt]
+    end
 ```
 
 ---
 
-## 세부 문서
+## 핵심 기능 상세
 
-| 문서                                           | 설명                                          |
-| ---------------------------------------------- | --------------------------------------------- |
-| [01-architecture.md](./01-architecture.md)     | 아키텍처, 스케일 전략, DB 선택 가이드         |
-| [02-schema.md](./02-schema.md)                 | 스키마 설계, 이벤트 소싱, 테이블 정의         |
-| [03-retrieval.md](./03-retrieval.md)           | 검색 시스템, Progressive Disclosure, MCP 도구 |
-| [04-governance.md](./04-governance.md)         | 메모리 거버넌스, Staging/Promotion, 신뢰도    |
-| [05-ecl-pipeline.md](./05-ecl-pipeline.md)     | Extract → Cognify → Load 파이프라인           |
-| [06-code-indexing.md](./06-code-indexing.md)   | 코드 인덱싱, 심볼 관리, LSP 통합              |
-| [07-integration.md](./07-integration.md)       | Ralph Loop 통합, 주입/추출 포인트             |
-| [08-implementation.md](./08-implementation.md) | 구현 로드맵, TODO, 우선순위                   |
+### 1. ECL Pipeline (Extract-Cognify-Load)
+*   **SimpleMem Insight**: 쓰레기 데이터(Garbage In)를 막는 것이 벡터 DB 성능보다 중요합니다.
+*   **Action**: `libs/memory/src/pipeline/cognify.ts`에서 Raw Log를 `Atomic Fact`로 변환하는 전처리기를 구현합니다. (Prompt: `prompts/memory/cognify.md`)
 
----
+### 2. ReasoningBank & SONA (agentdb Native)
+*   **RuVector Insight**: `agentdb`는 이미 성공/실패 궤적을 학습하는 `ReasoningBank`를 내장하고 있습니다.
+*   **Action**: 별도의 학습 로직을 짜지 않고, QA 테스트 결과(Pass/Fail)를 `agentdb.recordOutcome()`에 연결하여 자동으로 똑똑해지게 만듭니다.
 
-## Work Objectives
+### 3. Context Budgeting (claude-mem Style)
+*   **Claude-Mem Insight**: 검색된 모든 정보를 다 주면 토큰 낭비입니다. 중요도에 따라 정보를 압축합니다.
+*   **Action**: `libs/memory/src/retrieval/accountant.ts`에서 `Reasoning Patterns`(최우선) -> `Recent Failures`(차선) -> `Old Episodes`(요약) 순으로 예산을 배분합니다.
 
-### Core (Phase 9.0)
-
-1. **Constitution Layer**: 프로젝트 불변의 법칙 정의
-2. **ECL Pipeline**: Extract → Cognify → Load → **Memify**
-3. **Hybrid Search**: Semantic(Vector) + Lexical(tsvector) + Symbolic(Metadata)
-
-### Advanced (Phase 9.1)
-
-4. **Skill Memory**: 구조화된 기술 매뉴얼 형태로 지식 저장
-5. **Progressive Retrieval**: 토큰 효율적 3단계 검색 도구
-6. **Code Indexing**: 코드베이스 구조 인덱싱
-7. **Complexity-Aware**: 쿼리 복잡도에 따른 동적 검색 깊이 조절
-
-### Enterprise (Phase 9.2)
-
-8. **Self-Evolving**: 사용 패턴에 따른 메모리 구조 자동 최적화
-9. **Knowledge Graph**: 엔티티 관계 기반 검색
-10. **Multi-tenancy**: 프로젝트/사용자별 격리
-11. **Session Resume**: 작업 중단 후 완벽한 컨텍스트 복원
+### 4. Memory Janitor (Concept Drift)
+*   **New Insight**: 코드가 삭제되거나 리팩토링되면, 과거의 "파일 경로" 기반 기억은 환각(Hallucination)이 됩니다.
+*   **Action**: 주기적으로(Nightly) `git diff`를 분석하여, 사라진 파일과 연결된 메모리를 `archived` 처리하거나 `deprecated` 태그를 붙이는 백그라운드 잡을 실행합니다.
 
 ---
 
-## 참조
+## 구현 로드맵 (Updated)
 
-- [SimpleMem](https://github.com/simple-mem) - Semantic Compression, Hybrid Retrieval
-- [memU](https://github.com/memu-framework) - Hierarchical Memory, Skill Extraction
-- [claude-mem](https://github.com/claude-mem) - Progressive Disclosure
-- [cognee](https://github.com/cognee) - ECL Pipeline, Code Graph
-- [Auto-Claude](https://github.com/auto-claude) - Graphiti Memory, Session Insights
-- [emdash](https://github.com/emdash) - Terminal Snapshots
+1.  **Foundation**: `agentdb` 인스턴스화 및 `memU` 스타일 Citation 스키마 적용.
+2.  **Input**: `LogBuffer` 및 `Cognify` 구현 (SimpleMem).
+3.  **Output**: `ContextAccountant` 구현 (claude-mem).
+4.  **Loop Integration**: QA 결과 -> ReasoningBank 연결 (Self-Learning).
+5.  **Maintenance**: Memory Janitor 구현.
+
+---
+
+## 참조 문서
+- [05-ecl-pipeline.md](./05-ecl-pipeline.md): Cognify 프롬프트 및 파이프라인 상세.
+- [03-retrieval.md](./03-retrieval.md): Context Budgeting 전략.

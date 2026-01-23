@@ -1,341 +1,114 @@
-# Memory Governance
+# Memory Governance & Safety
 
 ## 개요
 
-병렬 에이전트 환경에서 메모리 일관성과 품질을 보장하기 위한 거버넌스 모델입니다.
-
-> [!CAUTION]
-> **Critical Gap**: 거버넌스 없이 5개의 병렬 에이전트가 동시에 쓰면:
->
-> - 중복/모순된 항목 발생
-> - Last-writer-wins 손상
-> - 추적 불가능한 지식 출처
+지능형 메모리 시스템이 "잘못된 확신"이나 "무한 루프"를 유발하지 않도록 안전장치를 정의합니다.
+`Auto-Claude`의 **Circular Fix Detection**과 `memU`의 **Provenance(출처 증명)** 원칙을 통합합니다.
 
 ---
 
-## Two-Phase Write Path
+## 1. Circular Fix Detection (Anti-Death-Loop)
 
-### 핵심 원칙
+**문제:** 에이전트가 에러를 고쳤다고 생각하지만, 실제로는 계속 같은 에러가 반복되거나(A->B->A), 미묘하게 다른 에러로 변하며 무한 루프에 빠지는 현상.
 
-- **Staging (App State)**: `pglite`에 로우 로그(Raw Logs)를 스트리밍. 에이전트는 이곳에 자유롭게 씁니다.
-- **Published (Wisdom)**: 검증(Verify)을 통과한 지식만 `agentdb`로 승격. 비용과 품질 관리.
+**해결:** 에러 메시지와 해결 시도를 해싱(Hashing)하여 추적합니다. (`Auto-Claude` 방식)
 
-```
-┌─────────────────────────────────────────────────────────────┐
-│              STAGING (pglite / Task-Scoped)                  │
-│        Agents append logs, thoughts, tool outputs            │
-│        → Source of Truth (Audit Log)                        │
-└─────────────────────────────┬───────────────────────────────┘
-                              │ PROMOTION GATE
-                              │ (Triggered by 'Verify' Success)
-                              ▼
-┌─────────────────────────────────────────────────────────────┐
-│              PUBLISHED (agentdb / Project-Scoped)            │
-│        Reflexion Episodes, Skills, Causal Graphs             │
-│        → Source of Wisdom (Semantic Search)                 │
-└─────────────────────────────────────────────────────────────┘
-```
-
----
-
-## Scope Hierarchy
+### 1.1 Detection Logic
 
 ```typescript
-type Scope = "task" | "worktree" | "project" | "org";
+// libs/orchestrator/safety/circular.ts
 
-// Scope 계층
-const SCOPE_HIERARCHY = {
-  task: 1, // 단일 작업 내에서만 유효
-  worktree: 2, // 워크트리 브랜치 내에서 유효
-  project: 3, // 프로젝트 전체에서 유효
-  org: 4, // 조직 전체에서 유효 (Cross-project)
-} as const;
+class CircularFixDetector {
+  private errorHistory: Map<string, number> = new Map();
+  private readonly THRESHOLD = 3;
 
-// 상위 스코프로 승격 가능 여부 확인
-function canPromote(from: Scope, to: Scope): boolean {
-  return SCOPE_HIERARCHY[from] < SCOPE_HIERARCHY[to];
-}
-```
-
----
-
-## Promotion Pipeline
-
-### 승격 프로세스 (Code View)
-
-```typescript
-// libs/memory/src/pipeline/promotion.ts
-
-export async function promoteTaskToMemory(taskId: string): Promise<string> {
-  // 1. Staging Log 조회 (from pglite)
-  const taskLogs = await drizzle.models.taskLogs.findMany({
-    where: eq(taskLogs.taskId, taskId),
-  });
-
-  // 2. Cognify (LLM으로 요약 및 비평)
-  const analysis = await llm.analyzeTask(taskLogs);
   /**
-   * Analysis Result:
-   * - Success: true
-   * - Critique: "OAuth2 구현 시 PKCE 플로우 누락됨"
-   * - KeyDecisions: ["Use hono instead of express"]
+   * 에러의 "의미적 지문"을 생성합니다.
+   * 스택 트레이스의 라인 번호 등 사소한 차이는 무시합니다.
    */
-
-  // 3. Load to agentdb (ReflexionMemory)
-  const episodeId = await agentdb.reflexion.storeEpisode({
-    task: taskLogs[0].taskDescription,
-    critique: analysis.critique,
-    reward: analysis.score,
-    success: analysis.success,
-    input: JSON.stringify(taskLogs[0].context),
-    output: JSON.stringify(analysis.result),
-  });
-
-  // 4. (Optional) 반복된 성공 시 Skill 생성
-  if (analysis.success && analysis.isRepeatable) {
-    await agentdb.skills.createSkill({
-      name: analysis.suggestedSkillName,
-      code: analysis.extractedCode,
-      // ...
-    });
+  private hashError(error: string): string {
+    const coreError = this.extractCoreError(error); // 정규식으로 핵심만 추출
+    return crypto.createHash('sha256').update(coreError).digest('hex');
   }
 
-  return episodeId;
+  check(errorMsg: string): Action {
+    const hash = this.hashError(errorMsg);
+    const count = (this.errorHistory.get(hash) || 0) + 1;
+    this.errorHistory.set(hash, count);
+
+    if (count >= this.THRESHOLD) {
+      return {
+        type: 'BLOCK',
+        reason: `Circular fix detected: Same error occurred ${count} times. Stop and ask human.`,
+        details: { errorHash: hash, count }
+      };
+    }
+    
+    return { type: 'ALLOW' };
+  }
 }
 ```
 
----
+### 1.2 Integration
 
-## Deduplication (agentdb Managed)
-
-`agentdb`는 데이터 저장 시 자동으로 임베딩 유사도를 검사하여 중복을 방지하거나 병합 제안을 합니다.
-
-- **Reflexion**: `storeEpisode` 시 유사한 에피소드가 있으면 연결 (Causal Graph).
-- **ReasoningBank**: `storePattern` 시 의미적 중복(Semantic Duplicate) 자동 감지.
+*   **Trigger:** 테스트 실패(`Verify Phase`) 시점에 즉시 호출.
+*   **Response:** `BLOCK` 신호가 오면, 에이전트에게 "멈춰! 같은 방법으로는 해결 안 돼. 다른 전략을 찾거나 사람에게 물어봐"라는 **강제 시스템 프롬프트**를 주입합니다.
 
 ---
 
-## Supersession Semantics
+## 2. Provenance (Trust Architecture)
 
-새로운 지식이 기존 지식을 대체할 때:
+**원칙:** "출처가 없는 지식은 가설(Hypothesis)일 뿐이다."
+`published` 상태(믿을 수 있는 지식)로 승격되려면 반드시 근거(Citation)가 있어야 합니다. (`memU` 방식)
+
+### 2.1 Schema Enforcement
 
 ```typescript
-interface SupersessionEntry {
+interface MemoryUnit {
   id: string;
-  supersedes_id: string; // 대체하는 항목
-  valid_from_commit: string; // 이 커밋부터 유효
-  valid_to_commit?: string; // 이 커밋까지 유효 (deprecated)
-  contradiction_note?: string; // 왜 대체되는지 설명
+  content: string;
+  
+  // Governance Fields
+  status: 'hypothesis' | 'verified' | 'published';
+  confidence: number; // 0.0 ~ 1.0
+  
+  // 🔥 Provenance: 반드시 하나 이상 있어야 함 (published 승격 조건)
+  citations: Citation[];
 }
 
-async function supersede(
-  newEntryId: string,
-  oldEntryId: string,
-  reason: string,
-): Promise<void> {
-  // 1. 새 항목에 supersedes 링크 추가
-  await update(newEntryId, {
-    supersedes_id: oldEntryId,
-  });
-
-  // 2. 기존 항목 deprecated 처리
-  await update(oldEntryId, {
-    deprecated_at: new Date(),
-    valid_to_commit: await getCurrentCommit(),
-    contradiction_note: reason,
-  });
-
-  // 3. 이벤트 기록
-  await appendEvent({
-    event_type: "SUPERSEDED",
-    payload: {
-      old: oldEntryId,
-      new: newEntryId,
-      reason,
-    },
-  });
-}
+type Citation = 
+  | { type: 'commit', hash: string, repo: string }   // 코드로 증명됨
+  | { type: 'log', id: string, timestamp: Date }     // 실행 로그에 있음
+  | { type: 'human', userId: string }                // 사람이 컨펌함
+  | { type: 'test', name: string, outcome: 'pass' }  // 테스트 통과함
 ```
+
+### 2.2 Verification Gate
+
+메모리 승격 파이프라인(`Consolidation`)에서 다음 규칙을 적용합니다.
+
+1.  **Rule 1:** `citations` 배열이 비어있으면 `status`는 영원히 `hypothesis`.
+2.  **Rule 2:** `test` 또는 `human` 타입의 citation이 있어야만 `verified`로 승격 가능.
+3.  **Rule 3:** `verified` 상태에서 재사용 횟수가 3회 이상이면 `published`(Global Skill)로 승격.
 
 ---
 
-## Confidence & Trust Scoring
+## 3. Cognitive Gate (Anti-Hallucination)
 
-### Trust Metadata
+검색된 메모리를 에이전트에게 주기 전에 검증합니다.
 
-```typescript
-interface TrustMetadata {
-  confidence: number; // 0-1
-  validation_source?: ValidationSource;
-  last_validated_at?: Date;
-  validation_count: number;
-  decay_policy: "recency_bias" | "stable" | "manual_only";
-}
-
-type ValidationSource =
-  | "tests_passed"
-  | "pr_merged"
-  | "human_approved"
-  | "repeated_success";
+```mermaid
+graph TD
+    Search[Retrieval] -->|Candidates| Gate[Cognitive Gate]
+    Gate -->|Check 1| FileExists{File Exists?}
+    Gate -->|Check 2| ContentMatch{Content Match?}
+    
+    FileExists -- No --> Discard[Discard Memory]
+    ContentMatch -- No --> Discard
+    
+    FileExists -- Yes --> Pass[Inject to Context]
+    ContentMatch -- Yes --> Pass
 ```
 
-### Confidence Update Rules
-
-```typescript
-const CONFIDENCE_RULES = {
-  // 검증 소스별 신뢰도 증가량
-  validation_boosts: {
-    tests_passed: 0.2,
-    pr_merged: 0.3,
-    human_approved: 0.4,
-    repeated_success: 0.15,
-  },
-
-  // 시간에 따른 감소
-  decay_rates: {
-    recency_bias: 0.1, // 월간 10% 감소
-    stable: 0.02, // 월간 2% 감소
-    manual_only: 0, // 자동 감소 없음
-  },
-
-  // 최대/최소값
-  bounds: {
-    min: 0.1,
-    max: 1.0,
-    initial_draft: 0.3,
-    initial_verified: 0.6,
-  },
-} as const;
-
-async function updateConfidence(
-  entryId: string,
-  signal: ValidationSource,
-): Promise<number> {
-  const entry = await getById(entryId);
-  const boost = CONFIDENCE_RULES.validation_boosts[signal];
-
-  const newConfidence = Math.min(
-    entry.confidence + boost,
-    CONFIDENCE_RULES.bounds.max,
-  );
-
-  await update(entryId, {
-    confidence: newConfidence,
-    validation_source: signal,
-    last_validated_at: new Date(),
-    validation_count: entry.validation_count + 1,
-  });
-
-  return newConfidence;
-}
-```
-
----
-
-## Circular Fix Detection
-
-반복되는 실패 접근법 감지:
-
-```typescript
-interface CircularFixDetector {
-  // 동일한 접근법이 반복되는지 감지
-  detectRepeatedApproach(taskId: string, approach: string): Promise<boolean>;
-
-  // 실패한 접근법 목록 조회
-  getFailedApproaches(taskId: string): Promise<FailedApproach[]>;
-
-  // 작업 교착 상태 표시
-  markSubtaskStuck(taskId: string, reason: string): Promise<void>;
-}
-
-interface FailedApproach {
-  approach: string;
-  attemptCount: number;
-  lastAttemptAt: Date;
-  failureReasons: string[];
-}
-
-// Think 단계에서 사용
-async function validateApproach(
-  taskId: string,
-  proposedApproach: string,
-): Promise<ApproachValidation> {
-  const isRepeated = await detector.detectRepeatedApproach(
-    taskId,
-    proposedApproach,
-  );
-
-  if (isRepeated) {
-    const failedApproaches = await detector.getFailedApproaches(taskId);
-
-    return {
-      valid: false,
-      reason: "이 접근법은 이미 실패했습니다",
-      suggestion: "대안 접근법을 시도하거나 인간 개입을 요청하세요",
-      failedHistory: failedApproaches,
-    };
-  }
-
-  return { valid: true };
-}
-```
-
----
-
-## Write Access Control
-
-### 스코프별 쓰기 권한
-
-```typescript
-interface WritePermission {
-  scope: Scope;
-  allowedActors: ActorType[];
-  requiresValidation: boolean;
-}
-
-type ActorType = "agent" | "orchestrator" | "human" | "system";
-
-const WRITE_PERMISSIONS: WritePermission[] = [
-  {
-    scope: "task",
-    allowedActors: ["agent", "orchestrator"],
-    requiresValidation: false,
-  },
-  {
-    scope: "worktree",
-    allowedActors: ["agent", "orchestrator"],
-    requiresValidation: false,
-  },
-  {
-    scope: "project",
-    allowedActors: ["orchestrator", "human"],
-    requiresValidation: true,
-  },
-  {
-    scope: "org",
-    allowedActors: ["human", "system"],
-    requiresValidation: true,
-  },
-];
-
-function canWrite(actor: ActorType, scope: Scope): boolean {
-  const permission = WRITE_PERMISSIONS.find((p) => p.scope === scope);
-  return permission?.allowedActors.includes(actor) ?? false;
-}
-```
-
----
-
-## Retention Policies (agentdb Managed)
-
-`agentdb`의 `BatchOperations.pruneData`를 사용하여 주기적으로 오래되거나 낮은 가치의 메모리를 정리합니다.
-
-```typescript
-// Nightly Maintenance Job
-await agentdb.batchOps.pruneData({
-  maxAge: 90, // 90일 이상 된 데이터
-  minReward: 0.3, // 낮은 보상(실패) 에피소드
-  minSuccessRate: 0.5, // 성공률 낮은 스킬
-  keepMinPerTask: 5, // 태스크당 최소 5개는 유지
-});
-```
+*   **Logic:** 기억 속에 있는 "로그인 함수(`auth.ts:login`)"가 현재 파일 시스템에 실제로 존재하는지, 시그니처가 일치하는지 가볍게 확인합니다.
+*   **Result:** 존재하지 않는 파일이나 함수에 대한 기억은 **"낡은 기억(Stale Memory)"** 으로 간주하여 컨텍스트에 포함시키지 않고, 백그라운드에서 `archived` 처리합니다.

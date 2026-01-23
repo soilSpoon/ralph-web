@@ -102,12 +102,15 @@ flowchart LR
 | ------ | ------------------------------- | ----- | ------------------- |
 | US-013 | **Spec Creation Pipeline**      | P2    | Auto-Claude         |
 | US-014 | **QA Loop (Reviewer → Fixer)**  | P1    | Auto-Claude         |
-| US-015 | **Multi-Provider Registry**     | P2    | emdash              |
+| US-015 | **Multi-Agent Registry**        | P2    | emdash              |
 | US-016 | **Sub-Chat/Session Resume**     | P2    | 1code               |
 | US-017 | **E2E Testing Integration**     | P2    | Auto-Claude         |
 | US-018 | **MCP 서버 상태 캐싱**          | P2    | 1code               |
 | US-019 | **Issue Tracker 통합**          | P3    | emdash, Auto-Claude |
 | US-020 | **Security Model (3계층 보안)** | P1    | Auto-Claude         |
+| US-021 | **Visual Context (Screenshot)** | P2    | Auto-Claude         |
+| US-022 | **Agent Usage Tracking**        | P2    | Auto-Claude         |
+| US-023 | **Git Attribution Config**      | P2    | 1code               |
 
 ---
 
@@ -167,10 +170,10 @@ ralph-web/
 - **US-011**, **US-012**, US-005, US-008, US-009
 - **목표**: 병렬 태스크 실행, 칸반 UI
 
-### Phase 3: Advanced Memory & Provider
+### Phase 3: Advanced Memory & Agent
 
 - US-006 Phase 3 (Graphiti 스타일 그래프 메모리)
-- **US-015** (Multi-Provider Registry)
+- **US-015** (Multi-Agent Registry)
 - **US-016** (Sub-Chat/Session Resume)
 - **US-017** (E2E Testing Integration)
 - **US-018** (MCP 서버 상태 캐싱)
@@ -191,11 +194,10 @@ ralph-web/
 | -------- | ------------------ | ----------------------------------------------------- |
 | Phase 7  | Agent Orchestrator | `child_process` 기반 에이전트 연결 및 실시간 스트리밍 |
 | Phase 8  | Worktree Manager   | `git worktree` 격리 환경 구축                         |
-| Phase 9  | Persistence (DB)   | Drizzle ORM + SQLite 연동 및 상태 영속화              |
+| Phase 9  | Memory & Persistence | 지능형 지식 그래프, 코드 인덱싱 및 DB 통합 영속화     |
 | Phase 10 | Queue Manager      | 병렬 태스크 스케줄링 및 리소스 제어                   |
 | Phase 11 | QA Loop (Fixer)    | 자동 테스트 연동 및 에러 피드백 루프                  |
-| Phase 12 | Memory Graph       | 벡터 임베딩 기반 지능형 지식 탐색                     |
-| Phase 13 | Multi-Provider     | 다양한 에이전트 CLI 표준 어댑터 확장                  |
+| Phase 12 | Multi-Agent        | 20+ CLI 에이전트 표준 어댑터 확장                     |
 
 ---
 
@@ -219,13 +221,17 @@ ralph-web/
 | **Spec Creation Pipeline** | 복잡도(SIMPLE/STANDARD/COMPLEX)에 따른 동적 파이프라인 | Auto-Claude         |
 | **QA Loop**                | Planner → Coder → QA Reviewer → QA Fixer 순환          | Auto-Claude         |
 | **Graphiti Memory**        | 그래프 DB + 시맨틱 검색 기반 지식 저장                 | Auto-Claude         |
-| **Multi-Provider**         | 20+ CLI 에이전트 지원 (Claude, Gemini, Qwen, Amp...)   | emdash              |
+| **Multi-Agent**            | 20+ CLI 에이전트 지원 (Claude, Gemini, Qwen, Amp...)   | emdash              |
 | **Sub-Chat/Session**       | Task 내 다중 세션, sessionId 기반 재개                 | 1code               |
 | **MCP 캐싱**               | MCP 서버 상태 디스크 캐시 (TTL 기반)                   | 1code               |
 | **E2E Testing**            | Playwright/Electron MCP 통합 자동 UI 검증              | Auto-Claude         |
 | **Issue Tracker**          | Linear, Jira, GitHub Issues 양방향 동기화              | emdash, Auto-Claude |
 | **Security Model**         | 3계층 보안 (OS Sandbox, Filesystem, Command Allowlist) | Auto-Claude         |
 | **File Preservation**      | Worktree 생성 시 .env 등 환경 파일 자동 보존           | emdash              |
+| **Visual Context**         | 태스크 생성 시 화면 캡처 및 이미지 컨텍스트 전달       | Auto-Claude         |
+| **Usage Tracking**         | 에이전트별 토큰 사용량 및 비용 추적 API                | Auto-Claude         |
+| **Git Attribution**        | Co-authored-by 서명 자동 관리 및 설정 옵션             | 1code               |
+| **Auth Expiry Alert**      | API 키/토큰 만료 시 선제적 경고 모달 (Silent Fail 방지)| Auto-Claude         |
 
 ---
 

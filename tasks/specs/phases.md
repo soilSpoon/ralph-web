@@ -14,7 +14,7 @@
 | 9     | [📄 Memory & Persistence](./memory/)                     | 지능형 메모리 + DB (9개 세부 문서) |
 | 10    | Phase 10: Queue Manager                                  | 병렬 태스크 스케줄링               |
 | 11    | Phase 11: QA Loop                                        | 자동 테스트 및 수정 루프           |
-| 12    | Phase 12: Multi-Provider                                 | 20+ CLI 에이전트 지원              |
+| 12    | Phase 12: Multi-Agent                                    | 20+ CLI 에이전트 지원              |
 
 ---
 
@@ -26,7 +26,7 @@ graph LR
     P8 --> P9[Phase 9: Memory & Persistence]
     P9 --> P10[Phase 10: Queue]
     P9 --> P11[Phase 11: QA Loop]
-    P7 --> P12[Phase 12: Multi-Provider]
+    P7 --> P12[Phase 12: Multi-Agent]
 ```
 
 ---
@@ -37,7 +37,7 @@ graph LR
 
 **목표**: CLI 에이전트 실행 및 실시간 스트리밍
 
-- `child_process.spawn`으로 Provider CLI 실행
+- `child_process.spawn`으로 Agent CLI 실행
 - SSE로 stdout/stderr 스트리밍
 - 완료 신호(`<promise>COMPLETE</promise>`) 감지
 
@@ -79,9 +79,9 @@ graph LR
 - QA Reviewer → QA Fixer → 재검증 (최대 3회)
 - Playwright E2E 테스트 통합
 
-### Phase 12: Multi-Provider
+### Phase 12: Multi-Agent
 
 **목표**: 20+ CLI 에이전트 지원
 
-- `ProviderDefinition` 타입으로 표준화
+- `AgentDefinition` 타입으로 표준화
 - 설치 상태 자동 감지

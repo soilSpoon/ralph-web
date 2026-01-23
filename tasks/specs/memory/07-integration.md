@@ -265,55 +265,46 @@ async function prepareCodeContext(
 }
 ```
 
-### Write Points (Staging Only)
+### Write Points (LogBuffer)
 
-Code Phase에서 에이전트가 staging 메모리에 쓰는 내용:
+Code Phase에서 에이전트가 생성하는 로그는 즉시 DB로 가지 않고 `LogBuffer`에 쌓입니다.
 
 ```typescript
 interface CodePhaseWrite {
-  // 발견 사항: "이 함수는 실제로 X를 수행함"
   discoveries: Discovery[];
-
-  // 결정 사항: 접근법에 대한 근거
   decisions: Decision[];
-
-  // 명령어: 중요한 터미널 상호작용
   commands: CommandCapture[];
 }
 
-// Discovery 쓰기
+// Discovery 쓰기 -> LogBuffer
 async function recordDiscovery(
   taskId: string,
   content: string,
   files: string[],
 ): Promise<void> {
-  await appendEvent({
-    event_type: "OBSERVED",
-    payload: {
-      content,
-      type: "discovery",
-    },
-    task_id: taskId,
-    scope: "task", // 항상 task scope로 쓰기
-    file_paths: files,
+  logBuffer.add({
+    timestamp: new Date().toISOString(),
+    actor: 'agent',
+    action: 'discover',
+    target: files.join(','),
+    payload: { content, type: "discovery" },
+    context: { taskId }
   });
 }
 
-// Decision 쓰기
+// Decision 쓰기 -> LogBuffer
 async function recordDecision(
   taskId: string,
   decision: string,
   rationale: string,
 ): Promise<void> {
-  await appendEvent({
-    event_type: "OBSERVED",
-    payload: {
-      content: decision,
-      type: "decision",
-      rationale,
-    },
-    task_id: taskId,
-    scope: "task",
+  logBuffer.add({
+    timestamp: new Date().toISOString(),
+    actor: 'agent',
+    action: 'decide',
+    target: 'task',
+    payload: { content: decision, rationale },
+    context: { taskId }
   });
 }
 ```
@@ -427,22 +418,23 @@ async function consolidateOnMerge(
 ): Promise<ConsolidateResult> {
   const { taskId, commitHash } = config;
 
-  // 1. Promote Staging to AgentDB (Reflexion Memory)
-  // This triggers embedding, graph node creation, and learning samples
-  const episode = await pglite.constructEpisode(taskId);
-  await agentdb.reflexion.storeEpisode(episode);
+  // 1. Buffer Flush (남은 로그 처리)
+  await logBuffer.flush();
 
-  // 2. Update Causal Graph with new Code Context
+  // 2. Feedback Loop (GNN Training)
+  // 성공한 패턴에 대해 보상(Reward) 기록 -> AgentDB가 내부적으로 학습
+  const patterns = await agentdb.reasoningBank.getPatternsUsedInTask(taskId);
+  for (const pattern of patterns) {
+    await agentdb.reasoningBank.recordOutcome(pattern.id, true, 1.0);
+  }
+
+  // 3. Update Causal Graph with new Code Context
   const changedFiles = await getChangedFiles(commitHash);
   await agentdb.causalGraph.updateContext(changedFiles);
 
-  // 3. Deduplication & Cleanup (handled by NightlyLearner asynchronously)
-  // But we can trigger a quick pass if needed
-  // await agentdb.nightlyLearner.runQuickPass();
-
   return {
-    promoted: 1, // Unit is Episode
-    deduplicated: 0, // Handled async
+    promoted: 1, 
+    deduplicated: 0,
     conflictsResolved: 0,
     codeEntitiesUpdated: changedFiles.length,
   };

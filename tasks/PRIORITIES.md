@@ -34,7 +34,7 @@
 - 실시간 로그 스트리밍 (SSE)
 - 완료 신호 감지
 
-> **참조**: 1code - tRPC + Claude SDK 통합
+> **참조**: 1code - tRPC + Claude SDK 통합 (v0.0.33 Plan Mode 안정성 개선 참고)
 
 ---
 
@@ -51,25 +51,24 @@
 
 ### Phase 9: Memory & Persistence (통합)
 
-**목표**: 확장 가능한 지능형 메모리 시스템 (소규모~대규모 지원)
+**목표**: 자기 진화형 계층적 메모리 시스템 (Self-Evolving Hierarchical Memory)
 
-| 단계 | 기능                  | 설명                                            |
-| ---- | --------------------- | ----------------------------------------------- |
-| 9.0  | Foundation            | pglite/PostgreSQL + pgvector, Drizzle ORM       |
-| 9.1  | ECL Pipeline          | Extract → Cognify → Load (Atomic Facts, Skills) |
-| 9.2  | Progressive Retrieval | 3-Layer 검색 (토큰 효율 ~10x)                   |
-| 9.3  | Code Indexing         | 코드베이스 구조 인덱싱 (Class, Function, 관계)  |
-| 9.4  | Patterns & Gotchas    | 성공 패턴/실수 분리, 터미널 스냅샷              |
-| 9.5  | Enterprise (선택)     | Knowledge Graph, Multi-tenancy                  |
+| 단계 | 기능 | 설명 |
+|---|---|---|
+| 9.0 | Foundation | AgentDB 연결, 3-Layer 스키마(Episodic, Semantic, Relations) 구축 |
+| 9.1 | Perception | LLM 기반 Cognify 파이프라인 (De-ambiguation, Fact Extraction) |
+| 9.2 | Structure | Memory Consolidation (단기→장기 승격), Graph 연결 자동화 |
+| 9.3 | Adaptive Retrieval | Context 분석 기반 Dynamic Search (Vector/Graph/Hybrid) |
+| 9.4 | Visual Memory Map & UI | 타임라인(Episodic) vs 지식 그래프(Semantic) 뷰 분리, 가지치기(Pruning) UI |
 
 **핵심 기능**:
+- **Active Cognition**: 단순 저장이 아닌, 모호성을 제거하고 구조화하여 저장
+- **Hierarchical Structure**: Resource → Atomic Fact → Knowledge Graph
+- **Adaptive Retrieval**: 질문 난이도에 따른 검색 전략 자동 변경
+- **Self-Evolution**: 사용 피드백에 따라 메모리 가중치 자동 조절
 
-- Hybrid Search: Semantic(Vector) + Lexical(tsvector) + Symbolic
-- Progressive Disclosure: 토큰 효율 ~10x 향상
-- Code Graph: cognee SourceCodeGraph 스타일
-
-> **참조**: SimpleMem, memU, claude-mem, cognee, Auto-Claude, emdash
-> **상세**: [phase9-memory.md](./.sisyphus/plans/phase9-memory.md)
+> **참조**: SimpleMem, memU, ruvector, cognee, agentic-flow
+> **상세**: [phase-9-memory-architecture.md](./phase-9-memory-architecture.md)
 
 ---
 
@@ -79,6 +78,8 @@
 
 - 최대 동시 실행 수 설정
 - 우선순위 기반 스케줄링
+
+> **참조**: Auto-Claude - Queue System v2 (Auto-Promotion, Smart Task Management)
 
 ---
 
@@ -93,18 +94,18 @@
 
 ---
 
-### Phase 12: Multi-Provider
+### Phase 12: Multi-Agent
 
 **목표**: 20+ CLI 에이전트 표준 어댑터 지원
 
-| Provider    | CLI      | Auto-Approve                     |
+| Agent       | CLI      | Auto-Approve                     |
 | ----------- | -------- | -------------------------------- |
 | Claude Code | `claude` | `--dangerously-skip-permissions` |
 | Gemini      | `gemini` | `--yolomode`                     |
 | Qwen        | `qwen`   | `--yolo`                         |
 | + 17개 이상 | ...      | ...                              |
 
-> **참조**: emdash - Provider 레지스트리 (20+ providers)
+> **참조**: emdash - Agent 레지스트리 (Renamed from Provider)
 
 ---
 
