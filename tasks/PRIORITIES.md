@@ -8,8 +8,8 @@
 
 | 우선순위  | 작업                                 | 설명                                                    | 상태      |
 | --------- | ------------------------------------ | ------------------------------------------------------- | --------- |
-| 🚀 진행중 | **Phase 7: Agent Orchestrator**      | `node-pty` 기반 Provider 인터페이스 구현 및 Gemini 연결 | 🚧 진행중 |
-| 🚀 진행중 | **Phase 8: Worktree Manager**        | `git worktree` 격리 환경 구축 및 환경 파일 링크         | 🚧 진행중 |
+| ✅ 완료   | **Phase 7: Agent Orchestrator**      | `node-pty` 기반 Provider 인터페이스 구현 및 Gemini 연결 | ✅ 완료   |
+| ✅ 완료   | **Phase 8: Worktree Manager**        | `git worktree` 격리 환경 구축 및 환경 파일 링크         | ✅ 완료   |
 | 🚀 진행중 | **Phase 9: Active Cognitive Kernel** | **AgentDB Native + Active Hooks** (능동적 인지 엔진)    | 🚧 진행중 |
 | 🏅 4순위  | **Phase 10: Queue Manager**          | 병렬 태스크 스케줄링 및 리소스 제어                     | ⏳ 대기   |
 | 🏅 5순위  | **Phase 11: QA Loop (Smart & Fast)** | **Agent Booster + Adaptive Routing** (초고속 자동 수정) | ⏳ 대기   |
