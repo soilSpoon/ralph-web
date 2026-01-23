@@ -62,3 +62,7 @@ package-lock.json
 .ralph/pgdata
 .ralph/pgdata-*
 :memory:
+
+
+# oh-my-opencode
+.sisyphus
