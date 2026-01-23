@@ -67,21 +67,19 @@ Ralph 핵심 기능 사용자 스토리입니다.
 
 ---
 
-## US-006: 영속적 기억 (Memory Layer)
+## US-006: 영속적 기억 (AgentDB Integrated Memory)
 
-- **설명**: 에이전트는 과거의 실수나 성공 패턴을 기억해야 합니다.
-- **참조**: [Memory System Spec](./memory-system.md)
+- **설명**: `agentdb`를 활용하여 에이전트가 과거의 성공 패턴, 실패 사례, 코드 구조를 스스로 학습하고 검색합니다.
+- **참조**: [Memory System Spec](./memory/00-overview.md)
 - **인수 조건**:
 
-  **Phase 1 - 파일 기반 (MVP, Ralph 호환)**:
-  - [ ] 작업 완료 시 `progress.txt`에 append-only 로그 기록.
-  - [ ] **Codebase Patterns 섹션**: `progress.txt` 상단에 재사용 가능한 패턴 통합 관리.
-  - [ ] 새 작업 시작 시 Codebase Patterns 섹션 우선 참조.
-
-  **Phase 2 - 하이브리드 확장 (Auto-Claude 스타일)**:
-  - [ ] **SQLite 동기화**: 파일 → SQLite DB 자동 동기화.
-  - [ ] **벡터 임베딩**: 패턴/인사이트 의미 기반 검색 지원.
-  - [ ] **Memory Explorer UI**: 저장된 패턴, gotchas, 인사이트 시각화.
+  **AgentDB Native Integration**:
+  - [ ] **Initialization**: `agentdb` 인스턴스 생성 (Backend: `ruvector`).
+  - [ ] **ReasoningBank**: 성공적인 코딩 패턴 자동 학습 및 검색 (기존 `patterns` 테이블 대체).
+  - [ ] **Reflexion**: 실행 궤적(Trajectory) 및 실패 사례(Anti-Pattern) 저장.
+  - [ ] **Knowledge Graph**: `enableAutoIndexing` 옵션으로 소스 코드 구조 자동 인덱싱.
+  - [ ] **Provenance**: Git Commit Hash 및 File Hash를 메타데이터로 주입하여 지식의 유효성 검증.
+  - [ ] **Memory Explorer UI**: `agentdb` 그래프 및 인사이트 시각화.
 
 ---
 
@@ -90,7 +88,8 @@ Ralph 핵심 기능 사용자 스토리입니다.
 - **설명**: 각 반복은 깨끗한 컨텍스트의 새로운 AI 인스턴스여야 합니다 (Ralph의 핵심 철학).
 - **인수 조건**:
   - [ ] 매 반복마다 새로운 에이전트 프로세스 생성 (컨텍스트 오염 방지).
-  - [ ] 메모리는 오직 git history, `progress.txt`, `prd.json`을 통해서만 전달.
+  - [ ] **Context Injection**: 기본 컨텍스트는 `git history`, `progress.txt`, `prd.json`을 통해 파일로 전달.
+  - [ ] **Active Retrieval**: 과거 패턴 및 지식은 `agentdb` (consult_memory 도구)를 통해 필요 시 능동적으로 검색.
   - [ ] 단일 스토리는 하나의 컨텍스트 윈도우 내에서 완료 가능한 크기로 제한.
 
 ---
@@ -136,9 +135,9 @@ Ralph 핵심 기능 사용자 스토리입니다.
   - [ ] 각 태스크는 독립된 메타데이터 디렉토리 보유.
 
   **오케스트레이션**:
-  - [ ] **중앙 상태 DB**: SQLite로 모든 태스크 상태 통합 관리.
+  - [ ] **중앙 상태 DB**: SQLite로 모든 태스크 상태 통합 관리 (`ralph.db`).
   - [ ] **병렬 실행 큐**: 최대 동시 실행 수 설정, 우선순위 기반 스케줄링.
-  - [ ] **글로벌 패턴 공유**: 태스크 간 학습 내용은 `global-patterns.md`로 통합.
+  - [ ] **글로벌 패턴 공유**: 태스크 간 학습 내용은 `agentdb` ReasoningBank로 통합 공유.
 
 ---
 

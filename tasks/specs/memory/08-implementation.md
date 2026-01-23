@@ -1,53 +1,46 @@
 # Implementation Roadmap (Phase 9)
 
-> **Goal**: Build a Self-Evolving Memory System
-> **Timeline**: 3 Weeks (Estimated)
+> **Goal**: Build the Cognitive Kernel (AgentDB + Middleware)
+> **Approach**: Native Integration + Strict Quality Control
 
 ---
 
-## Phase 9.1: Cognify Middleware (The "Input" Layer) - Week 1
-**목표:** 쓰레기 데이터 방지 및 고품질 로그 수집 체계 구축 (SimpleMem 기반).
+## Step 1: Foundation Setup (AgentDB)
+- [ ] **Dependency**: `bun add agentdb@alpha`
+- [ ] **Service Config**: `libs/memory/src/config.ts`
+    - [ ] `hyperbolic` 임베딩 공간 설정.
+    - [ ] `cypher` 쿼리 엔진 활성화.
+    - [ ] `./src`에 대한 `autoIndex` 설정.
+- [ ] **Bootstrap Script**: `scripts/bootstrap-memory.ts` (초기 인덱싱).
 
-### 1. LogBuffer Implementation
-- [ ] `libs/memory/src/pipeline/buffer.ts`: `LogBuffer` 클래스 구현 (Window size: 10).
-- [ ] `libs/memory/src/pipeline/types.ts`: `RawLogEntry`, `AtomicFact` 인터페이스 정의.
+## Step 2: Cognify Middleware (The Input Gate)
+- [ ] **Types**: `libs/memory/src/types.ts`
+    - [ ] `DiagnosisPattern` 및 `SolutionPattern` 인터페이스 정의.
+    - [ ] `AtomicFact` 인터페이스 정의.
+- [ ] **Cognify Agent**: `libs/memory/src/pipeline/cognify.ts`
+    - [ ] "Semantic Lossless Restatement" 프롬프트 구현.
+    - [ ] 규칙 적용: 대명사 금지, 절대 시간 주입, 컨텍스트 바인딩.
+    - [ ] 이전 윈도우(Last 5 Facts) 기반 중복 방지 로직.
 
-### 2. Cognify Agent
-- [ ] `prompts/cognify.md`: Disambiguation 프롬프트 작성 (SimpleMem 스타일).
-- [ ] `libs/memory/src/pipeline/cognify.ts`: LLM 호출 및 JSON 파싱 로직 구현.
-- [ ] **Test**: 모호한 로그("그거 고쳐줘")를 주입하여 구체적 사실로 변환되는지 단위 테스트.
+## Step 3: Retrieval & Token Budgeting (The Output Filter)
+- [ ] **TokenBudgetManager**: `libs/memory/src/retrieval/budget.ts`
+    - [ ] `allocateBudget(maxTokens)` 로직 구현.
+    - [ ] 예산 초과 시 `uplift` 기반 기억 제거(Pruning) 기능.
+- [ ] **Retrieval Service**: `libs/memory/src/retrieval/service.ts`
+    - [ ] `agentdb.recall()`을 Budgeting 로직으로 래핑.
 
----
+## Step 4: Governance & Loop Integration
+- [ ] **Governance Service**: `libs/memory/src/governance/service.ts`
+    - [ ] **Jaccard Similarity** 기반 `CircularFixDetector` 구현 (Threshold 0.3).
+    - [ ] 3회 이상 중복 시 `Strategy Pivot` 지시문 생성.
+- [ ] **Ralph Loop Hook**:
+    - [ ] **Pre-task**: `ReasoningBank`에서 Anti-Patterns 조회 및 경고 주입.
+    - [ ] **Think**: Cypher를 통한 영향도 분석 결과 주입.
+    - [ ] **Code**: 로그 버퍼링 및 Cognify 처리.
+    - [ ] **Verify**: Circular Fix 검사 실행.
+    - [ ] **Complete**: `reward` 기반 궤적 저장 및 패턴 승격.
 
-## Phase 9.2: Cognitive Engine (The "Storage" Layer) - Week 2
-**목표:** `agentdb` 연결 및 데이터 영속화 (memU 출처 관리 포함).
-
-### 1. AgentDB Setup
-- [ ] `bun add agentdb` (Latest Alpha).
-- [ ] `libs/memory/src/engine.ts`: `RalphMemoryService` 래퍼 구현 (Singleton).
-- [ ] `agentdb.createDatabase()` 초기화 및 `ruvector` 백엔드 연결.
-
-### 2. Schema Integration
-- [ ] `metadata` 필드에 `Citation` 스키마 강제 적용 로직 추가.
-- [ ] `Loader`: Cognify된 데이터를 `agentdb.reflexion` 및 `agentdb.reasoningBank`로 라우팅하는 로직 구현.
-
----
-
-## Phase 9.3: Context Budgeter (The "Output" Layer) - Week 3
-**목표:** 토큰 경제성을 고려한 지능형 검색 (claude-mem 기반).
-
-### 1. Context Accountant
-- [ ] `libs/memory/src/retrieval/accountant.ts`: `calculateCost` 및 `allocate` 함수 구현.
-- [ ] **Prioritization Logic**: Skills -> Recent -> Old 순으로 예산 할당 알고리즘 구현.
-
-### 2. Timeline Renderer
-- [ ] `libs/memory/src/retrieval/renderer.ts`: 메모리 객체를 Markdown Timeline 포맷으로 변환.
-- [ ] **Integration**: Ralph Loop의 `Think Phase`에 검색 결과 주입.
-
----
-
-## Checklist for Start
-
-- [ ] `agentdb` 패키지 설치 확인.
-- [ ] Gemini API Key (Cognify용 Fast Model) 준비.
-- [ ] `LogBuffer` -> `Cognify` -> `Loader` 흐름 설계 검토 완료.
+## Step 5: Verification
+- [ ] **Test Case 1**: 재진술 검증 (로그: "고쳤음" -> 사실: "auth.ts 수정").
+- [ ] **Test Case 2**: Trajectory 학습 검증 (유사한 에러 발생 시 과거의 성공 경로를 추천하는지).
+- [ ] **Test Case 3**: Cypher 쿼리를 통한 종속성 탐색 정확도 확인.

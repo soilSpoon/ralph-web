@@ -54,29 +54,10 @@ CREATE TABLE stories (
 
 ---
 
-## patterns (패턴 테이블)
+## patterns (Deprecated)
 
-학습된 Codebase Patterns를 관리합니다.
-
-```sql
-CREATE TABLE patterns (
-  id INTEGER PRIMARY KEY AUTOINCREMENT,
-  task_id TEXT REFERENCES tasks(id) ON DELETE SET NULL,
-  pattern TEXT NOT NULL,
-  category TEXT,                    -- 'convention', 'gotcha', 'tip'
-  source_file TEXT,
-  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-  promoted_at DATETIME
-);
-```
-
-**카테고리**:
-
-| 카테고리     | 설명        | 예시                                              |
-| ------------ | ----------- | ------------------------------------------------- |
-| `convention` | 코드 컨벤션 | "Component naming: PascalCase"                    |
-| `gotcha`     | 주의사항    | "Always use IF NOT EXISTS for migrations"         |
-| `tip`        | 유용한 팁   | "Use --dangerously-allow-all for autonomous mode" |
+> ⚠️ **Moved to AgentDB**: 패턴과 지식은 `agentdb`의 `ReasoningBank` 및 `KnowledgeGraph`에서 관리합니다.
+> 상세 내용은 [Phase 9: Memory Architecture](../memory/00-overview.md)를 참조하세요.
 
 ---
 

@@ -1,114 +1,88 @@
-# Memory Governance & Safety
+# Memory Governance & Safety (Cognitum Gate)
 
 ## 개요
 
-지능형 메모리 시스템이 "잘못된 확신"이나 "무한 루프"를 유발하지 않도록 안전장치를 정의합니다.
-`Auto-Claude`의 **Circular Fix Detection**과 `memU`의 **Provenance(출처 증명)** 원칙을 통합합니다.
+**Source Inspiration**: `RuVector` (Cognitum Gate), `Auto-Claude` (Circular Detection & Jaccard Similarity)
+
+기존의 "LLM에게 다시 물어보는" 방식은 느리고 비용이 많이 들며, LLM 자체의 환각 가능성이 있습니다.
+우리는 `ruvector`의 **Cognitum Gate**를 활용하여 수학적으로 증명된 안전장치를 구축하고, `Auto-Claude` 스타일의 **Jaccard 유사도 검사**를 통해 무한 루프를 원천 차단합니다.
 
 ---
 
-## 1. Circular Fix Detection (Anti-Death-Loop)
+## 1. Cognitum Gate (Mathematical Safety)
 
-**문제:** 에이전트가 에러를 고쳤다고 생각하지만, 실제로는 계속 같은 에러가 반복되거나(A->B->A), 미묘하게 다른 에러로 변하며 무한 루프에 빠지는 현상.
+**원리**: Min-Cut 알고리즘을 사용하여 지식 그래프 내의 **논리적 모순(Contradiction)**을 탐지합니다.
+새로운 기억이나 행동이 기존의 확립된 사실(Verified Facts)과 모순될 경우, Gate가 닫히며 행동이 거부됩니다.
 
-**해결:** 에러 메시지와 해결 시도를 해싱(Hashing)하여 추적합니다. (`Auto-Claude` 방식)
+### 1.1 Implementation Concept
 
-### 1.1 Detection Logic
+```typescript
+// libs/memory/src/governance/gate.ts
+import { agentdb } from '../service'; 
+
+const gate = agentdb.governance.createGate();
+
+async function validateAction(action: AgentAction, context: Context) {
+  // 1. Check for Logical Contradictions (Math-based)
+  const coherence = await gate.evaluate({
+    action: action,
+    context: context,
+    witnesses: await agentdb.getVerifiedFacts() 
+  });
+
+  if (!coherence.permitted) {
+    throw new Error(`Safety Gate Blocked: ${coherence.reason}`);
+  }
+
+  return true;
+}
+```
+
+---
+
+## 2. Circular Fix Detection (Jaccard Similarity)
+
+**원리**: 에이전트가 유사한 실패를 반복하는 것을 막기 위해, **현재 시도의 키워드 집합**과 **과거 실패 이력의 키워드 집합** 간의 유사도를 계산합니다.
+
+### 2.1 Jaccard 유사도 알고리즘 (Auto-Claude 스타일)
+*   **알고리즘**: `J(A, B) = |A ∩ B| / |A ∪ B|`
+*   **Threshold**: 유사도가 **0.3 (30%)** 이상이면 순환 수정 시도로 간주.
+*   **데이터**: 에러 메시지 + 에이전트가 제안한 `Fix Strategy` 키워드.
+
+### 2.2 Native Graph Cycle Detection
 
 ```typescript
 // libs/orchestrator/safety/circular.ts
 
-class CircularFixDetector {
-  private errorHistory: Map<string, number> = new Map();
-  private readonly THRESHOLD = 3;
-
-  /**
-   * 에러의 "의미적 지문"을 생성합니다.
-   * 스택 트레이스의 라인 번호 등 사소한 차이는 무시합니다.
-   */
-  private hashError(error: string): string {
-    const coreError = this.extractCoreError(error); // 정규식으로 핵심만 추출
-    return crypto.createHash('sha256').update(coreError).digest('hex');
-  }
-
-  check(errorMsg: string): Action {
-    const hash = this.hashError(errorMsg);
-    const count = (this.errorHistory.get(hash) || 0) + 1;
-    this.errorHistory.set(hash, count);
-
-    if (count >= this.THRESHOLD) {
+async function checkCircularFix(taskId: string, proposedFix: FixStrategy) {
+  // 1. Jaccard Similarity Check (Auto-Claude Logic)
+  const attempts = await agentdb.history.getRecentAttempts(taskId, 3);
+  const currentKeywords = extractKeywords(proposedFix);
+  
+  for (const prev of attempts) {
+    const similarity = calculateJaccard(currentKeywords, prev.keywords);
+    if (similarity > 0.3) {
       return {
-        type: 'BLOCK',
-        reason: `Circular fix detected: Same error occurred ${count} times. Stop and ask human.`,
-        details: { errorHash: hash, count }
+        allowed: false,
+        reason: "Circular Fix Detected (Jaccard Similarity > 0.3)",
+        history: prev.action
       };
     }
-    
-    return { type: 'ALLOW' };
   }
+
+  // 2. Graph-based Cycle Detection (AgentDB Native)
+  const cycle = await agentdb.graph.detectCycle({
+    taskId: taskId,
+    node: proposedFix
+  });
+
+  return cycle.detected ? { allowed: false, reason: "Graph Cycle Detected" } : { allowed: true };
 }
 ```
 
-### 1.2 Integration
-
-*   **Trigger:** 테스트 실패(`Verify Phase`) 시점에 즉시 호출.
-*   **Response:** `BLOCK` 신호가 오면, 에이전트에게 "멈춰! 같은 방법으로는 해결 안 돼. 다른 전략을 찾거나 사람에게 물어봐"라는 **강제 시스템 프롬프트**를 주입합니다.
-
 ---
 
-## 2. Provenance (Trust Architecture)
+## 3. Strategy Pivot (강제 전략 변경)
 
-**원칙:** "출처가 없는 지식은 가설(Hypothesis)일 뿐이다."
-`published` 상태(믿을 수 있는 지식)로 승격되려면 반드시 근거(Citation)가 있어야 합니다. (`memU` 방식)
-
-### 2.1 Schema Enforcement
-
-```typescript
-interface MemoryUnit {
-  id: string;
-  content: string;
-  
-  // Governance Fields
-  status: 'hypothesis' | 'verified' | 'published';
-  confidence: number; // 0.0 ~ 1.0
-  
-  // 🔥 Provenance: 반드시 하나 이상 있어야 함 (published 승격 조건)
-  citations: Citation[];
-}
-
-type Citation = 
-  | { type: 'commit', hash: string, repo: string }   // 코드로 증명됨
-  | { type: 'log', id: string, timestamp: Date }     // 실행 로그에 있음
-  | { type: 'human', userId: string }                // 사람이 컨펌함
-  | { type: 'test', name: string, outcome: 'pass' }  // 테스트 통과함
-```
-
-### 2.2 Verification Gate
-
-메모리 승격 파이프라인(`Consolidation`)에서 다음 규칙을 적용합니다.
-
-1.  **Rule 1:** `citations` 배열이 비어있으면 `status`는 영원히 `hypothesis`.
-2.  **Rule 2:** `test` 또는 `human` 타입의 citation이 있어야만 `verified`로 승격 가능.
-3.  **Rule 3:** `verified` 상태에서 재사용 횟수가 3회 이상이면 `published`(Global Skill)로 승격.
-
----
-
-## 3. Cognitive Gate (Anti-Hallucination)
-
-검색된 메모리를 에이전트에게 주기 전에 검증합니다.
-
-```mermaid
-graph TD
-    Search[Retrieval] -->|Candidates| Gate[Cognitive Gate]
-    Gate -->|Check 1| FileExists{File Exists?}
-    Gate -->|Check 2| ContentMatch{Content Match?}
-    
-    FileExists -- No --> Discard[Discard Memory]
-    ContentMatch -- No --> Discard
-    
-    FileExists -- Yes --> Pass[Inject to Context]
-    ContentMatch -- Yes --> Pass
-```
-
-*   **Logic:** 기억 속에 있는 "로그인 함수(`auth.ts:login`)"가 현재 파일 시스템에 실제로 존재하는지, 시그니처가 일치하는지 가볍게 확인합니다.
-*   **Result:** 존재하지 않는 파일이나 함수에 대한 기억은 **"낡은 기억(Stale Memory)"** 으로 간주하여 컨텍스트에 포함시키지 않고, 백그라운드에서 `archived` 처리합니다.
+순환 수정이 감지될 경우, 시스템은 에이전트에게 단순히 "다시 시도해"가 아닌 **명시적인 Pivot 지시**를 내립니다.
+*   **Instruction**: "You have tried X and Y multiple times. DO NOT use these patterns. Try a DIFFERENT approach (e.g., use a different library, simplify the logic, or check the caller function)."

@@ -35,7 +35,7 @@ flowchart TB
 
     subgraph CentralState["💾 Central State"]
         DB[(ralph.db)]
-        GlobalPatterns[global-patterns.md]
+        AgentDB[(agentdb)]
     end
 
     subgraph TaskMemory["📁 Task Memory"]
@@ -58,9 +58,9 @@ flowchart TB
 
     TaskScheduler <--> DB
     TM1 & TM2 -->|sync| DB
-    TM1 & TM2 -->|patterns| GlobalPatterns
+    TM1 & TM2 -->|patterns| AgentDB
 
-    MemoryExplorer --> DB & GlobalPatterns
+    MemoryExplorer --> DB & AgentDB
 ```
 
 ---
@@ -90,6 +90,7 @@ flowchart TB
 │              ↓                                                          │
 │              Fresh AI instance each time                                │
 │              Reads: prd.json, progress.txt, AGENTS.md                   │
+│              Tools: consult_memory (AgentDB)                            │
 │              Works in: .worktrees/task-001/                             │
 │                                                                         │
 └─────────────────────────────────────────────────────────────────────────┘
@@ -237,5 +238,5 @@ ralph-web/
 | 태스크 상태 | `tasks/prd.json` | `.ralph/ralph.db` (중앙 DB) |
 | 진행 로그 | `tasks/progress.txt` | `.ralph/tasks/{id}/progress.txt` (격리) |
 | 작업 공간 | 프로젝트 루트 | `.worktrees/{task-id}/` (격리) |
-| 패턴 공유 | `progress.txt` 상단 | `.ralph/global-patterns.md` + DB |
+| 패턴 공유 | `progress.txt` 상단 | `agentdb` (ReasoningBank) |
 | 병렬 실행 | 불가 | 태스크별 독립 루프 |

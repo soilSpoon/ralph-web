@@ -1,140 +1,69 @@
-# Retrieval System & Context Budgeting
+# Retrieval System: Causal Recall (Native)
 
 ## 개요
 
-검색 시스템은 단순히 데이터를 가져오는 것이 아니라, **한정된 토큰 예산(Token Budget) 안에서 최적의 정보를 구성하는 경제적 문제**입니다.
-`claude-mem`의 **Context Accountant** 패턴을 도입하여 비용 효율적인 컨텍스트를 구성합니다.
+**Strategy**: `agentdb.recall()` Tuning (Native Only)
+**Benchmark**: `ruvector` (Scoring) vs `memU` (Custom Resolver)
+
+별도의 복잡한 "Conflict Resolver(JS)"를 구현하지 않습니다. (Reinvention 방지)
+`agentdb`의 **Causal Recall** 엔진이 `uplift`(성공 기여도)와 `decay`(시간 감쇠)를 계산하여, **"최신이면서 성공적인"** 기억을 자연스럽게 상위에 랭크하도록 파라미터를 튜닝합니다.
 
 ---
 
-## 1. Context Accountant (Token Economics)
+## 1. Native Retrieval (AgentDB)
 
-에이전트에게 전달할 컨텍스트의 총량을 제어합니다.
+`agentdb`의 검색 API를 있는 그대로 활용합니다.
+상충되는 정보(예: 구버전 라이브러리 사용법 vs 신버전 사용법)는 `score` 차이로 자연스럽게 해결됩니다.
 
 ```typescript
-// libs/memory/src/retrieval/accountant.ts
+// libs/memory/src/retrieval/service.ts
 
-export interface ContextBudget {
-  total: number;       // e.g., 8000 tokens
-  reserved: {
-    system: number;    // System prompt
-    task: number;      // Current task description
-    files: number;     // Active file contents
-  };
-  // 남은 예산 = total - reserved
-  availableForMemory: number; 
+interface RetrievalOptions {
+  limit?: number;
+  minScore?: number;
+  taskContext?: string; // 현재 수행하려는 작업 설명
 }
 
-export class ContextAccountant {
-  calculateCost(text: string): number {
-    // Simple approximation: char length / 4
-    return Math.ceil(text.length / 4);
-  }
-
-  allocate(budget: number, items: MemoryUnit[]): MemoryUnit[] {
-    let used = 0;
-    const selected: MemoryUnit[] = [];
-
-    // 우선순위 정렬 (Confidence * Relevance)
-    const sorted = items.sort((a, b) => b.score - a.score);
-
-    for (const item of sorted) {
-      const cost = this.calculateCost(JSON.stringify(item));
-      if (used + cost <= budget) {
-        selected.push(item);
-        used += cost;
-      } else {
-        // 예산 초과 시 요약본(Summary) 시도 또는 스킵
-        break;
-      }
-    }
+async function searchMemory(query: string, options: RetrievalOptions) {
+  // AgentDB Native Call
+  return await agentdb.recall(query, {
+    // 1. Causal Strategy: 인과관계 고려 (성공한 기억 우대)
+    strategy: "causal", 
     
-    return selected;
-  }
+    // 2. Parameters Tuning (경험적 수치)
+    // 이 파라미터 조합이 "Conflict Resolution"의 핵심입니다.
+    params: {
+      alpha: 0.6, // Semantic: 관련성
+      beta: 0.5,  // Uplift: 성공 보상 가중치 (실패한 기억은 점수 하락)
+      gamma: 0.3, // Decay: 시간 감쇠 (오래된 기억은 점수 하락)
+    },
+    
+    // 3. Filter
+    filter: {
+      // 프로젝트 범위 제한 (Global + Current Project)
+      scope: ["global", `project:${currentProjectId}`],
+      // 가설 단계의 기억은 제외 (검증된 것만)
+      status: ["verified", "published"] 
+    },
+    
+    // 4. Native Graph Consistency (Staleness Check 대체)
+    // 현재 파일 시스템 그래프(autoIndex)에 존재하는 노드와 연결된 기억만 반환
+    graph_consistency: true, 
+
+    limit: options.limit || 5
+  });
 }
 ```
 
 ---
 
-## 2. Retrieval Strategy (Priority Layers)
+## 2. 망각 (Decay) 전략
 
-`claude-mem`의 전략을 참조하여, 정보의 종류에 따라 우선순위를 둡니다.
+별도의 Garbage Collection 스크립트를 돌리기보다, `agentdb`의 `retention` 설정을 활용합니다.
 
-| 우선순위 | 종류 | 설명 | 출처 |
-| :--- | :--- | :--- | :--- |
-| **P1** | **Global Skills** | 검증된 성공 패턴. 가장 압축률이 높고 가치가 큼. | `ReasoningBank` |
-| **P2** | **Project Rules** | 프로젝트별 컨벤션 및 금지 사항. | `Constitution` |
-| **P3** | **Recent Errors** | 동일한 실수를 반복하지 않기 위한 최근 실패 기록. | `Reflexion (Failures)` |
-| **P4** | **Similar Episodes** | 현재 태스크와 유사한 과거 사례. | `Reflexion (Vector)` |
-
-### Retrieval Flow
-
-```mermaid
-graph TD
-    Query[Query Task] --> Search
-    
-    subgraph Search [Parallel Search]
-        S1[Search Patterns (P1)]
-        S2[Load Constitution (P2)]
-        S3[Search Failures (P3)]
-        S4[Vector Recall (P4)]
-    end
-    
-    S1 & S2 & S3 & S4 --> Candidates[Candidate Pool]
-    
-    Candidates --> Budgeter{Context Accountant}
-    
-    Budgeter -->|Fits Budget| Full[Full Content]
-    Budgeter -->|Over Budget| Summary[Summarized View]
-    
-    Full & Summary --> Final[Prompt Context]
-```
-
----
-
-## 3. Timeline Rendering (Visual Context)
-
-`claude-mem`은 검색 결과를 단순 나열하지 않고, **타임라인(Timeline)** 형태로 렌더링하여 시간적 인과관계를 보여줍니다.
-
-```markdown
-# 🧠 Memory Context (Timeline View)
-
-## 📅 2026-01-20 (Project Setup)
-- [PATTERN] Established `Next.js 14` directory structure.
-- [DECISION] Selected `Tailwind CSS` over `Chakra UI` for performance.
-
-## 📅 2026-01-22 (Auth Feature)
-- [FAILURE] Encountered `JWT expired` error in Edge Runtime.
-- [FIX] Switched to `jose` library (See: ReasoningPattern #42).
-
-## 📅 Today (Current Context)
-- [GOAL] Implement User Profile page.
-- [WARNING] Remember to use `jose` for JWT handling (Derived from 2026-01-22).
-```
-
----
-
-## 4. Cognitive Gate (Verification)
-
-검색된 정보가 현재 코드베이스와 모순되지 않는지 검증합니다.
-
-```typescript
-async function cognitiveGate(memories: MemoryUnit[]): Promise<MemoryUnit[]> {
-  const validMemories = [];
-  
-  for (const mem of memories) {
-    // 1. 파일 존재 여부 확인
-    if (mem.citations.some(c => c.type === 'file' && !fileExists(c.path))) {
-      // 파일이 삭제되었다면 이 기억은 낡은 것임 -> 제외
-      continue;
-    }
-    
-    // 2. 심볼 존재 여부 확인 (Optional)
-    // ...
-    
-    validMemories.push(mem);
-  }
-  
-  return validMemories;
-}
-```
+*   **Config**: `retention.policy = "uplift_based"`
+*   **Logic**:
+    *   조회되지 않고(Low Access),
+    *   성공에 기여하지 못했거나(Low Reward),
+    *   오래된(High Age) 기억은
+    *   `agentdb`가 내부적으로 인덱스에서 제거합니다.

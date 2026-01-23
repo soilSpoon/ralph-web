@@ -2,150 +2,116 @@
 
 ## 개요
 
-모든 메모리는 **AgentDB**에 저장되지만, 엄격한 **TypeScript 인터페이스**를 통해 데이터의 무결성을 보장합니다.
-핵심 원칙은 **"Provenance First (출처 우선)"**입니다. (`memU` 참조)
+**Source Inspiration**: `memU` (Provenance), `agentic-flow` (Pattern Separation)
+
+`agentdb`는 Schema-less하지만, 우리는 TypeScript 인터페이스를 통해 **메타데이터(Metadata)**의 구조를 강제합니다.
+특히 **일화 기억(Episode)**과 **의미 기억(Pattern)**을 분리하고, 패턴을 다시 **진단(Diagnosis)**과 **해결(Solution)**로 세분화합니다.
 
 ---
 
-## 1. Base Memory Unit & Citation (from memU)
+## 1. AgentDB Metadata Schema
 
-모든 메모리는 반드시 출처(`Citation`)를 가져야 합니다. 출처 없는 정보는 '환각' 또는 '가설'로 취급됩니다.
+모든 항목에 공통으로 적용되는 메타데이터 구조입니다.
 
 ```typescript
 // libs/memory/src/types.ts
 
-export type MemoryStatus = 'hypothesis' | 'verified' | 'published' | 'archived';
-export type MemoryScope = 'task' | 'project' | 'global';
+export interface AgentDBMetadata {
+  // 1. Provenance (출처 증명 - from memU)
+  source: {
+    type: 'user_interaction' | 'agent_execution' | 'test_result' | 'file_analysis';
+    id: string;      // Trace ID
+    author: string;  // 'user', 'claude-code', 'system'
+  };
 
-export interface MemoryUnit {
-  id: string;
+  // 2. Temporal Context (시공간 좌표 - Key for Validation)
+  context: {
+    timestamp: number;
+    git_commit: string;   // 이 기억이 생성된 시점의 커밋 해시
+    git_branch: string;
+    
+    // Integrity Check
+    related_files: Array<{
+      path: string;
+      hash: string; // 파일 내용 해시 (SHA-1)
+    }>;
+  };
+
+  // 3. Governance (신뢰도 관리)
+  validation: {
+    status: 'hypothesis' | 'verified' | 'published' | 'archived';
+    verified_by?: 'test_runner' | 'human_approval' | 'compiler';
+    verification_id?: string;
+    failure_hash?: string; // 순환 수정 방지용 에러 해시
+  };
   
-  // Metadata
-  createdAt: Date;
-  updatedAt: Date;
-  lastAccessedAt: Date;
-  accessCount: number;
+  tags: string[];
+  project_id: string;
+}
+```
+
+---
+
+## 2. Core Entities Mapping
+
+### 2.1 Atomic Fact (일화 기억 - from SimpleMem)
+Raw Log를 정제한 무손실 재진술(Semantic Lossless Restatement) 형태의 실행 기록입니다.
+
+```typescript
+// libs/memory/src/types.ts
+
+export interface AtomicFact {
+  // "The Agent fixed the 'null pointer exception' in 'auth.ts' by adding a check."
+  // 대명사가 없고 독립적으로 이해 가능한 문장
+  content: string; 
   
-  // Governance
-  status: MemoryStatus;
-  scope: MemoryScope;
+  fact_type: 'error' | 'solution' | 'observation' | 'decision';
   confidence: number; // 0.0 ~ 1.0
   
-  // 🔥 Provenance (Essential for Trust - from memU)
-  citations: Citation[];
+  // 엔티티 추출 정보
+  entities: {
+    files: string[];
+    functions: string[];
+    libraries: string[];
+    error_codes?: string[];
+  };
+  
+  metadata: AgentDBMetadata;
 }
+```
 
-export type Citation = 
-  | CommitCitation
-  | LogCitation
-  | UserCitation
-  | FileCitation
-  | UrlCitation;
+### 2.2 Native Trajectory (의미 기억 - ReasoningBank)
+`ruvector`의 **SONA** 엔진이 학습하는 궤적 데이터입니다. 진단(Diagnosis)과 해결(Solution)을 하나의 연속된 흐름으로 저장합니다.
 
-export interface CommitCitation {
-  type: 'commit';
-  hash: string;
-  repo: string;
-  message: string;
-  diffSummary?: string;
-}
-
-export interface LogCitation {
-  type: 'log';
-  logId: string;
-  timestamp: Date;
-  context: string; // 당시 실행된 명령어 등
-}
-
-export interface UserCitation {
-  type: 'user';
-  userId: string;
-  comment: string; // 사용자가 직접 입력한 피드백
-}
-
-export interface FileCitation {
-  type: 'file';
-  path: string;
-  lineHash: string; // 내용 변경 추적용 해시
-}
-
-export interface UrlCitation {
-  type: 'url';
-  url: string;
-  title: string;
-  crawledAt: Date;
+```typescript
+// Mapped to: agentdb.reasoningBank (Native SONA Trajectory)
+interface ReasoningTrajectory {
+  steps: Array<{
+    action: string;      // 시도한 해결책 (Solution)
+    observation: string; // 결과 및 에러 메시지 (Diagnosis/Feedback)
+    reward: number;      // 단계별 보상
+  }>;
+  final_reward: number;  // 최종 성공 여부 (1.0 | 0.0)
+  metadata: AgentDBMetadata;
 }
 ```
 
 ---
 
-## 2. Core Entities (Mapped to agentdb)
+## 3. Schema Enforcement
 
-`agentdb`의 내장 컨트롤러가 사용하는 데이터 구조에 맞추되, 메타데이터를 확장합니다.
-
-### 2.1 Reflexion Episode (Episodic Memory)
-`agentdb.reflexion`에 매핑됩니다. 구체적인 사건과 결과를 기록합니다.
+저장 전 `zod`를 사용하여 스키마를 검증합니다.
 
 ```typescript
-export interface ReflexionEpisode extends MemoryUnit {
-  type: 'episode';
-  
-  // Context
-  taskDescription: string;
-  initialStateSnapshot: string; // Terminal or File snapshot hash
-  
-  // Action & Result
-  actionPlan: string;
-  actionOutput: string;
-  
-  // Outcome
-  success: boolean;
-  critique: string; // "Why it failed/succeeded"
-  
-  // Tags for Clustering
-  tags: string[]; // e.g., ["auth", "jwt", "error-401"]
-}
-```
+import { z } from 'zod';
 
-### 2.2 Reasoning Pattern (Semantic Memory)
-`agentdb.reasoningBank`에 매핑됩니다. 일반화된 지식과 노하우입니다.
-
-```typescript
-export interface ReasoningPattern extends MemoryUnit {
-  type: 'pattern';
-  
-  // Pattern Definition
-  problemSpace: string; // "Authentication"
-  solutionTemplate: string; // "Use NextAuth.js v5 pattern..."
-  
-  // Usage Stats (Self-Learning)
-  usageCount: number;
-  successRate: number; // applied count / success count
-  
-  // Generalization Source
-  generalizedFrom: string[]; // Episode IDs derived from (Links to Episodes)
-}
-```
-
----
-
-## 3. Storage Strategy via AgentDB
-
-`agentdb`는 기본적으로 SQLite + Vector Store를 추상화합니다. 우리는 `metadata` 필드를 활용하여 위 스키마를 저장합니다.
-
-```typescript
-// Example: Storing a Pattern
-await agentdb.reasoningBank.storePattern({
-  taskType: "auth_implementation",
-  approach: "Use NextAuth v5 with Edge compatibility",
-  successRate: 0.9,
-  metadata: {
-    // Custom Fields
-    scope: "global",
-    citations: [
-      { type: "url", url: "https://authjs.dev/...", ... }
-    ],
-    generalizedFrom: ["episode-123", "episode-456"]
-  }
-});
+// [Deprecated] Manual Pattern Splitting is replaced by Native Trajectories
+// Use 'ReasoningTrajectory' schema instead.
+export const SolutionPatternSchema = z.object({
+  diagnosis_id: z.string(),
+  strategy: z.string(),
+  success_rate: z.number().min(0).max(1),
+  usage_count: z.number().int(),
+  metadata: AgentDBMetadataSchema
+}).describe("Legacy schema. Use agentdb.reasoningBank schemas.");
 ```

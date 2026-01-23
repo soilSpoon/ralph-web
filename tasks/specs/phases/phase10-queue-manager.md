@@ -2,6 +2,7 @@
 
 > 📌 Part of [Phase 7-13 구현 명세](../phases.md)
 > **Goal**: 병렬 태스크 관리 및 자동 승격 시스템 (Inspired by `Auto-Claude` Queue V2)
+> **Note**: `Auto-Claude` implements most queue logic in Frontend (`KanbanBoard.tsx`). Ralph-Web will port this to a robust Backend implementation.
 
 ---
 
@@ -63,7 +64,8 @@ export class PromotionManager {
     } else {
       // 3. 실패 시: Smart Demotion
       // 동일 에러가 3번 반복되면(Circular Fix), 우선순위를 대폭 낮추고 개발자 개입 요청
-      if (this.isCircularFailure(taskId, result.error)) {
+      // Refinement: Auto-Claude의 로직을 agentdb.causalGraph.detectCircularFix()로 대체
+      if (await this.isCircularFailure(taskId, result.error)) {
         return { type: 'demote', reason: 'circular_fix_detected' };
       }
       
@@ -71,9 +73,16 @@ export class PromotionManager {
     }
   }
 
-  private calculateScore(result: ExecutionResult): number {
-    // 테스트 커버리지, 실행 속도, 변경 라인 수 등을 종합
-    return 0; // TODO: Implement scoring logic
+  private async calculateScore(taskId: string, result: ExecutionResult): Promise<number> {
+    // [Refinement] Replaced custom logic with AgentDB Native (SONA Engine)
+    // Inspiration: ruvector (Reward-based Uplift Calculation)
+    // 
+    // 우리가 직접 점수 공식을 만들지 않습니다. 
+    // agentdb의 SONA 엔진이 '이전 행동들의 성공 기여도(Uplift)'를 이미 계산해 두었습니다.
+    // 테스트 통과율, 속도, 에러 빈도 등이 종합적으로 반영된 점수입니다.
+    
+    const metrics = await agentdb.reasoning.getSessionMetrics(taskId);
+    return metrics.upliftScore * 100; // 0.0 ~ 1.0 -> 0 ~ 100
   }
 }
 ```

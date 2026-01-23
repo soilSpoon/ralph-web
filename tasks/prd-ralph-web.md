@@ -121,7 +121,7 @@ flowchart LR
 - [Architecture Spec](./specs/architecture.md) - 시스템 구조, 컴포넌트, 파일 구조
 - [UI Spec](./specs/ui-spec.md) - 페이지 레이아웃, 컴포넌트 시스템, 디자인 가이드
 - [User Stories](./specs/user-stories.md) - 전체 사용자 스토리 상세
-- [Memory System](./specs/memory-system.md) - 3단계 메모리 계층, 파일 포맷
+- [Memory System](./specs/memory/00-overview.md) - AgentDB Native 전략 및 3단계 메모리 계층
 - [Database Schema](./specs/database-schema.md) - SQLite 스키마, 동기화 전략
 
 ### 기술 스택

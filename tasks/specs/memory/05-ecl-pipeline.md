@@ -2,139 +2,44 @@
 
 ## 개요
 
-**"Garbage In, Garbage Out."**
-로그가 쌓이는 시점에 품질을 확보하지 않으면, 나중에 아무리 좋은 검색 엔진(Vector DB)을 써도 소용없습니다.
-`SimpleMem`의 **Write-time Disambiguation(쓰기 시점 모호성 제거)** 철학을 도입하여, 에이전트의 로그를 "완결된 원자적 사실"로 변환한 뒤 `agentdb`에 저장합니다.
+**Source Inspiration**: `SimpleMem` (Semantic Lossless Restatement)
+
+데이터 품질의 핵심은 **"모호성 제거(De-referencing)"**입니다. 
+`Cognify` 단계에서 모든 대명사를 없애고, 상대 시간을 절대 시간으로 변환하여, 로그 하나만 떼어놓고 봐도 완벽하게 이해할 수 있는 **Atomic Fact**로 만듭니다.
 
 ---
 
-## 1. Pipeline Architecture
+## 1. Cognify Strategy (The Input Gate)
 
-```mermaid
-graph LR
-    Agent[Agent Action] -->|Raw Log| Buffer[LogBuffer]
-    Buffer -->|Window Full (10 logs)| Cognify[Cognify Agent]
-    
-    subgraph "Transformation (SimpleMem)"
-        Cognify -->|Resolve Pronouns| T1[De-ambiguation]
-        T1 -->|Anchor Time| T2[Absolute Timestamp]
-        T2 -->|Link Files| T3[File Context Injection]
-    end
-    
-    T3 -->|Atomic Facts| Loader[Memory Loader]
-    Loader -->|Store| AgentDB[(agentdb)]
-```
+### 1.1 The "No Pronoun" Rule (SimpleMem 스타일)
 
----
+프롬프트 엔지니어링의 핵심은 모델에게 "요약해줘"가 아니라 **"재진술(Restate)해줘"**라고 요청하는 것입니다.
 
-## 2. Component: LogBuffer
+*   ❌ **Bad (Summary)**: "He fixed the auth bug." (누가? 무슨 버그?)
+*   ✅ **Good (Restatement)**: "The agent `claude-code` fixed the `InvalidTokenError` in `src/lib/auth.ts` by adding a Bearer prefix check."
 
-로그를 하나씩 LLM에 보내면 비용과 시간이 낭비됩니다. 일정량을 모아서 배치 처리합니다.
+### 1.2 핵심 변환 규칙 (F_θ Transformation)
+1.  **Coreference Resolution (Φ_coref)**: 모든 대명사(it, that, he, she)를 실제 엔티티 명칭으로 교체.
+2.  **Temporal Anchoring (Φ_time)**: "yesterday", "now" 등을 절대 날짜와 시간(`2026-01-23T14:00`)으로 변환.
+3.  **Environment Binding**: 현재 Git Commit Hash, 작업 중인 파일 경로, 태스크 ID를 문장 내에 명시적으로 포함.
 
-```typescript
-// libs/memory/src/pipeline/LogBuffer.ts
+### 1.3 Pipeline Steps
 
-interface RawLogEntry {
-  timestamp: Date;
-  actor: 'user' | 'agent' | 'system';
-  content: string; // "그거 안되는데?" (모호함)
-  metadata?: any;
-}
-
-export class LogBuffer {
-  private buffer: RawLogEntry[] = [];
-  private readonly WINDOW_SIZE = 10; // SimpleMem 권장 사이즈
-  
-  constructor(private cognifyService: CognifyService) {}
-
-  add(log: RawLogEntry) {
-    this.buffer.push(log);
-    if (this.buffer.length >= this.WINDOW_SIZE) {
-      this.flush();
-    }
-  }
-  
-  async flush() {
-    if (this.buffer.length === 0) return;
-    
-    const logsToProcess = [...this.buffer];
-    this.buffer = []; // 버퍼 비우기
-    
-    // 비동기로 Cognify 실행 (메인 스레드 차단 방지)
-    this.cognifyService.process(logsToProcess).catch(console.error);
-  }
-}
-```
+1.  **Raw Stream**: 에이전트의 stdout/stderr 및 파일 변경 이벤트를 수집.
+2.  **Buffering**: 2~5초 단위 또는 문맥(Context) 단위로 로그 버퍼링.
+3.  **Context Injection**: 중복 저장을 막기 위해 **최근 저장된 5개의 Atomic Facts**를 프롬프트에 로드.
+4.  **Cognify (LLM)**: `SimpleMem` 스타일 프롬프트를 사용하여 Atomic Fact로 변환.
+    *   Input: Raw Logs + Current Context + Metadata
+    *   Output: JSON List of Atomic Facts
+5.  **Load**: `agentdb`에 저장하며 Vector Indexing 및 Graph Linking 수행.
 
 ---
 
-## 3. Cognify Prompt (The "Magic" Sauce)
+## 2. Prompt Strategy (See `prompts/memory/cognify.md`)
 
-이 프롬프트가 이 시스템의 핵심입니다. `SimpleMem`의 프롬프트를 Ralph-Web 환경에 맞게 최적화했습니다.
-
-```markdown
-# Role
-You are a Memory Cognifier. Your goal is to convert raw conversation logs into "Atomic Memory Entries".
-
-# Input Context
-- Current Date: {{currentDate}} (ISO 8601)
-- Active Files: {{activeFiles}}
-- Project: {{projectName}}
-
-# Instructions (SimpleMem Protocol)
-1. **De-ambiguate**: Replace ALL pronouns (it, they, he, that) with specific entities.
-   - "Fix it" -> "Fix the `auth_error` in `src/auth.ts`"
-2. **Anchor Time**: Convert relative time ("tomorrow", "later") to absolute timestamps.
-3. **Atomicity**: Each entry must be self-contained. Understanding it should NOT require reading previous logs.
-4. **Outcome Extraction**: Identify the result of actions (Success/Fail).
-
-# Raw Logs
-{{logs}}
-
-# Output Format (JSON)
-[
-  {
-    "fact": "The user reported a 401 error in 'src/api/auth.ts' during login.",
-    "tags": ["bug", "auth", "401"],
-    "timestamp": "2026-01-23T10:00:00Z",
-    "confidence": 1.0,
-    "citations": [
-      { "type": "log", "logId": "log-123", "timestamp": "..." }
-    ]
-  },
-  {
-    "fact": "Agent decided to switch from 'jsonwebtoken' to 'jose' library to fix edge runtime compatibility.",
-    "tags": ["decision", "dependency", "jose"],
-    "timestamp": "2026-01-23T10:05:00Z",
-    "confidence": 0.9,
-    "citations": [...]
-  }
-]
-```
-
----
-
-## 4. Loader (to agentdb)
-
-변환된 데이터를 `agentdb`의 적절한 컨트롤러로 라우팅합니다.
-
-```typescript
-// libs/memory/src/pipeline/Loader.ts
-
-async function loadToAgentDB(entries: AtomicEntry[]) {
-  for (const entry of entries) {
-    if (entry.tags.includes('decision') || entry.tags.includes('error')) {
-      // 중요한 결정이나 에러는 Reflexion (Episode)으로 저장
-      await agentdb.reflexion.storeEpisode({
-        task: entry.fact,
-        success: !entry.tags.includes('error'),
-        reward: entry.tags.includes('error') ? 0.0 : 1.0,
-        metadata: { citations: entry.citations }
-      });
-    } else {
-      // 일반적인 사실은 추후 Knowledge Graph 확장을 위해 보관 (또는 단순 로그)
-      // 현재는 Reflexion에 통합 저장하거나 별도 Semantic Store 사용
-    }
-  }
-}
-```
+구체적인 프롬프트는 별도 파일로 관리하여 버전을 제어합니다.
+핵심 요구사항:
+1.  **Semantic Lossless**: 기술적 세부사항(에러 코드, 변수명) 유지.
+2.  **Absolute Context**: 상대적 표현 제거.
+3.  **Intent/Outcome Separation**: 시도한 것과 결과를 분리.
+4.  **Density Optimization**: 중복된 정보는 필터링하여 토큰 효율성 극대화.

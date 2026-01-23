@@ -87,40 +87,41 @@ lib/
 
 ## 주요 모듈 상세
 
-### 1. Safety: Circular Fix Detector (from Auto-Claude)
+### 1. Safety: Circular Fix Detector (Native Integration)
 
-에이전트가 동일한 에러를 반복해서 수정하려고 시도하는 "Death Loop"를 감지합니다.
+**Source Inspiration**: `Auto-Claude` (Error Hashing & Loop Detection)
+
+**Refinement Strategy**: 
+`Auto-Claude`는 메모리 내 `Map`과 SHA-256 해시를 사용하여 루프를 감지했지만, 이는 프로세스가 재시작되면 초기화되는 단점이 있습니다.
+우리는 `agentdb`의 **Causal Graph** 기능을 사용하여 영속적이고 스마트(Fuzzy Matching)한 루프 감지를 구현합니다.
 
 ```typescript
 // lib/orchestrator/safety/circular-detector.ts
+import { agentdb } from '@/lib/memory/agentdb';
 
 export class CircularFixDetector {
-  private errorHistory: Map<string, number> = new Map(); // hash -> count
-  private readonly THRESHOLD = 3;
-
   /**
-   * 에러 해시 생성 (Error Msg + Stack Trace 일부)
+   * AgentDB Native API를 사용하여 순환 수정 감지
+   * (별도의 Error Hashing 로직 불필요)
    */
-  private hashError(errorOutput: string): string {
-    return crypto.createHash('sha256').update(errorOutput.slice(0, 500)).digest('hex');
-  }
+  async check(taskId: string, errorOutput: string): Promise<{ detected: boolean; count: number; context?: string }> {
+    
+    // agentdb가 에러 메시지의 유사성을 판단하고, 과거 시도 그래프를 순회하여 반복 여부 확인
+    const detection = await agentdb.causalGraph.detectCircularFix({
+      taskId: taskId,
+      errorSignature: errorOutput, 
+      threshold: 3
+    });
 
-  /**
-   * 순환 감지 체크
-   */
-  check(errorOutput: string): { detected: boolean; count: number } {
-    const hash = this.hashError(errorOutput);
-    const count = (this.errorHistory.get(hash) || 0) + 1;
-    this.errorHistory.set(hash, count);
-
-    return {
-      detected: count >= this.THRESHOLD,
-      count
-    };
-  }
-
-  reset() {
-    this.errorHistory.clear();
+    if (detection.isCircular) {
+      return {
+        detected: true,
+        count: detection.cycleCount,
+        context: detection.previousAttempts.map(a => a.critique).join('\n')
+      };
+    }
+    
+    return { detected: false, count: detection.cycleCount };
   }
 }
 ```
@@ -134,13 +135,13 @@ async function runVerification() {
   const result = await runTests();
   
   if (!result.passed) {
-    // 순환 수정 감지
-    const safety = this.circularDetector.check(result.errorOutput);
+    // 순환 수정 감지 (Async & AgentDB backed)
+    const safety = await this.circularDetector.check(this.task.id, result.errorOutput);
     
     if (safety.detected) {
       // 전략: Gotcha 주입 및 전략 변경 프롬프트
-      await this.injectGotchaAndPivot(result.errorOutput);
-      // 루프 계속 진행 (단, 프롬프트가 변경됨)
+      // agentdb에서 가져온 이전 시도들의 요약(safety.context)을 함께 전달
+      await this.injectGotchaAndPivot(result.errorOutput, safety.context);
       return false;
     }
     

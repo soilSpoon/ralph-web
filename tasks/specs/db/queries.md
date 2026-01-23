@@ -16,11 +16,6 @@ CREATE INDEX idx_tasks_created ON tasks(created_at DESC);
 CREATE INDEX idx_stories_task ON stories(task_id);
 CREATE INDEX idx_stories_passes ON stories(task_id, passes);
 
--- 패턴 조회 최적화
-CREATE INDEX idx_patterns_task ON patterns(task_id);
-CREATE INDEX idx_patterns_category ON patterns(category);
-CREATE INDEX idx_patterns_global ON patterns(task_id) WHERE task_id IS NULL;
-
 -- 반복 로그 조회 최적화
 CREATE INDEX idx_iterations_task ON iterations(task_id, iteration_number);
 
@@ -107,14 +102,6 @@ FROM stories s
 JOIN tasks t ON s.task_id = t.id
 WHERE s.passes = FALSE AND t.status = 'running'
 ORDER BY s.priority ASC;
-```
-
-### 글로벌 패턴 조회
-
-```sql
-SELECT * FROM patterns
-WHERE task_id IS NULL
-ORDER BY created_at DESC;
 ```
 
 ### 태스크 완료율 통계
