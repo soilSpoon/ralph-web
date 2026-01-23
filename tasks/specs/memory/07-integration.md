@@ -85,18 +85,19 @@ async function hydrateSession(
 ): Promise<HydrationConfig> {
   const constitution = await loadConstitution();
 
-  // 작업 컨텍스트 기반 Skill 검색
-  const relevantSkills = await searchMemory(taskContext.description, {
-    intent: "how_to",
-    scope: "project",
+  // 작업 컨텍스트 기반 Skill 검색 (via AgentDB)
+  const relevantSkills = await agentdb.skillLibrary.findSkills(
+    taskContext.description,
+  );
+
+  // 관련 파일의 Gotcha 검색 (via AgentDB Patterns/Gotchas)
+  const recentGotchas = await agentdb.recall(taskContext.description, {
+    filter: { type: "gotcha", files: taskContext.files },
     limit: 5,
   });
 
-  // 관련 파일의 Gotcha 검색
-  const recentGotchas = await getGotchasForFiles(taskContext.files);
-
-  // 코드 심볼 로드
-  const codeContext = await getCodeEntitiesForFiles(taskContext.files);
+  // 코드 심볼 로드 (pglite)
+  const codeContext = await pglite.codeGraph.getEntities(taskContext.files);
 
   return {
     constitution,
@@ -134,27 +135,32 @@ interface ThinkPhaseInjection {
 }
 
 async function prepareThinkContext(task: Task): Promise<ThinkPhaseInjection> {
-  // 병렬로 검색
-  const [skills, patterns, gotchas, codeEntities] = await Promise.all([
-    searchMemory(task.description, { intent: "how_to", limit: 5 }),
-    searchPatterns(task.description, { limit: 3 }),
-    searchGotchas(task.description, { files: task.files, limit: 5 }),
-    getCodeEntitiesForFiles(task.files),
+  // 병렬로 검색 (Using AgentDB)
+  const [skills, recallResult, codeEntities] = await Promise.all([
+    agentdb.skillLibrary.findSkills(task.description),
+
+    // Causal Recall handles patterns, gotchas, and past episodes
+    agentdb.recall(task.description, {
+      limit: 10,
+      context: { files: task.files },
+    }),
+
+    pglite.codeGraph.getEntities(task.files),
   ]);
 
-  // 충분성 검사
-  const sufficiency = await evaluateSufficiency(task, {
-    skills,
-    patterns,
-    gotchas,
-    codeEntities,
-  });
+  // recallResult contains patterns, gotchas, and episodes
+  const patterns = recallResult.filter((r) => r.type === "pattern");
+  const gotchas = recallResult.filter((r) => r.type === "gotcha");
 
-  // 부족하면 추가 검색
-  if (!sufficiency.isComplete) {
-    for (const missing of sufficiency.missingTypes) {
-      await expandSearch(task, missing);
-    }
+  // 충분성 검사 (AgentDB Explainable Recall)
+  const sufficiency = await agentdb.explainableRecall.verifySufficiency(
+    task.description,
+    recallResult,
+  );
+
+  // 부족하면 추가 검색 (handled by Explainable Recall internally or re-query)
+  if (!sufficiency.isComplete && sufficiency.missingTopics.length > 0) {
+    // ... expansion logic
   }
 
   return {
@@ -163,7 +169,7 @@ async function prepareThinkContext(task: Task): Promise<ThinkPhaseInjection> {
     patterns,
     gotchas,
     codeSymbols: codeEntities,
-    codeRelations: await getRelationsForEntities(codeEntities),
+    codeRelations: await pglite.codeGraph.getRelations(codeEntities),
     sufficiency,
     citationRequirements: CITATION_RULES,
   };
@@ -231,21 +237,25 @@ async function prepareCodeContext(
   task: Task,
   modifyingFiles: string[],
 ): Promise<CodePhaseInjection> {
-  // 파일별 Gotcha
-  const fileGotchas = await getGotchasForFiles(modifyingFiles);
+  // 파일별 Gotcha (AgentDB)
+  const fileGotchas = await agentdb.recall(
+    `gotchas for ${modifyingFiles.join(", ")}`,
+    {
+      filter: { type: "gotcha" },
+    },
+  );
 
-  // 최근 타임라인 (관련 파일에 대한)
-  const recentTimeline = await getRecentObservations({
-    files: modifyingFiles,
-    limit: 10,
-    window: { days: 7 },
+  // 최근 타임라인 (pglite Staging + AgentDB Recent Episodes)
+  const recentTimeline = await agentdb.reflexion.getRecentEpisodes({
+    limit: 5,
+    filter: { files: modifyingFiles },
   });
 
-  // 순환 수정 체크
-  const circularFixCheck = await checkCircularFix(
-    task.id,
-    task.proposedApproach,
-  );
+  // 순환 수정 체크 (AgentDB Causal Graph)
+  const circularFixCheck = await agentdb.causalGraph.detectCircularFix({
+    taskId: task.id,
+    attemptedSolution: task.proposedApproach,
+  });
 
   return {
     fileGotchas,
@@ -417,34 +427,24 @@ async function consolidateOnMerge(
 ): Promise<ConsolidateResult> {
   const { taskId, commitHash } = config;
 
-  // 1. 작업 스코프에서 고가치 항목 추출
-  const stagingEntries = await getStagingEntries(taskId);
-  const highValueEntries = filterHighValue(stagingEntries);
+  // 1. Promote Staging to AgentDB (Reflexion Memory)
+  // This triggers embedding, graph node creation, and learning samples
+  const episode = await pglite.constructEpisode(taskId);
+  await agentdb.reflexion.storeEpisode(episode);
 
-  // 2. 프로젝트 메모리와 중복 체크
-  const { unique, duplicates } =
-    await deduplicateAgainstProject(highValueEntries);
-
-  // 3. 충돌 해결 (대체 시맨틱)
-  const conflicts = await detectConflicts(unique);
-  for (const conflict of conflicts) {
-    await resolveWithSupersession(conflict);
-  }
-
-  // 4. 프로젝트 스코프로 승격
-  for (const entry of unique) {
-    await promoteEntry(entry.id, "task", "project");
-  }
-
-  // 5. 변경된 파일의 코드 그래프 업데이트
+  // 2. Update Causal Graph with new Code Context
   const changedFiles = await getChangedFiles(commitHash);
-  await updateCodeGraph(changedFiles);
+  await agentdb.causalGraph.updateContext(changedFiles);
+
+  // 3. Deduplication & Cleanup (handled by NightlyLearner asynchronously)
+  // But we can trigger a quick pass if needed
+  // await agentdb.nightlyLearner.runQuickPass();
 
   return {
-    promoted: unique.length,
-    deduplicated: duplicates.length,
-    conflictsResolved: conflicts.length,
-    codeEntitiesUpdated: await getUpdatedEntityCount(),
+    promoted: 1, // Unit is Episode
+    deduplicated: 0, // Handled async
+    conflictsResolved: 0,
+    codeEntitiesUpdated: changedFiles.length,
   };
 }
 ```

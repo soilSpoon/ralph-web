@@ -34,13 +34,13 @@ Week 3: Optimization & Causal Learning (Graph + NightlyLearner)
 
 ### Deliverables
 
-| 파일                                      | 설명                   |
-| ----------------------------------------- | ---------------------- |
-| `libs/memory/src/store/interface.ts`      | MemoryStore 인터페이스 |
-| `libs/memory/src/store/sqlite.ts`         | SQLite 구현체          |
-| `libs/memory/src/governance/scope.ts`     | 스코프 관리            |
-| `libs/memory/src/governance/promotion.ts` | 승격 파이프라인        |
-| `libs/memory/src/governance/dedupe.ts`    | 중복 제거              |
+| 파일                                      | 설명                    |
+| ----------------------------------------- | ----------------------- |
+| `libs/memory/src/store/interface.ts`      | MemoryStore 인터페이스  |
+| `libs/memory/src/store/pglite.ts`         | Pglite(Staging) 구현체  |
+| `libs/memory/src/store/agentdb.ts`        | AgentDB(Published) 연동 |
+| `libs/memory/src/governance/promotion.ts` | 승격 파이프라인         |
+| `libs/memory/src/governance/dedupe.ts`    | 중복 제거(Nightly)      |
 
 ### SQL Migrations
 
@@ -259,8 +259,8 @@ CREATE TABLE observations (
 ```json
 {
   "dependencies": {
-    "better-sqlite3": "^9.0.0",
-    "sqlite-vec": "^0.1.0",
+    "agentdb": "^0.1.0-alpha",
+    "pglite": "^0.2.0",
     "drizzle-orm": "^0.29.0",
     "openai": "^4.0.0"
   }
