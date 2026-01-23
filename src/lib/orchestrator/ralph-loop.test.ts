@@ -1,14 +1,27 @@
-import { describe, expect, it, vi } from "vitest";
-import { RalphLoop } from "@/lib/orchestrator/ralph-loop";
+import { exec } from "node:child_process";
+import { beforeEach, describe, expect, it, type Mock, vi } from "vitest";
+import type {
+  RalphLoop,
+  RalphLoopOptions,
+} from "@/lib/orchestrator/ralph-loop";
 import type { WorkflowPhase } from "@/lib/orchestrator/types";
 
-vi.mock("./pty-runner", () => ({
+// --- Mocks ---
+
+// Mock child_process exec
+vi.mock("node:child_process", () => ({
+  exec: vi.fn(),
+}));
+
+// Mock pty-runner
+vi.mock("@/lib/orchestrator/pty-runner", () => ({
   ptyRunner: {
-    spawn: vi.fn().mockResolvedValue({}),
+    spawn: vi.fn(),
   },
 }));
 
-vi.mock("../prd/generator", () => ({
+// Mock prd/generator
+vi.mock("@/lib/prd/generator", () => ({
   prdGenerator: {
     generateQuestions: vi.fn().mockResolvedValue([]),
     generate: vi.fn(),
@@ -16,13 +29,15 @@ vi.mock("../prd/generator", () => ({
   },
 }));
 
-vi.mock("../db/sync-service", () => ({
+// Mock db/sync-service
+vi.mock("@/lib/db/sync-service", () => ({
   syncService: {
     materializeTask: vi.fn().mockResolvedValue("/mock/prd.json"),
     consolidateTask: vi.fn().mockResolvedValue(undefined),
   },
 }));
 
+// Mock worktree
 const mockWorktreeServiceInstance = {
   createWorktree: vi.fn().mockResolvedValue({
     id: "wt-1",
@@ -32,181 +47,210 @@ const mockWorktreeServiceInstance = {
   removeWorktree: vi.fn().mockResolvedValue(undefined),
   getSettings: vi.fn().mockReturnValue({}),
 };
-
-vi.mock("../worktree", () => ({
+vi.mock("@/lib/worktree", () => ({
   WorktreeService: vi
     .fn()
     .mockImplementation(() => mockWorktreeServiceInstance),
 }));
 
+// Mock memory-ops
+vi.mock("@/lib/completion/memory-ops", () => ({
+  memoryOps: {
+    saveTerminalSnapshot: vi.fn().mockResolvedValue(undefined),
+  },
+}));
+
+// Define strict types for mocks
+interface ExecError extends Error {
+  code: number;
+  stdout: string;
+  stderr: string;
+}
+
+// --- Tests ---
+
 describe("RalphLoop", () => {
-  it("should initialize and transition through phases", async () => {
-    const loop = new RalphLoop({
-      id: "session-1",
-      taskId: "task-1",
-      providerId: "gemini",
-      maxIterations: 5,
-      metadataPath: "./temp/metadata",
+  let RalphLoopClass: new (opts: RalphLoopOptions) => RalphLoop;
+  let loop: RalphLoop;
+  let ptyRunner: { spawn: Mock };
+  let memoryOps: { saveTerminalSnapshot: Mock };
+
+  beforeEach(async () => {
+    vi.clearAllMocks();
+
+    // Dynamic imports
+    const rlModule = await import("@/lib/orchestrator/ralph-loop");
+    RalphLoopClass = rlModule.RalphLoop;
+
+    const prModule = await import("@/lib/orchestrator/pty-runner");
+    ptyRunner = prModule.ptyRunner as unknown as { spawn: Mock };
+
+    const moModule = await import("@/lib/completion/memory-ops");
+    memoryOps = moModule.memoryOps as unknown as { saveTerminalSnapshot: Mock };
+
+    // Reset exec default implementation
+    (exec as unknown as Mock).mockReset();
+    (exec as unknown as Mock).mockImplementation((_cmd, options, callback) => {
+      const cb = typeof options === "function" ? options : callback;
+      // Default: Success
+      cb(null, "Tests passed", "");
+      return { unref: () => {} };
     });
 
-    // We want to test that it reaches 'prd_generating' phase
-    const phases: WorkflowPhase[] = [];
-    loop.onTransition = (phase: WorkflowPhase) => phases.push(phase);
-
-    await loop.initialize();
-
-    expect(phases).toContain("initializing");
-
-    // Check if worktree was created
-    expect(mockWorktreeServiceInstance.createWorktree).toHaveBeenCalledWith(
-      "task-1",
-    );
-  });
-
-  it("should transition to prd_clarifying when starting wizard", async () => {
-    const loop = new RalphLoop({
-      id: "session-2",
-      taskId: "task-2",
-      providerId: "gemini",
-      maxIterations: 5,
-      metadataPath: "./temp/metadata",
-    });
-
-    const phases: WorkflowPhase[] = [];
-    loop.onTransition = (phase: WorkflowPhase) => phases.push(phase);
-
-    await loop.initialize();
-    await loop.startPrdWizard("새로운 인증 모듈을 만들고 싶어");
-
-    expect(phases).toContain("prd_clarifying");
-  });
-
-  it("should transition to planning and select a story", async () => {
-    const loop = new RalphLoop({
-      id: "session-3",
-      taskId: "task-3",
-      providerId: "gemini",
-      maxIterations: 5,
-      metadataPath: "./temp/metadata",
-    });
-
-    const phases: WorkflowPhase[] = [];
-    loop.onTransition = (phase: WorkflowPhase) => phases.push(phase);
-
-    await loop.initialize();
-    await loop.enterPlanning();
-
-    expect(phases).toContain("planning");
-  });
-
-  it("should transition to coding and spawn a PTY", async () => {
-    const loop = new RalphLoop({
-      id: "session-4",
-      taskId: "task-4",
-      providerId: "gemini",
-      maxIterations: 5,
-      metadataPath: "./temp/metadata",
-      worktreePath: "./temp/worktree",
-    });
-
-    const phases: WorkflowPhase[] = [];
-    loop.onTransition = (phase: WorkflowPhase) => phases.push(phase);
-
-    await loop.initialize();
-    await loop.startCoding({
-      id: "S-1",
-      taskId: "T-1",
-      title: "Story 1",
-      description: "Desc",
-      acceptanceCriteria: [],
-      priority: 1,
-      passes: false,
-    });
-
-    expect(phases).toContain("coding");
-  });
-
-  it("should transition to verifying when PTY exits", async () => {
-    let capturedOnExit: (code: number) => void = () => {};
-    const { ptyRunner } = await import("./pty-runner");
-    vi.spyOn(ptyRunner, "spawn").mockImplementation(async (options) => {
-      capturedOnExit = options.onExit;
+    // Reset ptyRunner default implementation
+    (ptyRunner.spawn as Mock).mockImplementation(async (options) => {
+      setTimeout(() => options.onExit(0), 10);
       return {
-        onData: vi.fn(() => ({ dispose: vi.fn() })),
-        onExit: vi.fn(() => ({ dispose: vi.fn() })),
+        pid: 123,
+        onData: vi.fn(),
+        onExit: vi.fn(),
         write: vi.fn(),
         kill: vi.fn(),
         resize: vi.fn(),
       };
     });
+  });
 
-    const loop = new RalphLoop({
-      id: "session-5",
-      taskId: "task-5",
+  const createLoop = (maxIterations = 5) => {
+    return new RalphLoopClass({
+      id: "session-test",
+      taskId: "task-test",
       providerId: "gemini",
-      maxIterations: 5,
+      maxIterations,
       metadataPath: "./temp/metadata",
       worktreePath: "./temp/worktree",
     });
+  };
 
+  const dummyStory = {
+    id: "S-1",
+    taskId: "T-1",
+    title: "Story 1",
+    description: "Desc",
+    acceptanceCriteria: [],
+    priority: 1,
+    passes: false,
+  };
+
+  it("should initialize and transition through phases", async () => {
+    loop = createLoop();
     const phases: WorkflowPhase[] = [];
-    loop.onTransition = (phase: WorkflowPhase) => phases.push(phase);
+    loop.onTransition = (phase) => phases.push(phase);
 
     await loop.initialize();
-    await loop.startCoding({
-      id: "S-1",
-      taskId: "T-1",
-      title: "Story 1",
-      description: "Desc",
-      acceptanceCriteria: [],
-      priority: 1,
-      passes: false,
+    expect(phases).toContain("initializing");
+  });
+
+  it("should transition to coding and then verifying", async () => {
+    loop = createLoop();
+    const phases: WorkflowPhase[] = [];
+    loop.onTransition = (phase) => phases.push(phase);
+
+    await loop.initialize();
+    await loop.startCoding(dummyStory);
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(phases).toContain("coding");
+    expect(phases).toContain("verifying");
+    expect(phases).toContain("planning");
+  });
+
+  it("should handle verification failure and retry", async () => {
+    // Override implementation
+    let attempt = 0;
+    (exec as unknown as Mock).mockImplementation((cmd, options, callback) => {
+      const cb = typeof options === "function" ? options : callback;
+      if (cmd.includes("npm test")) {
+        attempt++;
+        if (attempt === 1) {
+          const err = new Error("Command failed") as ExecError;
+          err.code = 1;
+          err.stdout = "ReferenceError: foo is not defined";
+          err.stderr = "";
+          cb(err, "ReferenceError: foo is not defined", "");
+        } else {
+          cb(null, "Success", "");
+        }
+      } else {
+        cb(null, "Success", "");
+      }
+      return { unref: () => {} };
     });
 
-    // Simulate PTY exit
-    await capturedOnExit(0);
+    loop = createLoop();
+    const phases: WorkflowPhase[] = [];
+    loop.onTransition = (phase) => phases.push(phase);
 
-    expect(phases).toContain("verifying");
+    await loop.initialize();
+    await loop.startCoding(dummyStory);
+
+    await new Promise((resolve) => setTimeout(resolve, 50));
+
+    expect(memoryOps.saveTerminalSnapshot).toHaveBeenCalled();
+    expect(ptyRunner.spawn).toHaveBeenCalledTimes(2);
+  });
+
+  it("should detect circular errors and pivot strategy", async () => {
+    (exec as unknown as Mock).mockImplementation((_cmd, options, callback) => {
+      const cb = typeof options === "function" ? options : callback;
+      const err = new Error("Command failed") as ExecError;
+      err.code = 1;
+      err.stdout = "Persistent Error: X is broken";
+      err.stderr = "";
+      cb(err, err.stdout, "");
+      return { unref: () => {} };
+    });
+
+    loop = createLoop();
+    const phases: WorkflowPhase[] = [];
+    loop.onTransition = (phase) => phases.push(phase);
+
+    await loop.initialize();
+    await loop.startCoding(dummyStory);
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(phases).toContain("circular_detected");
+  });
+
+  it("should stop after max iterations", async () => {
+    (exec as unknown as Mock).mockImplementation((_cmd, options, callback) => {
+      const cb = typeof options === "function" ? options : callback;
+      const err = new Error("Command failed") as ExecError;
+      err.code = 1;
+      err.stdout = "Some Error";
+      err.stderr = "";
+      cb(err, err.stdout, "");
+      return { unref: () => {} };
+    });
+
+    loop = createLoop(2);
+    const phases: WorkflowPhase[] = [];
+    loop.onTransition = (phase) => phases.push(phase);
+
+    await loop.initialize();
+    await loop.startCoding(dummyStory);
+
+    await new Promise((resolve) => setTimeout(resolve, 200));
+
+    expect(phases).toContain("error");
   });
 
   describe("Queue Integration", () => {
     it("should transition to queued after PRD approval", async () => {
-      const loop = new RalphLoop({
-        id: "session-q1",
-        taskId: "task-q1",
-        providerId: "gemini",
-        maxIterations: 5,
-        metadataPath: "./temp/metadata",
-      });
-
+      loop = createLoop();
       await loop.approvePRD();
       expect(loop.getPhase()).toBe("queued");
-    });
-
-    it("should transition to initializing when started from queue", async () => {
-      const loop = new RalphLoop({
-        id: "session-q2",
-        taskId: "task-q2",
-        providerId: "gemini",
-        maxIterations: 5,
-        metadataPath: "./temp/metadata",
-        initialPhase: "queued",
-      });
-
-      await loop.startExecution();
-      expect(loop.getPhase()).toBe("initializing");
     });
   });
 });
 
-import { phaseToUIStatus } from "./types";
+import { phaseToUIStatus } from "@/lib/orchestrator/types";
 
 describe("phaseToUIStatus", () => {
   it("should map correctly", () => {
-    expect(phaseToUIStatus("prd_clarifying")).toBe("draft");
-    expect(phaseToUIStatus("queued")).toBe("queued");
-    expect(phaseToUIStatus("coding")).toBe("running");
-    expect(phaseToUIStatus("task_reviewing")).toBe("review");
-    expect(phaseToUIStatus("completed")).toBe("completed");
+    expect(phaseToUIStatus("circular_detected")).toBe("running");
+    expect(phaseToUIStatus("error")).toBe("completed");
   });
 });

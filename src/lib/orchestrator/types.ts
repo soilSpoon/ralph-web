@@ -17,6 +17,8 @@ export type WorkflowPhase =
   | "planning" // Selecting the next story/task to implement (System)
   | "coding" // Agent is actively writing/modifying code (AI)
   | "verifying" // Running builds and tests to verify changes (System)
+  | "circular_detected" // System detected a loop in fixes
+  | "error" // System encountered a critical error
 
   // --- Completion & Review ---
   | "task_reviewing" // Final task review by the user
@@ -36,7 +38,15 @@ export function phaseToUIStatus(phase: WorkflowPhase): UIStatus {
     return "draft";
   }
   if (phase === "queued") return "queued";
-  if (["initializing", "planning", "coding", "verifying"].includes(phase)) {
+  if (
+    [
+      "initializing",
+      "planning",
+      "coding",
+      "verifying",
+      "circular_detected",
+    ].includes(phase)
+  ) {
     return "running";
   }
   if (phase === "task_reviewing") return "review";

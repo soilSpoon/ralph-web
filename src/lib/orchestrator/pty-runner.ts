@@ -13,6 +13,7 @@ type PtyRecord = {
  * Minimal interface for the agent process, matched by node-pty's IPty.
  */
 export interface IAgentProcess {
+  pid: number;
   onData(cb: (data: string) => void): { dispose(): void };
   onExit(cb: (data: { exitCode: number; signal?: number }) => void): {
     dispose(): void;
@@ -45,6 +46,7 @@ export class PTYRunner {
     cwd: string;
     prompt: string;
     autoApprove?: boolean;
+    signal?: AbortSignal;
     onData: (data: string) => void;
     onExit: (code: number, signal?: number) => void;
   }): Promise<IAgentProcess> {
@@ -117,6 +119,17 @@ export class PTYRunner {
     };
     ptys.set(options.id, record);
 
+    // Handle AbortSignal if provided
+    if (options.signal) {
+      if (options.signal.aborted) {
+        this.kill(options.id);
+        return proc;
+      }
+      options.signal.addEventListener("abort", () => {
+        this.kill(options.id);
+      });
+    }
+
     proc.onData((data) => {
       record.output.push(data);
       options.onData(data);
@@ -151,7 +164,17 @@ export class PTYRunner {
     const record = ptys.get(id);
     if (record) {
       try {
-        record.proc.kill();
+        // Try to kill the process group to avoid orphans
+        if (process.platform !== "win32" && record.proc.pid) {
+          try {
+            process.kill(-record.proc.pid, "SIGKILL");
+          } catch (_e) {
+            // Fallback if group kill fails
+            record.proc.kill();
+          }
+        } else {
+          record.proc.kill();
+        }
       } catch (_e) {
         // Ignore kill errors
       }
