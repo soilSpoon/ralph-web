@@ -9,6 +9,10 @@ interface TerminalViewProps {
   sessionId: string;
 }
 
+import { z } from "zod";
+
+const SSEDataSchema = z.string();
+
 export function TerminalView({ sessionId }: TerminalViewProps) {
   const terminalRef = useRef<HTMLDivElement>(null);
   const xtermRef = useRef<Terminal>(null);
@@ -39,15 +43,25 @@ export function TerminalView({ sessionId }: TerminalViewProps) {
     );
 
     eventSource.addEventListener("data", (event: MessageEvent) => {
-      const data = JSON.parse(event.data);
-      term.write(data);
+      try {
+        const rawData = typeof event.data === "string" ? event.data : "";
+        const data = SSEDataSchema.parse(JSON.parse(rawData));
+        term.write(data);
+      } catch (err) {
+        console.error("[TerminalView] Failed to parse data event:", err);
+      }
     });
 
     eventSource.addEventListener("transition", (event: MessageEvent) => {
-      const phase = JSON.parse(event.data);
-      term.write(
-        `\r\n\x1b[33m--- Workflow Transition: ${phase} ---\x1b[0m\r\n`,
-      );
+      try {
+        const rawData = typeof event.data === "string" ? event.data : "";
+        const phase = SSEDataSchema.parse(JSON.parse(rawData));
+        term.write(
+          `\r\n\x1b[33m--- Workflow Transition: ${phase} ---\x1b[0m\r\n`,
+        );
+      } catch (err) {
+        console.error("[TerminalView] Failed to parse transition event:", err);
+      }
     });
 
     eventSource.onerror = (err) => {

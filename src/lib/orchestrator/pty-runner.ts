@@ -65,7 +65,8 @@ export class PTYRunner {
     const shell = getDefaultShell();
 
     // 1. Build a clean environment (Security Best Practice)
-    const cleanEnv: Record<string, string> = {
+    const cleanEnv: NodeJS.ProcessEnv = {
+      NODE_ENV: process.env.NODE_ENV || "development",
       TERM: "xterm-256color",
       COLORTERM: "truecolor",
       HOME: process.env.HOME || os.homedir(),

@@ -7,6 +7,17 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ["lucide-react", "@base-ui/react"],
   },
+  serverExternalPackages: [
+    "agentdb",
+    "ruvector",
+    "@ruvector/ruvllm",
+    "@ruvector/attention",
+    "@ruvector/graph-node",
+    "@ruvector/sona",
+    "better-sqlite3",
+    "sharp",
+    "node-pty",
+  ],
   images: {
     remotePatterns: [
       {

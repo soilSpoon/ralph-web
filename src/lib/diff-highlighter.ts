@@ -22,7 +22,7 @@ interface SyntaxLine {
   nodeList: { node: SyntaxNode; wrapper?: SyntaxNode }[];
 }
 
-export type SyntaxFileMap = Record<number, SyntaxLine>;
+export type SyntaxFileMap = { [key: number]: SyntaxLine };
 
 export interface DiffHighlighter {
   name: string;
@@ -150,7 +150,7 @@ function processAST(ast: Root): {
 
       if (node.type === "element") {
         const elementNode: SyntaxNode = {
-          type: node.type,
+          type: "element",
           tagName: node.tagName,
           properties: node.properties,
           value: "",

@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/input-group";
 import { cn } from "@/lib/utils";
 
-function Combobox({ ...props }: ComboboxPrimitive.Root.Props<unknown>) {
+function Combobox<T>({ ...props }: ComboboxPrimitive.Root.Props<T>) {
   return <ComboboxPrimitive.Root data-slot="combobox" {...props} />;
 }
 

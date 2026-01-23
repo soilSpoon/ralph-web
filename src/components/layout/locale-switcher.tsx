@@ -21,7 +21,7 @@ export function LocaleSwitcher() {
     if (!value) return;
 
     const isLocale = (v: string): v is (typeof routing.locales)[number] =>
-      (routing.locales as readonly string[]).includes(v);
+      routing.locales.some((l) => l === v);
 
     if (isLocale(value)) {
       router.replace(pathname, { locale: value });

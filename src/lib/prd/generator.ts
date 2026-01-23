@@ -95,7 +95,7 @@ export class PRDGenerator {
 
   async generate(
     description: string,
-    answers: Record<string, string>,
+    answers: { [key: string]: string },
     maxRetries = 3,
   ): Promise<PRD> {
     const userContent = `Description: ${description}\nAnswers: ${JSON.stringify(answers)}`;

@@ -1,34 +1,51 @@
-import crypto from "node:crypto";
+export interface ICircularFixDetector {
+  check(errorOutput: string): { detected: boolean; similarity: number };
+  reset(): void;
+}
 
-export class CircularFixDetector {
-  private errorHistory: Map<string, number> = new Map(); // hash -> count
-  private readonly THRESHOLD = 3;
+export class CircularFixDetector implements ICircularFixDetector {
+  private errorHistory: string[] = [];
+  private readonly SIMILARITY_THRESHOLD = 0.3; // Jaccard similarity threshold
+  private readonly REPETITION_THRESHOLD = 2; // Number of similar errors before detection
 
   /**
-   * Generates a hash for the error output (using first 500 chars).
+   * Calculates Jaccard Similarity between two strings.
    */
-  private hashError(errorOutput: string): string {
-    return crypto
-      .createHash("sha256")
-      .update(errorOutput.slice(0, 500))
-      .digest("hex");
+  private calculateJaccard(s1: string, s2: string): number {
+    const set1 = new Set(s1.toLowerCase().split(/\s+/));
+    const set2 = new Set(s2.toLowerCase().split(/\s+/));
+
+    const intersection = new Set([...set1].filter((x) => set2.has(x)));
+    const union = new Set([...set1, ...set2]);
+
+    return intersection.size / union.size;
   }
 
   /**
-   * Checks if the error has been seen before and increments the count.
+   * Checks if the error is similar to past errors.
    */
-  check(errorOutput: string): { detected: boolean; count: number } {
-    const hash = this.hashError(errorOutput);
-    const count = (this.errorHistory.get(hash) || 0) + 1;
-    this.errorHistory.set(hash, count);
+  check(errorOutput: string): { detected: boolean; similarity: number } {
+    let maxSimilarity = 0;
+    let occurrences = 1;
+
+    for (const pastError of this.errorHistory) {
+      const sim = this.calculateJaccard(errorOutput, pastError);
+      if (sim > maxSimilarity) maxSimilarity = sim;
+
+      if (sim >= this.SIMILARITY_THRESHOLD) {
+        occurrences++;
+      }
+    }
+
+    this.errorHistory.push(errorOutput);
 
     return {
-      detected: count >= this.THRESHOLD,
-      count,
+      detected: occurrences >= this.REPETITION_THRESHOLD,
+      similarity: maxSimilarity,
     };
   }
 
   reset() {
-    this.errorHistory.clear();
+    this.errorHistory = [];
   }
 }

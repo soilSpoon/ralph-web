@@ -1,13 +1,18 @@
-import { type ExecException, exec } from "node:child_process";
+import { exec } from "node:child_process";
 import { EventEmitter } from "node:events";
 import { promisify } from "node:util";
 import { memoryOps } from "../completion/memory-ops";
 import { syncService } from "../db/sync-service";
+import { memoryHooks } from "../memory/hooks";
+import { memoryService } from "../memory/service";
 import { prdGenerator } from "../prd/generator";
 import type { Story } from "../types";
 import { WorktreeService } from "../worktree";
 import { ptyRunner } from "./pty-runner";
-import { CircularFixDetector } from "./safety/circular-detector";
+import {
+  CircularFixDetector,
+  type ICircularFixDetector,
+} from "./safety/circular-detector";
 import type { ProviderId, RalphSession, WorkflowPhase } from "./types";
 
 const execAsync = promisify(exec);
@@ -20,11 +25,29 @@ export interface RalphLoopOptions {
   metadataPath: string;
   worktreePath?: string;
   initialPhase?: WorkflowPhase;
+  circularDetector?: ICircularFixDetector;
 }
 
-type VerificationResult =
-  | { passed: true; output: string }
-  | { passed: false; errorOutput: string };
+import { z } from "zod";
+
+const VerificationResultSchema = z.union([
+  z.object({ passed: z.literal(true), output: z.string() }),
+  z.object({ passed: z.literal(false), errorOutput: z.string() }),
+]);
+
+type VerificationResult = z.infer<typeof VerificationResultSchema>;
+
+const ExecErrorSchema = z.object({
+  message: z.string(),
+  stdout: z.string(),
+  stderr: z.string(),
+});
+
+type ExecError = z.infer<typeof ExecErrorSchema>;
+
+function isExecError(error: unknown): error is ExecError {
+  return ExecErrorSchema.safeParse(error).success;
+}
 
 /**
  * RalphLoop is the brain of the implementation phase.
@@ -33,7 +56,7 @@ type VerificationResult =
 export class RalphLoop extends EventEmitter {
   private session: RalphSession;
   private worktreeService: WorktreeService;
-  private circularDetector: CircularFixDetector;
+  private circularDetector: ICircularFixDetector;
   public onTransition?: (phase: WorkflowPhase) => void;
 
   constructor(options: RalphLoopOptions) {
@@ -52,7 +75,8 @@ export class RalphLoop extends EventEmitter {
       iterations: [],
     };
     this.worktreeService = new WorktreeService(process.cwd());
-    this.circularDetector = new CircularFixDetector();
+    this.circularDetector =
+      options.circularDetector || new CircularFixDetector();
   }
 
   /**
@@ -62,6 +86,10 @@ export class RalphLoop extends EventEmitter {
     this.transition("initializing");
 
     try {
+      // Initialize Cognitive Kernel
+      await memoryService.initialize();
+      console.log("[RalphLoop] Cognitive Kernel initialized.");
+
       const worktree = await this.worktreeService.createWorktree(
         this.session.taskId,
       );
@@ -112,7 +140,12 @@ ${story.acceptanceCriteria.map((ac) => `- ${ac}`).join("\n")}
 Please implement this story. When finished, print <promise>COMPLETE</promise>.
 `.trim();
 
-    const prompt = retryPrompt ? `${retryPrompt}\n\n${basePrompt}` : basePrompt;
+    const memoryWarning = await memoryHooks.preTask(story.description);
+    const contextPrompt = memoryWarning ? `\n${memoryWarning}\n` : "";
+
+    const prompt = retryPrompt
+      ? `${retryPrompt}\n\n${contextPrompt}\n${basePrompt}`
+      : `${contextPrompt}${basePrompt}`;
 
     await ptyRunner.spawn({
       id: this.session.id,
@@ -141,14 +174,17 @@ Please implement this story. When finished, print <promise>COMPLETE</promise>.
       });
       result = { passed: true, output: stdout };
     } catch (error) {
-      const execError = error as ExecException & {
-        stdout: string;
-        stderr: string;
-      };
-      result = {
-        passed: false,
-        errorOutput: `${execError.message}\n${execError.stdout}\n${execError.stderr}`,
-      };
+      if (isExecError(error)) {
+        result = {
+          passed: false,
+          errorOutput: `${error.message}\n${error.stdout}\n${error.stderr}`,
+        };
+      } else {
+        result = {
+          passed: false,
+          errorOutput: error instanceof Error ? error.message : String(error),
+        };
+      }
     }
 
     if (!result.passed) {
@@ -179,6 +215,15 @@ Please implement this story. When finished, print <promise>COMPLETE</promise>.
       this.transition("planning"); // Or task_reviewing
       // Reset circular detector for next story
       this.circularDetector.reset();
+
+      // Store success trajectory
+      await memoryHooks.onComplete({
+        taskId: this.session.id,
+        taskDescription: story.description,
+        success: true,
+        output: result.output,
+        latencyMs: 0, // Need to track this
+      });
     }
   }
 

@@ -37,4 +37,36 @@ describe("DiffHighlighter", () => {
 
     expect(ast.type).toBe("root");
   });
+
+  it("should allow setting configuration options", async () => {
+    const highlighter = await getDiffHighlighter();
+
+    const originalMaxLine = highlighter.maxLineToIgnoreSyntax;
+    highlighter.setMaxLineToIgnoreSyntax(500);
+    expect(highlighter.maxLineToIgnoreSyntax).toBe(500);
+    // Reset for other tests
+    highlighter.setMaxLineToIgnoreSyntax(originalMaxLine);
+
+    const originalIgnoreList = highlighter.ignoreSyntaxHighlightList;
+    highlighter.setIgnoreSyntaxHighlightList(["*.log"]);
+    expect(highlighter.ignoreSyntaxHighlightList).toEqual(["*.log"]);
+    // Reset
+    highlighter.setIgnoreSyntaxHighlightList(originalIgnoreList);
+  });
+
+  it("should check if language is registered", async () => {
+    const highlighter = await getDiffHighlighter();
+    expect(highlighter.hasRegisteredCurrentLang("typescript")).toBe(true);
+    expect(highlighter.hasRegisteredCurrentLang("non-existent-lang")).toBe(
+      false,
+    );
+  });
+
+  it("should return the highlighter engine", async () => {
+    const highlighter = await getDiffHighlighter();
+    const engine = highlighter.getHighlighterEngine();
+    expect(engine).toBeDefined();
+    // Verify it's not null (since we initialized it)
+    expect(engine).not.toBeNull();
+  });
 });
