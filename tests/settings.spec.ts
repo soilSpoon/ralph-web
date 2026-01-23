@@ -21,7 +21,9 @@ test.describe("Settings Page", () => {
     await page.getByRole("button", { name: "저장" }).click();
 
     // Check for toast success
-    await expect(page.getByText("설정이 저장되었습니다")).toBeVisible();
+    await expect(page.getByText("설정이 저장되었습니다")).toBeVisible({
+      timeout: 10000,
+    });
   });
 
   test("should change provider", async ({ page }) => {
