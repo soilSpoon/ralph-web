@@ -190,8 +190,18 @@ export async function getDiffHighlighter(): Promise<DiffHighlighter> {
     getAST(raw, _fileName, lang, theme) {
       try {
         const shikiTheme = theme === "dark" ? "github-dark" : "github-light";
+
+        let targetLang = lang || "plaintext";
+        if (
+          targetLang !== "plaintext" &&
+          targetLang !== "text" &&
+          !shiki.getLoadedLanguages().includes(targetLang)
+        ) {
+          targetLang = "plaintext";
+        }
+
         const hast = shiki.codeToHast(raw, {
-          lang: lang || "plaintext",
+          lang: targetLang,
           theme: shikiTheme,
           defaultColor: false,
           mergeWhitespaces: false,
