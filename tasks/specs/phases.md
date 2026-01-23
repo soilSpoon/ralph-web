@@ -7,12 +7,14 @@
 
 ## 상세 문서
 
-| Phase | 문서                                                     | 설명                                   |
-| ----- | -------------------------------------------------------- | -------------------------------------- |
-| 7     | [📄 Agent Orchestrator](./phases/phase7-orchestrator.md) | CLI 에이전트 실행 및 스트리밍          |
-| 8     | [📄 Worktree Manager](./phases/phase8-worktree.md)       | Git Worktree 격리 환경                 |
-| 9     | [📄 Persistence (DB)](./phases/phase9-persistence.md)    | Drizzle ORM + SQLite                   |
-| 10-13 | [📄 Advanced Features](./phases/phase10-13-advanced.md)  | Queue, QA Loop, Memory, Multi-Provider |
+| Phase | 문서                                                     | 설명                               |
+| ----- | -------------------------------------------------------- | ---------------------------------- |
+| 7     | [📄 Agent Orchestrator](./phases/phase7-orchestrator.md) | CLI 에이전트 실행 및 스트리밍      |
+| 8     | [📄 Worktree Manager](./phases/phase8-worktree.md)       | Git Worktree 격리 환경             |
+| 9     | [📄 Memory & Persistence](./memory/)                     | 지능형 메모리 + DB (9개 세부 문서) |
+| 10    | Phase 10: Queue Manager                                  | 병렬 태스크 스케줄링               |
+| 11    | Phase 11: QA Loop                                        | 자동 테스트 및 수정 루프           |
+| 12    | Phase 12: Multi-Provider                                 | 20+ CLI 에이전트 지원              |
 
 ---
 
@@ -21,11 +23,10 @@
 ```mermaid
 graph LR
     P7[Phase 7: Orchestrator] --> P8[Phase 8: Worktree]
-    P8 --> P9[Phase 9: DB]
+    P8 --> P9[Phase 9: Memory & Persistence]
     P9 --> P10[Phase 10: Queue]
     P9 --> P11[Phase 11: QA Loop]
-    P9 --> P12[Phase 12: Memory]
-    P7 --> P13[Phase 13: Multi-Provider]
+    P7 --> P12[Phase 12: Multi-Provider]
 ```
 
 ---
@@ -48,19 +49,27 @@ graph LR
 - 환경 파일 보존 (`.env`, `.npmrc`)
 - 안전 장치: 메인 프로젝트 삭제 방지
 
-### Phase 9: Persistence (DB)
+### Phase 9: Memory & Persistence (통합)
 
-**목표**: Drizzle ORM + SQLite 영속화
+**목표**: 지능형 메모리 시스템 + DB 영속화
 
-- tasks, stories, sessions, iterations 테이블
-- 앱 시작 시 auto-migrate
-- 파일 ↔ DB 동기화
+**세부 단계**:
+| 단계 | 문서 | 설명 |
+|------|------|------|
+| 9A | [Governance](./memory/04-governance.md) | 쓰기 권한, 승격, 중복 제거 |
+| 9B | [Retrieval](./memory/03-retrieval.md) | Progressive Disclosure, Hybrid Search |
+| 9C | [ECL Pipeline](./memory/05-ecl-pipeline.md) | Extract → Cognify → Load → Memify |
+| 9D | [Code Indexing](./memory/06-code-indexing.md) | 코드 구조 인덱싱 |
+| 9E | [Integration](./memory/07-integration.md) | Ralph Loop 통합, 세션 재개 |
+| 9F | [Implementation](./memory/08-implementation.md) | 구현 로드맵 |
+
+> 📚 **상세**: [specs/memory/](./memory/) (9개 문서)
 
 ### Phase 10: Queue Manager
 
 **목표**: 병렬 태스크 스케줄링
 
-- 최대 동시 실행 수 제한 (기본: 3)
+- 최대 동시 실행 수 제한 (기본: 10)
 - 우선순위 기반 스케줄링
 
 ### Phase 11: QA Loop
@@ -70,14 +79,7 @@ graph LR
 - QA Reviewer → QA Fixer → 재검증 (최대 3회)
 - Playwright E2E 테스트 통합
 
-### Phase 12: Memory Graph
-
-**목표**: Graphiti 스타일 메모리
-
-- 벡터 임베딩 기반 시맨틱 검색
-- 세션 인사이트 자동 추출
-
-### Phase 13: Multi-Provider
+### Phase 12: Multi-Provider
 
 **목표**: 20+ CLI 에이전트 지원
 
